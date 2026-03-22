@@ -5,8 +5,7 @@ function readExcel(file) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: "array" });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            const json = XLSX.utils.sheet_to_json(sheet);
-            resolve(json);
+            resolve(XLSX.utils.sheet_to_json(sheet));
         };
         reader.readAsArrayBuffer(file);
     });
@@ -14,8 +13,8 @@ function readExcel(file) {
 
 function toSeconds(time) {
     if (!time) return 0;
-    let parts = time.split(":").map(Number);
-    return parts[0]*3600 + parts[1]*60 + parts[2];
+    let p = time.split(":").map(Number);
+    return p[0]*3600 + p[1]*60 + p[2];
 }
 
 function toTime(sec) {
@@ -31,39 +30,64 @@ async function processFiles() {
     const cdrFile = document.getElementById("cdrFile").files[0];
 
     if (!aprFile || !cdrFile) {
-        alert("Please upload both files ❌");
+        alert("Upload both files ❌");
         return;
     }
 
     document.getElementById("loading").style.display = "block";
 
-    const aprData = await readExcel(aprFile);
-    const cdrData = await readExcel(cdrFile);
+    const apr = await readExcel(aprFile);
+    const cdr = await readExcel(cdrFile);
 
-    // 👉 Processing logic (basic merge example)
-    let result = aprData.map(row => {
+    // 🔹 IVR HIT
+    const ivrHit = cdr.filter(r => r["Skill"] === "INBOUND").length;
 
-        let login = toSeconds(row["Total Login Time"]);
-        let lunch = toSeconds(row["LUNCHBREAK"]);
-        let tea = toSeconds(row["TEABREAK"]);
-        let shortb = toSeconds(row["SHORTBREAK"]);
-        let meeting = toSeconds(row["MEETING"]);
-        let system = toSeconds(row["SYSTEMDOWN"]);
+    let final = [];
 
-        let totalBreak = lunch + tea + shortb;
-        let netLogin = login - totalBreak;
-        let totalMeeting = meeting + system;
+    apr.forEach(agent => {
 
-        return {
-            "Agent Name": row["Agent Name"],
-            "Total Login": row["Total Login Time"],
-            "Total Break": toTime(totalBreak),
-            "Net Login": toTime(netLogin),
-            "Total Meeting": toTime(totalMeeting)
-        };
+        let name = agent["Agent Name"];
+
+        // match CDR
+        let calls = cdr.filter(c => 
+            c["Username"] === name &&
+            (c["Disposition"] === "callmature" || c["Disposition"] === "transfer")
+        );
+
+        let totalCalls = calls.length;
+
+        let ib = calls.filter(c => c["Campaign"]?.includes("IB")).length;
+        let ob = calls.filter(c => c["Campaign"]?.includes("OB")).length;
+
+        let totalTalk = calls.reduce((sum, c) => sum + toSeconds(c["Talk Duration"]), 0);
+
+        let login = toSeconds(agent["Total Login Time"]);
+        let breakTime = toSeconds(agent["LUNCHBREAK"]) + toSeconds(agent["TEABREAK"]) + toSeconds(agent["SHORTBREAK"]);
+        let meeting = toSeconds(agent["MEETING"]) + toSeconds(agent["SYSTEMDOWN"]);
+
+        let netLogin = login - breakTime;
+
+        let aht = totalCalls ? totalTalk / totalCalls : 0;
+
+        final.push({
+            name,
+            totalCalls,
+            ib,
+            ob,
+            netLogin,
+            breakTime,
+            meeting,
+            aht
+        });
     });
 
-    localStorage.setItem("finalData", JSON.stringify(result));
+    // 🔹 Sorting
+    final.sort((a, b) => b.totalCalls - a.totalCalls || b.netLogin - a.netLogin);
+
+    localStorage.setItem("dashboardData", JSON.stringify({
+        data: final,
+        ivrHit: ivrHit
+    }));
 
     setTimeout(() => {
         window.location.href = "dashboard.html";

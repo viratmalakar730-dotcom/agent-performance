@@ -11,15 +11,6 @@ function readExcel(file) {
     });
 }
 
-// 🔹 Smart value getter (auto column detect)
-function get(obj, keys) {
-    for (let k of keys) {
-        if (obj[k] !== undefined && obj[k] !== "") return obj[k];
-    }
-    return "";
-}
-
-// 🔹 Time convert
 function toSeconds(time) {
     if (!time) return 0;
     let t = time.toString().split(":").map(Number);
@@ -45,54 +36,55 @@ async function processFiles() {
     console.log("CDR:", cdr[0]);
 
     // 🔹 IVR HIT
-    const ivrHit = cdr.filter(r => 
-        get(r, ["Skill", "Call Type"]) === "INBOUND"
-    ).length;
+    const ivrHit = cdr.filter(r => r["Skill"] === "INBOUND").length;
 
     let final = [];
 
     apr.forEach(agent => {
 
-        let name = get(agent, ["Agent Name", "Agent Full Name"]);
+        // 🔥 Employee ID (MAIN MATCH)
+        let empID = agent["Agent Name"];
 
+        // 🔹 Display name
+        let fullName = agent["Agent Full Name"] || empID;
+
+        // 🔹 Match with CDR Username
         let calls = cdr.filter(c => 
-            get(c, ["Username", "User Full Name"]) === name &&
-            ["callmature", "transfer"].includes(
-                get(c, ["Disposition", "Call Status"])
-            )
+            c["Username"] == empID &&
+            (c["Disposition"] === "callmature" || c["Disposition"] === "transfer")
         );
 
         let totalCalls = calls.length;
 
         let ib = calls.filter(c => 
-            get(c, ["Campaign", "Call Type"]).toString().toUpperCase().includes("INBOUND")
+            (c["Campaign"] || "").toUpperCase().includes("IB")
         ).length;
 
         let ob = calls.filter(c => 
-            get(c, ["Campaign", "Call Type"]).toString().toUpperCase().includes("OUTBOUND")
+            (c["Campaign"] || "").toUpperCase().includes("OB")
         ).length;
 
         let totalTalk = calls.reduce((sum, c) => 
-            sum + toSeconds(get(c, ["Talk Duration", "TalkDuration"])), 0
+            sum + toSeconds(c["Talk Duration"]), 0
         );
 
-        let login = toSeconds(get(agent, ["Total Login Time"]));
+        let login = toSeconds(agent["Total Login Time"]);
 
         let breakTime =
-            toSeconds(get(agent, ["LUNCHBREAK"])) +
-            toSeconds(get(agent, ["TEABREAK"])) +
-            toSeconds(get(agent, ["SHORTBREAK"]));
+            toSeconds(agent["LUNCHBREAK"]) +
+            toSeconds(agent["TEABREAK"]) +
+            toSeconds(agent["SHORTBREAK"]);
 
         let meeting =
-            toSeconds(get(agent, ["MEETING"])) +
-            toSeconds(get(agent, ["SYSTEMDOWN"]));
+            toSeconds(agent["MEETING"]) +
+            toSeconds(agent["SYSTEMDOWN"]);
 
         let netLogin = login - breakTime;
 
         let aht = totalCalls ? totalTalk / totalCalls : 0;
 
         final.push({
-            name: name || "N/A",
+            name: fullName,
             totalCalls,
             ib,
             ob,
@@ -103,6 +95,7 @@ async function processFiles() {
         });
     });
 
+    // 🔹 Sorting
     final.sort((a, b) => b.totalCalls - a.totalCalls || b.netLogin - a.netLogin);
 
     localStorage.setItem("dashboardData", JSON.stringify({
@@ -125,7 +118,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     stored.data.forEach(r => {
 
-        let rowClass = r.breakTime > r.netLogin ? "red" : "green";
+        let rowClass = r.netLogin >= 28800 ? "green" : "red"; // 8 hr = 28800 sec
 
         const tr = document.createElement("tr");
         tr.className = rowClass;
@@ -143,7 +136,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// 🔹 Export
+// 🔹 Export Excel
 function exportExcel() {
     const data = JSON.parse(localStorage.getItem("dashboardData")).data;
     const ws = XLSX.utils.json_to_sheet(data);

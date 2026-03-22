@@ -6,30 +6,18 @@ function readExcel(file, skipRows = 0) {
             const workbook = XLSX.read(data, { type: "array" });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            let json = XLSX.utils.sheet_to_json(sheet, { defval: 0 });
+            // 🔥 ARRAY MODE (NO HEADER)
+            let json = XLSX.utils.sheet_to_json(sheet, {
+                header: 1,
+                defval: 0
+            });
 
             json = json.slice(skipRows);
-
-            json = json.map(row => {
-                Object.keys(row).forEach(k => {
-                    if (row[k] === "-") row[k] = 0;
-                });
-                return row;
-            });
 
             resolve(json);
         };
         reader.readAsArrayBuffer(file);
     });
-}
-
-// 🔹 smart column finder
-function findKey(obj, possibleNames) {
-    return Object.keys(obj).find(k =>
-        possibleNames.some(name =>
-            k.toLowerCase().includes(name.toLowerCase())
-        )
-    );
 }
 
 function toSeconds(time) {
@@ -50,76 +38,51 @@ async function processFiles() {
     const apr = await readExcel(document.getElementById("aprFile").files[0], 2);
     const cdr = await readExcel(document.getElementById("cdrFile").files[0], 1);
 
-    let sampleAPR = apr[0];
-    let sampleCDR = cdr[0];
-
-    // 🔥 AUTO DETECT COLUMNS
-    let empKey = findKey(sampleAPR, ["agent name", "employee"]);
-    let nameKey = findKey(sampleAPR, ["full name"]);
-    let loginKey = findKey(sampleAPR, ["login"]);
-
-    let lunchKey = findKey(sampleAPR, ["lunch"]);
-    let teaKey = findKey(sampleAPR, ["tea"]);
-    let shortKey = findKey(sampleAPR, ["short"]);
-    let meetKey = findKey(sampleAPR, ["meeting"]);
-    let sysKey = findKey(sampleAPR, ["system"]);
-
-    let userKey = findKey(sampleCDR, ["username"]);
-    let dispoKey = findKey(sampleCDR, ["disposition"]);
-    let skillKey = findKey(sampleCDR, ["skill"]);
-    let talkKey = findKey(sampleCDR, ["talk"]);
-
-    console.log("Detected:", {
-        empKey, nameKey, loginKey,
-        lunchKey, teaKey, shortKey,
-        meetKey, sysKey,
-        userKey, dispoKey, skillKey, talkKey
-    });
-
     let final = [];
 
-    apr.forEach(agent => {
+    apr.forEach(row => {
 
-        let empID = agent[empKey];
-        let fullName = agent[nameKey];
+        // 🔥 APR COLUMN INDEX BASED
+        let empID = row[1];   // B
+        let name = row[2];    // C
+        let totalLogin = toSeconds(row[3]); // D
 
-        let totalLogin = toSeconds(agent[loginKey]);
-
-        let totalBreak =
-            toSeconds(agent[lunchKey]) +
-            toSeconds(agent[teaKey]) +
-            toSeconds(agent[shortKey]);
+        let lunch = toSeconds(row[19]); // T
+        let tea = toSeconds(row[22]);   // W
+        let shortb = toSeconds(row[24]); // Y
 
         let meeting =
-            toSeconds(agent[meetKey]) +
-            toSeconds(agent[sysKey]);
+            toSeconds(row[20]) + // U
+            toSeconds(row[23]);  // X
 
+        let totalBreak = lunch + tea + shortb;
         let netLogin = totalLogin - totalBreak;
 
+        // 🔥 CDR FILTER
         let calls = cdr.filter(c =>
-            c[userKey] == empID &&
+            c[1] == empID &&  // Username
             ["callmature", "transfer"].includes(
-                (c[dispoKey] || "").toLowerCase()
+                (c[25] || "").toLowerCase()
             )
         );
 
         let totalCalls = calls.length;
 
         let ib = calls.filter(c =>
-            (c[skillKey] || "").toUpperCase() === "INBOUND"
+            (c[7] || "").toUpperCase() === "INBOUND"
         ).length;
 
         let ob = totalCalls - ib;
 
         let totalTalk = calls.reduce((sum, c) =>
-            sum + toSeconds(c[talkKey]), 0
+            sum + toSeconds(c[13]), 0
         );
 
         let aht = totalCalls ? totalTalk / totalCalls : 0;
 
         final.push({
             empID,
-            name: fullName,
+            name,
             totalLogin,
             netLogin,
             totalBreak,

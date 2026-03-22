@@ -1,11 +1,23 @@
-function readExcel(file) {
+function readExcel(file, skipRows = 0) {
     return new Promise((resolve) => {
         const reader = new FileReader();
         reader.onload = function(e) {
             const data = new Uint8Array(e.target.result);
             const workbook = XLSX.read(data, { type: "array" });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
-            resolve(XLSX.utils.sheet_to_json(sheet));
+
+            let json = XLSX.utils.sheet_to_json(sheet, { defval: 0 });
+
+            json = json.slice(skipRows);
+
+            json = json.map(row => {
+                Object.keys(row).forEach(k => {
+                    if (row[k] === "-") row[k] = 0;
+                });
+                return row;
+            });
+
+            resolve(json);
         };
         reader.readAsArrayBuffer(file);
     });
@@ -15,6 +27,13 @@ function toSeconds(time) {
     if (!time) return 0;
     let t = time.toString().split(":").map(Number);
     return (t[0]||0)*3600 + (t[1]||0)*60 + (t[2]||0);
+}
+
+function toTime(sec) {
+    let h = Math.floor(sec/3600);
+    let m = Math.floor((sec%3600)/60);
+    let s = sec%60;
+    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
 async function processFiles() {
@@ -29,48 +48,19 @@ async function processFiles() {
 
     document.getElementById("loading").style.display = "block";
 
-    const apr = await readExcel(aprFile);
-    const cdr = await readExcel(cdrFile);
-
-    console.log("APR:", apr[0]);
-    console.log("CDR:", cdr[0]);
-
-    // 🔹 IVR HIT
-    const ivrHit = cdr.filter(r => r["Skill"] === "INBOUND").length;
+    const apr = await readExcel(aprFile, 2);
+    const cdr = await readExcel(cdrFile, 1);
 
     let final = [];
 
     apr.forEach(agent => {
 
-        // 🔥 Employee ID (MAIN MATCH)
         let empID = agent["Agent Name"];
+        let fullName = agent["Agent Full Name"];
 
-        // 🔹 Display name
-        let fullName = agent["Agent Full Name"] || empID;
+        let totalLogin = toSeconds(agent["Total Login Time"]);
 
-        // 🔹 Match with CDR Username
-        let calls = cdr.filter(c => 
-            c["Username"] == empID &&
-            (c["Disposition"] === "callmature" || c["Disposition"] === "transfer")
-        );
-
-        let totalCalls = calls.length;
-
-        let ib = calls.filter(c => 
-            (c["Campaign"] || "").toUpperCase().includes("IB")
-        ).length;
-
-        let ob = calls.filter(c => 
-            (c["Campaign"] || "").toUpperCase().includes("OB")
-        ).length;
-
-        let totalTalk = calls.reduce((sum, c) => 
-            sum + toSeconds(c["Talk Duration"]), 0
-        );
-
-        let login = toSeconds(agent["Total Login Time"]);
-
-        let breakTime =
+        let totalBreak =
             toSeconds(agent["LUNCHBREAK"]) +
             toSeconds(agent["TEABREAK"]) +
             toSeconds(agent["SHORTBREAK"]);
@@ -79,66 +69,85 @@ async function processFiles() {
             toSeconds(agent["MEETING"]) +
             toSeconds(agent["SYSTEMDOWN"]);
 
-        let netLogin = login - breakTime;
+        let netLogin = totalLogin - totalBreak;
+
+        let calls = cdr.filter(c =>
+            c["Username"] == empID &&
+            ["callmature", "transfer"].includes(
+                (c["Disposition"] || "").toLowerCase()
+            )
+        );
+
+        let totalCalls = calls.length;
+
+        let ib = calls.filter(c =>
+            (c["Skill"] || "").toUpperCase() === "INBOUND"
+        ).length;
+
+        let ob = totalCalls - ib;
+
+        let totalTalk = calls.reduce((sum, c) =>
+            sum + toSeconds(c["Talk Duration"]), 0
+        );
 
         let aht = totalCalls ? totalTalk / totalCalls : 0;
 
         final.push({
+            empID,
             name: fullName,
+            totalLogin,
+            netLogin,
+            totalBreak,
+            meeting,
+            aht,
             totalCalls,
             ib,
-            ob,
-            netLogin,
-            breakTime,
-            meeting,
-            aht
+            ob
         });
     });
 
-    // 🔹 Sorting
     final.sort((a, b) => b.totalCalls - a.totalCalls || b.netLogin - a.netLogin);
 
-    localStorage.setItem("dashboardData", JSON.stringify({
-        data: final,
-        ivrHit: ivrHit
-    }));
+    localStorage.setItem("dashboardData", JSON.stringify(final));
 
     window.location.href = "dashboard.html";
 }
 
-// 🔹 Dashboard load
+// DASHBOARD
 document.addEventListener("DOMContentLoaded", () => {
 
-    const stored = JSON.parse(localStorage.getItem("dashboardData") || "{}");
-    if (!stored.data) return;
-
-    document.getElementById("ivr").innerText = "IVR HIT: " + stored.ivrHit;
+    const data = JSON.parse(localStorage.getItem("dashboardData") || "[]");
+    if (!data.length) return;
 
     const table = document.querySelector("#dataTable tbody");
 
-    stored.data.forEach(r => {
+    data.forEach(r => {
 
-        let rowClass = r.netLogin >= 28800 ? "green" : "red"; // 8 hr = 28800 sec
+        let rowClass = r.netLogin >= 28800 ? "green" : "red";
 
         const tr = document.createElement("tr");
         tr.className = rowClass;
 
         tr.innerHTML = `
+        <td>${r.empID}</td>
         <td>${r.name}</td>
+        <td>${toTime(r.totalLogin)}</td>
+        <td>${toTime(r.netLogin)}</td>
+        <td>${toTime(r.totalBreak)}</td>
+        <td>${toTime(r.meeting)}</td>
+        <td>${Math.round(r.aht)}</td>
         <td>${r.totalCalls}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
-        <td>${(r.netLogin/3600).toFixed(2)}</td>
-        <td>${(r.aht).toFixed(0)}</td>
         `;
 
         table.appendChild(tr);
     });
 });
 
-// 🔹 Export Excel
+// EXPORT
 function exportExcel() {
-    const data = JSON.parse(localStorage.getItem("dashboardData")).data;
+    const data = JSON.parse(localStorage.getItem("dashboardData"));
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Report");

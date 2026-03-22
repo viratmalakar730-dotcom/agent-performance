@@ -1,34 +1,48 @@
 body {
-font-family: Arial;
-background: #0b1f3a;
-color: white;
-text-align: center;
+    font-family: Arial;
+    background: #0b1f3a;
+    color: white;
+    text-align: center;
 }
 
 .container {
-margin-top: 100px;
+    margin-top: 80px;
 }
 
-input {
-padding: 10px;
-margin: 10px;
+input, button {
+    padding: 10px;
+    margin: 10px;
+}
+
+.loading {
+    display: none;
+    margin-top: 20px;
+    font-size: 18px;
 }
 
 table {
-margin: auto;
-margin-top: 30px;
-border-collapse: collapse;
-width: 90%;
-background: white;
-color: black;
+    margin: auto;
+    margin-top: 30px;
+    border-collapse: collapse;
+    width: 95%;
+    background: white;
+    color: black;
 }
 
 th {
-background: navy;
-color: white;
+    background: navy;
+    color: white;
 }
 
 td, th {
-padding: 10px;
-border: 1px solid black;
+    padding: 10px;
+    border: 1px solid black;
+}
+
+.green {
+    background: #d4edda;
+}
+
+.red {
+    background: #f8d7da;
 }

@@ -1,14 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Upload Report</title>
+<title>Upload Reports</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-<h2>Upload Excel File</h2>
-<input type="file" id="fileInput">
+<h2>Upload Reports</h2>
+
+<label>APR Report:</label><br>
+<input type="file" id="aprFile"><br><br>
+
+<label>CDR Report:</label><br>
+<input type="file" id="cdrFile"><br><br>
+
+<button onclick="processFiles()">Generate Report</button>
+
+<div id="loading" style="display:none; margin-top:20px;">
+⏳ Processing... Please wait
+</div>
+
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

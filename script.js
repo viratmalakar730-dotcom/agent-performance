@@ -6,12 +6,12 @@ function readExcel(file, skipRows = 0) {
             const workbook = XLSX.read(data, { type: "array" });
             const sheet = workbook.Sheets[workbook.SheetNames[0]];
 
-            // 🔥 ARRAY MODE (NO HEADER)
             let json = XLSX.utils.sheet_to_json(sheet, {
                 header: 1,
                 defval: 0
             });
 
+            // 🔥 Skip top rows (header remove)
             json = json.slice(skipRows);
 
             resolve(json);
@@ -35,14 +35,27 @@ function toTime(sec) {
 
 async function processFiles() {
 
-    const apr = await readExcel(document.getElementById("aprFile").files[0], 2);
-    const cdr = await readExcel(document.getElementById("cdrFile").files[0], 1);
+    const aprFile = document.getElementById("aprFile").files[0];
+    const cdrFile = document.getElementById("cdrFile").files[0];
+
+    if (!aprFile || !cdrFile) {
+        alert("Upload both files ❌");
+        return;
+    }
+
+    document.getElementById("loading").style.display = "block";
+
+    // 🔥 FINAL FIX: skip header rows
+    const apr = await readExcel(aprFile, 3);
+    const cdr = await readExcel(cdrFile, 2);
 
     let final = [];
 
     apr.forEach(row => {
 
-        // 🔥 APR COLUMN INDEX BASED
+        // 🔹 Skip empty row safety
+        if (!row[1]) return;
+
         let empID = row[1];   // B
         let name = row[2];    // C
         let totalLogin = toSeconds(row[3]); // D
@@ -58,9 +71,8 @@ async function processFiles() {
         let totalBreak = lunch + tea + shortb;
         let netLogin = totalLogin - totalBreak;
 
-        // 🔥 CDR FILTER
         let calls = cdr.filter(c =>
-            c[1] == empID &&  // Username
+            c[1] == empID &&
             ["callmature", "transfer"].includes(
                 (c[25] || "").toLowerCase()
             )
@@ -98,7 +110,7 @@ async function processFiles() {
     window.location.href = "dashboard.html";
 }
 
-// DASHBOARD
+// 🔹 DASHBOARD
 document.addEventListener("DOMContentLoaded", () => {
 
     const data = JSON.parse(localStorage.getItem("dashboardData") || "[]");
@@ -106,7 +118,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     data.forEach(r => {
 
+        let rowClass = r.netLogin >= 28800 ? "green" : "red";
+
         const tr = document.createElement("tr");
+        tr.className = rowClass;
 
         tr.innerHTML = `
         <td>${r.empID}</td>
@@ -124,3 +139,12 @@ document.addEventListener("DOMContentLoaded", () => {
         table.appendChild(tr);
     });
 });
+
+// 🔹 EXPORT
+function exportExcel() {
+    const data = JSON.parse(localStorage.getItem("dashboardData"));
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    XLSX.writeFile(wb, "Dashboard.xlsx");
+}

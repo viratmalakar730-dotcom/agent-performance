@@ -11,19 +11,19 @@ function readExcel(file) {
     });
 }
 
-// 🔹 Convert time safely
-function toSeconds(time) {
-    if (!time) return 0;
-    let parts = time.toString().split(":").map(Number);
-    return (parts[0] || 0) * 3600 + (parts[1] || 0) * 60 + (parts[2] || 0);
-}
-
-// 🔹 Get value safely (handles different column names)
-function getVal(obj, keys) {
+// 🔹 Smart value getter (auto column detect)
+function get(obj, keys) {
     for (let k of keys) {
-        if (obj[k] !== undefined) return obj[k];
+        if (obj[k] !== undefined && obj[k] !== "") return obj[k];
     }
     return "";
+}
+
+// 🔹 Time convert
+function toSeconds(time) {
+    if (!time) return 0;
+    let t = time.toString().split(":").map(Number);
+    return (t[0]||0)*3600 + (t[1]||0)*60 + (t[2]||0);
 }
 
 async function processFiles() {
@@ -41,49 +41,51 @@ async function processFiles() {
     const apr = await readExcel(aprFile);
     const cdr = await readExcel(cdrFile);
 
-    console.log("APR Sample:", apr[0]);
-    console.log("CDR Sample:", cdr[0]);
+    console.log("APR:", apr[0]);
+    console.log("CDR:", cdr[0]);
 
     // 🔹 IVR HIT
-    const ivrHit = cdr.filter(r => getVal(r, ["Skill"]) === "INBOUND").length;
+    const ivrHit = cdr.filter(r => 
+        get(r, ["Skill", "Call Type"]) === "INBOUND"
+    ).length;
 
     let final = [];
 
     apr.forEach(agent => {
 
-        let name = getVal(agent, ["Agent Name", "Agent Full Name"]);
+        let name = get(agent, ["Agent Name", "Agent Full Name"]);
 
         let calls = cdr.filter(c => 
-            getVal(c, ["Username", "User Full Name"]) === name &&
+            get(c, ["Username", "User Full Name"]) === name &&
             ["callmature", "transfer"].includes(
-                getVal(c, ["Disposition"])
+                get(c, ["Disposition", "Call Status"])
             )
         );
 
         let totalCalls = calls.length;
 
         let ib = calls.filter(c => 
-            getVal(c, ["Campaign"]).includes("IB")
+            get(c, ["Campaign", "Call Type"]).toString().toUpperCase().includes("INBOUND")
         ).length;
 
         let ob = calls.filter(c => 
-            getVal(c, ["Campaign"]).includes("OB")
+            get(c, ["Campaign", "Call Type"]).toString().toUpperCase().includes("OUTBOUND")
         ).length;
 
         let totalTalk = calls.reduce((sum, c) => 
-            sum + toSeconds(getVal(c, ["Talk Duration"])), 0
+            sum + toSeconds(get(c, ["Talk Duration", "TalkDuration"])), 0
         );
 
-        let login = toSeconds(getVal(agent, ["Total Login Time"]));
+        let login = toSeconds(get(agent, ["Total Login Time"]));
 
-        let breakTime = 
-            toSeconds(getVal(agent, ["LUNCHBREAK"])) +
-            toSeconds(getVal(agent, ["TEABREAK"])) +
-            toSeconds(getVal(agent, ["SHORTBREAK"]));
+        let breakTime =
+            toSeconds(get(agent, ["LUNCHBREAK"])) +
+            toSeconds(get(agent, ["TEABREAK"])) +
+            toSeconds(get(agent, ["SHORTBREAK"]));
 
-        let meeting = 
-            toSeconds(getVal(agent, ["MEETING"])) +
-            toSeconds(getVal(agent, ["SYSTEMDOWN"]));
+        let meeting =
+            toSeconds(get(agent, ["MEETING"])) +
+            toSeconds(get(agent, ["SYSTEMDOWN"]));
 
         let netLogin = login - breakTime;
 
@@ -101,7 +103,6 @@ async function processFiles() {
         });
     });
 
-    // 🔹 Sorting
     final.sort((a, b) => b.totalCalls - a.totalCalls || b.netLogin - a.netLogin);
 
     localStorage.setItem("dashboardData", JSON.stringify({
@@ -112,7 +113,7 @@ async function processFiles() {
     window.location.href = "dashboard.html";
 }
 
-// 🔹 DASHBOARD LOAD
+// 🔹 Dashboard load
 document.addEventListener("DOMContentLoaded", () => {
 
     const stored = JSON.parse(localStorage.getItem("dashboardData") || "{}");
@@ -142,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// 🔹 EXPORT EXCEL
+// 🔹 Export
 function exportExcel() {
     const data = JSON.parse(localStorage.getItem("dashboardData")).data;
     const ws = XLSX.utils.json_to_sheet(data);

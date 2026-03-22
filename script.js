@@ -11,7 +11,6 @@ function readExcel(file, skipRows = 0) {
                 defval: 0
             });
 
-            // 🔥 Skip top rows (header remove)
             json = json.slice(skipRows);
 
             resolve(json);
@@ -45,7 +44,6 @@ async function processFiles() {
 
     document.getElementById("loading").style.display = "block";
 
-    // 🔥 FINAL FIX: skip header rows
     const apr = await readExcel(aprFile, 3);
     const cdr = await readExcel(cdrFile, 2);
 
@@ -53,7 +51,6 @@ async function processFiles() {
 
     apr.forEach(row => {
 
-        // 🔹 Skip empty row safety
         if (!row[1]) return;
 
         let empID = row[1];   // B
@@ -71,24 +68,25 @@ async function processFiles() {
         let totalBreak = lunch + tea + shortb;
         let netLogin = totalLogin - totalBreak;
 
-        let calls = cdr.filter(c =>
-            c[1] == empID &&
-            ["callmature", "transfer"].includes(
-                (c[25] || "").toLowerCase()
-            )
-        );
+        // 🔥 FINAL CORRECT FILTER
+        let calls = cdr.filter(c => {
+
+            let dispo = (c[25] || "").toString().toLowerCase();
+
+            return c[1] == empID &&
+                   (dispo.includes("callmatured") || dispo.includes("transfer"));
+        });
 
         let totalCalls = calls.length;
 
         let ib = calls.filter(c =>
-            (c[7] || "").toUpperCase() === "INBOUND"
+            (c[7] || "").toString().toUpperCase().includes("INBOUND")
         ).length;
 
         let ob = totalCalls - ib;
 
-        let totalTalk = calls.reduce((sum, c) =>
-            sum + toSeconds(c[13]), 0
-        );
+        // 🔥 AHT = APR TOTAL TALK TIME / TOTAL CALL
+        let totalTalk = toSeconds(row[5]); // APR column F
 
         let aht = totalCalls ? totalTalk / totalCalls : 0;
 
@@ -110,7 +108,7 @@ async function processFiles() {
     window.location.href = "dashboard.html";
 }
 
-// 🔹 DASHBOARD
+// DASHBOARD
 document.addEventListener("DOMContentLoaded", () => {
 
     const data = JSON.parse(localStorage.getItem("dashboardData") || "[]");
@@ -140,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// 🔹 EXPORT
+// EXPORT
 function exportExcel() {
     const data = JSON.parse(localStorage.getItem("dashboardData"));
     const ws = XLSX.utils.json_to_sheet(data);

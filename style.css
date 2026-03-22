@@ -17,7 +17,6 @@ input, button {
 .loading {
     display: none;
     margin-top: 20px;
-    font-size: 18px;
 }
 
 table {

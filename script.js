@@ -23,6 +23,15 @@ function readExcel(file, skipRows = 0) {
     });
 }
 
+// 🔹 smart column finder
+function findKey(obj, possibleNames) {
+    return Object.keys(obj).find(k =>
+        possibleNames.some(name =>
+            k.toLowerCase().includes(name.toLowerCase())
+        )
+    );
+}
+
 function toSeconds(time) {
     if (!time) return 0;
     let t = time.toString().split(":").map(Number);
@@ -38,56 +47,72 @@ function toTime(sec) {
 
 async function processFiles() {
 
-    const aprFile = document.getElementById("aprFile").files[0];
-    const cdrFile = document.getElementById("cdrFile").files[0];
+    const apr = await readExcel(document.getElementById("aprFile").files[0], 2);
+    const cdr = await readExcel(document.getElementById("cdrFile").files[0], 1);
 
-    if (!aprFile || !cdrFile) {
-        alert("Upload both files ❌");
-        return;
-    }
+    let sampleAPR = apr[0];
+    let sampleCDR = cdr[0];
 
-    document.getElementById("loading").style.display = "block";
+    // 🔥 AUTO DETECT COLUMNS
+    let empKey = findKey(sampleAPR, ["agent name", "employee"]);
+    let nameKey = findKey(sampleAPR, ["full name"]);
+    let loginKey = findKey(sampleAPR, ["login"]);
 
-    const apr = await readExcel(aprFile, 2);
-    const cdr = await readExcel(cdrFile, 1);
+    let lunchKey = findKey(sampleAPR, ["lunch"]);
+    let teaKey = findKey(sampleAPR, ["tea"]);
+    let shortKey = findKey(sampleAPR, ["short"]);
+    let meetKey = findKey(sampleAPR, ["meeting"]);
+    let sysKey = findKey(sampleAPR, ["system"]);
+
+    let userKey = findKey(sampleCDR, ["username"]);
+    let dispoKey = findKey(sampleCDR, ["disposition"]);
+    let skillKey = findKey(sampleCDR, ["skill"]);
+    let talkKey = findKey(sampleCDR, ["talk"]);
+
+    console.log("Detected:", {
+        empKey, nameKey, loginKey,
+        lunchKey, teaKey, shortKey,
+        meetKey, sysKey,
+        userKey, dispoKey, skillKey, talkKey
+    });
 
     let final = [];
 
     apr.forEach(agent => {
 
-        let empID = agent["Agent Name"];
-        let fullName = agent["Agent Full Name"];
+        let empID = agent[empKey];
+        let fullName = agent[nameKey];
 
-        let totalLogin = toSeconds(agent["Total Login Time"]);
+        let totalLogin = toSeconds(agent[loginKey]);
 
         let totalBreak =
-            toSeconds(agent["LUNCHBREAK"]) +
-            toSeconds(agent["TEABREAK"]) +
-            toSeconds(agent["SHORTBREAK"]);
+            toSeconds(agent[lunchKey]) +
+            toSeconds(agent[teaKey]) +
+            toSeconds(agent[shortKey]);
 
         let meeting =
-            toSeconds(agent["MEETING"]) +
-            toSeconds(agent["SYSTEMDOWN"]);
+            toSeconds(agent[meetKey]) +
+            toSeconds(agent[sysKey]);
 
         let netLogin = totalLogin - totalBreak;
 
         let calls = cdr.filter(c =>
-            c["Username"] == empID &&
+            c[userKey] == empID &&
             ["callmature", "transfer"].includes(
-                (c["Disposition"] || "").toLowerCase()
+                (c[dispoKey] || "").toLowerCase()
             )
         );
 
         let totalCalls = calls.length;
 
         let ib = calls.filter(c =>
-            (c["Skill"] || "").toUpperCase() === "INBOUND"
+            (c[skillKey] || "").toUpperCase() === "INBOUND"
         ).length;
 
         let ob = totalCalls - ib;
 
         let totalTalk = calls.reduce((sum, c) =>
-            sum + toSeconds(c["Talk Duration"]), 0
+            sum + toSeconds(c[talkKey]), 0
         );
 
         let aht = totalCalls ? totalTalk / totalCalls : 0;
@@ -106,10 +131,7 @@ async function processFiles() {
         });
     });
 
-    final.sort((a, b) => b.totalCalls - a.totalCalls || b.netLogin - a.netLogin);
-
     localStorage.setItem("dashboardData", JSON.stringify(final));
-
     window.location.href = "dashboard.html";
 }
 
@@ -117,16 +139,11 @@ async function processFiles() {
 document.addEventListener("DOMContentLoaded", () => {
 
     const data = JSON.parse(localStorage.getItem("dashboardData") || "[]");
-    if (!data.length) return;
-
     const table = document.querySelector("#dataTable tbody");
 
     data.forEach(r => {
 
-        let rowClass = r.netLogin >= 28800 ? "green" : "red";
-
         const tr = document.createElement("tr");
-        tr.className = rowClass;
 
         tr.innerHTML = `
         <td>${r.empID}</td>
@@ -144,12 +161,3 @@ document.addEventListener("DOMContentLoaded", () => {
         table.appendChild(tr);
     });
 });
-
-// EXPORT
-function exportExcel() {
-    const data = JSON.parse(localStorage.getItem("dashboardData"));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Report");
-    XLSX.writeFile(wb, "Dashboard.xlsx");
-}

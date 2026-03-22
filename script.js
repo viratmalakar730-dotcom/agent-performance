@@ -13,15 +13,8 @@ function readExcel(file) {
 
 function toSeconds(time) {
     if (!time) return 0;
-    let p = time.split(":").map(Number);
-    return p[0]*3600 + p[1]*60 + p[2];
-}
-
-function toTime(sec) {
-    let h = Math.floor(sec/3600);
-    let m = Math.floor((sec%3600)/60);
-    let s = sec%60;
-    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
+    let p = time.toString().split(":").map(Number);
+    return (p[0]||0)*3600 + (p[1]||0)*60 + (p[2]||0);
 }
 
 async function processFiles() {
@@ -39,7 +32,6 @@ async function processFiles() {
     const apr = await readExcel(aprFile);
     const cdr = await readExcel(cdrFile);
 
-    // 🔹 IVR HIT
     const ivrHit = cdr.filter(r => r["Skill"] === "INBOUND").length;
 
     let final = [];
@@ -48,7 +40,6 @@ async function processFiles() {
 
         let name = agent["Agent Name"];
 
-        // match CDR
         let calls = cdr.filter(c => 
             c["Username"] === name &&
             (c["Disposition"] === "callmature" || c["Disposition"] === "transfer")
@@ -66,7 +57,6 @@ async function processFiles() {
         let meeting = toSeconds(agent["MEETING"]) + toSeconds(agent["SYSTEMDOWN"]);
 
         let netLogin = login - breakTime;
-
         let aht = totalCalls ? totalTalk / totalCalls : 0;
 
         final.push({
@@ -81,7 +71,6 @@ async function processFiles() {
         });
     });
 
-    // 🔹 Sorting
     final.sort((a, b) => b.totalCalls - a.totalCalls || b.netLogin - a.netLogin);
 
     localStorage.setItem("dashboardData", JSON.stringify({
@@ -89,7 +78,44 @@ async function processFiles() {
         ivrHit: ivrHit
     }));
 
-    setTimeout(() => {
-        window.location.href = "dashboard.html";
-    }, 1000);
+    window.location.href = "dashboard.html";
+}
+
+// DASHBOARD LOAD
+document.addEventListener("DOMContentLoaded", () => {
+
+    const stored = JSON.parse(localStorage.getItem("dashboardData") || "{}");
+    if (!stored.data) return;
+
+    document.getElementById("ivr").innerText = "IVR HIT: " + stored.ivrHit;
+
+    const table = document.querySelector("#dataTable tbody");
+
+    stored.data.forEach(r => {
+
+        let rowClass = r.breakTime > r.netLogin ? "red" : "green";
+
+        const tr = document.createElement("tr");
+        tr.className = rowClass;
+
+        tr.innerHTML = `
+        <td>${r.name}</td>
+        <td>${r.totalCalls}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
+        <td>${(r.netLogin/3600).toFixed(2)}</td>
+        <td>${(r.aht).toFixed(0)}</td>
+        `;
+
+        table.appendChild(tr);
+    });
+});
+
+// EXPORT
+function exportExcel() {
+    const data = JSON.parse(localStorage.getItem("dashboardData")).data;
+    const ws = XLSX.utils.json_to_sheet(data);
+    const wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Report");
+    XLSX.writeFile(wb, "Dashboard.xlsx");
 }

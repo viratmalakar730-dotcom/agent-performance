@@ -6,39 +6,28 @@
 </head>
 <body>
 
-<h2>Final Dashboard</h2>
+<h2>Agent Performance Dashboard</h2>
+
+<h3 id="ivr"></h3>
+
+<button onclick="exportExcel()">Export Excel</button>
 
 <table id="dataTable">
 <thead>
 <tr>
-<th>Agent Name</th>
-<th>Total Login</th>
-<th>Total Break</th>
-<th>Net Login</th>
-<th>Total Meeting</th>
+<th>Agent</th>
+<th>Total Calls</th>
+<th>IB</th>
+<th>OB</th>
+<th>Net Login (hr)</th>
+<th>AHT (sec)</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<script>
-const data = JSON.parse(localStorage.getItem("finalData") || "[]");
-const table = document.querySelector("#dataTable tbody");
-
-data.forEach(row => {
-    const tr = document.createElement("tr");
-
-    tr.innerHTML = `
-    <td>${row["Agent Name"]}</td>
-    <td>${row["Total Login"]}</td>
-    <td>${row["Total Break"]}</td>
-    <td>${row["Net Login"]}</td>
-    <td>${row["Total Meeting"]}</td>
-    `;
-
-    table.appendChild(tr);
-});
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>

@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<h2>Agent Performance Dashboard</h2>
+<h2>Final Dashboard</h2>
 
 <table id="dataTable">
 <thead>
@@ -21,7 +21,24 @@
 <tbody></tbody>
 </table>
 
-<script src="script.js"></script>
+<script>
+const data = JSON.parse(localStorage.getItem("finalData") || "[]");
+const table = document.querySelector("#dataTable tbody");
+
+data.forEach(row => {
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+    <td>${row["Agent Name"]}</td>
+    <td>${row["Total Login"]}</td>
+    <td>${row["Total Break"]}</td>
+    <td>${row["Net Login"]}</td>
+    <td>${row["Total Meeting"]}</td>
+    `;
+
+    table.appendChild(tr);
+});
+</script>
 
 </body>
 </html>

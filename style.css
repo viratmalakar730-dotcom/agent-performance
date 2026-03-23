@@ -1,50 +1,92 @@
 body {
-    font-family: Arial;
-    background: #0b1f3a;
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0b1f3a, #020617);
     color: white;
-    text-align: center;
 }
 
-.hidden { display: none; }
+/* 🔥 GOLD SHINE HEADER */
+h2 {
+    text-align: center;
+    font-size: 32px;
+    background: linear-gradient(90deg, gold, #ffd700, #fff3b0, gold);
+    background-size: 300%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: shine 3s linear infinite;
+}
 
-.welcome {
+@keyframes shine {
+    0% { background-position: 0% }
+    100% { background-position: 300% }
+}
+
+/* 🔥 CENTER BOX */
+.container {
     height: 100vh;
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
-    animation: fadeOut 2s forwards;
 }
 
-@keyframes fadeOut {
-    0% {opacity:1;}
-    100% {opacity:0; visibility:hidden;}
+.upload-box {
+    background: rgba(255,255,255,0.05);
+    padding: 40px;
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 0 20px rgba(255,215,0,0.3);
 }
 
+/* INPUT */
+input {
+    padding: 10px;
+    margin: 10px;
+    width: 250px;
+}
+
+/* BUTTON */
+button {
+    padding: 10px 20px;
+    background: gold;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+/* CARDS */
 .cards {
     display: flex;
     justify-content: center;
-    gap: 10px;
+    gap: 15px;
     flex-wrap: wrap;
 }
 
 .card {
-    background: gold;
+    background: linear-gradient(135deg, gold, #ffcc00);
     color: black;
-    padding: 10px;
-    border-radius: 8px;
+    padding: 15px;
+    border-radius: 10px;
+    min-width: 180px;
+    font-weight: bold;
 }
 
+/* TABLE */
 table {
-    width: 95%;
     margin: auto;
     margin-top: 20px;
+    width: 95%;
+    border-collapse: collapse;
     background: white;
     color: black;
-    border-collapse: collapse;
 }
 
-th, td {
-    padding: 8px;
+th {
+    background: gold;
+    color: black;
+}
+
+td, th {
+    padding: 10px;
     border: 1px solid black;
 }

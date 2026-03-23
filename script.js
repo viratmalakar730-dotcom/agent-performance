@@ -1,23 +1,26 @@
-function readExcel(file, skipRows = 0) {
-    return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const data = new Uint8Array(e.target.result);
-            const workbook = XLSX.read(data, { type: "array" });
-            const sheet = workbook.Sheets[workbook.SheetNames[0]];
+let idleTimer;
 
-            let json = XLSX.utils.sheet_to_json(sheet, {
-                header: 1,
-                defval: 0
-            });
+// 🔥 Welcome animation
+setTimeout(() => {
+    let w = document.getElementById("welcome");
+    let m = document.getElementById("main");
+    if (w && m) {
+        w.style.display = "none";
+        m.classList.remove("hidden");
+    }
+}, 2000);
 
-            json = json.slice(skipRows);
-
-            resolve(json);
-        };
-        reader.readAsArrayBuffer(file);
-    });
+// 🔥 Auto reset (5 min)
+function resetTimer() {
+    clearTimeout(idleTimer);
+    idleTimer = setTimeout(() => {
+        resetApp();
+    }, 300000);
 }
+
+document.onload = resetTimer;
+document.onmousemove = resetTimer;
+document.onkeypress = resetTimer;
 
 function toSeconds(time) {
     if (!time) return 0;
@@ -38,80 +41,78 @@ async function processFiles() {
     const cdr = await readExcel(document.getElementById("cdrFile").files[0], 2);
 
     let final = [];
+    let ivr = 0;
+
+    cdr.forEach(c => {
+        if ((c[7] || "").toString().toUpperCase().includes("INBOUND")) {
+            ivr++;
+        }
+    });
 
     apr.forEach(row => {
 
-        if (!row[1]) return;
-
         let empID = row[1];
         let name = row[2];
-        let totalLogin = toSeconds(row[3]);
 
-        let totalBreak =
-            toSeconds(row[19]) +
-            toSeconds(row[22]) +
-            toSeconds(row[24]);
+        let login = toSeconds(row[3]);
 
-        let meeting =
-            toSeconds(row[20]) +
-            toSeconds(row[23]);
+        let breakTime = toSeconds(row[19]) + toSeconds(row[22]) + toSeconds(row[24]);
+        let meeting = toSeconds(row[20]) + toSeconds(row[23]);
 
-        let netLogin = totalLogin - totalBreak;
+        let net = login - breakTime;
 
         let calls = cdr.filter(c => {
-            let dispo = (c[25] || "").toString().toLowerCase();
-            return c[1] == empID &&
-                   (dispo.includes("callmatured") || dispo.includes("transfer"));
+            let d = (c[25] || "").toLowerCase();
+            return c[1] == empID && (d.includes("callmatured") || d.includes("transfer"));
         });
 
-        let totalCalls = calls.length;
+        let total = calls.length;
 
-        let ib = calls.filter(c =>
-            (c[7] || "").toString().toUpperCase().includes("INBOUND")
-        ).length;
+        let ib = calls.filter(c => (c[7] || "").toUpperCase().includes("INBOUND")).length;
+        let ob = total - ib;
 
-        let ob = totalCalls - ib;
+        let totalTalk = toSeconds(row[5]); // APR Talk Time
+        let aht = total ? totalTalk / total : 0;
 
-        let totalTalk = toSeconds(row[5]);
-        let aht = totalCalls ? totalTalk / totalCalls : 0;
-
-        final.push({
-            empID, name, totalLogin, netLogin,
-            totalBreak, meeting, aht,
-            totalCalls, ib, ob
-        });
+        final.push({empID,name,login,net,breakTime,meeting,aht,total,ib,ob});
     });
 
-    localStorage.setItem("dashboardData", JSON.stringify(final));
+    sessionStorage.setItem("data", JSON.stringify({final, ivr}));
     window.location.href = "dashboard.html";
 }
 
-// DASHBOARD LOAD
+// 🔥 Dashboard
 document.addEventListener("DOMContentLoaded", () => {
 
-    const data = JSON.parse(localStorage.getItem("dashboardData") || "[]");
-    const table = document.querySelector("#dataTable tbody");
+    let stored = JSON.parse(sessionStorage.getItem("data") || "{}");
+    if (!stored.final) return;
 
-    let totalCalls = 0, totalIB = 0, totalOB = 0, totalAHT = 0;
+    let {final, ivr} = stored;
 
-    data.forEach(r => {
+    document.getElementById("ivr").innerText = ivr;
 
-        totalCalls += r.totalCalls;
-        totalIB += r.ib;
-        totalOB += r.ob;
-        totalAHT += r.aht;
+    let total=0, ib=0, ob=0, ahtSum=0;
 
-        const tr = document.createElement("tr");
+    const table = document.querySelector("#table tbody");
+
+    final.forEach(r => {
+
+        total += r.total;
+        ib += r.ib;
+        ob += r.ob;
+        ahtSum += r.aht;
+
+        let tr = document.createElement("tr");
 
         tr.innerHTML = `
         <td>${r.empID}</td>
         <td>${r.name}</td>
-        <td>${toTime(r.totalLogin)}</td>
-        <td>${toTime(r.netLogin)}</td>
-        <td>${toTime(r.totalBreak)}</td>
+        <td>${toTime(r.login)}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
         <td>${toTime(r.meeting)}</td>
-        <td>${Math.round(r.aht)}</td>
-        <td>${r.totalCalls}</td>
+        <td>${toTime(r.aht)}</td>
+        <td>${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -119,30 +120,27 @@ document.addEventListener("DOMContentLoaded", () => {
         table.appendChild(tr);
     });
 
-    document.getElementById("totalCalls").innerText = totalCalls;
-    document.getElementById("ibCalls").innerText = totalIB;
-    document.getElementById("obCalls").innerText = totalOB;
-    document.getElementById("aht").innerText = Math.round(totalAHT / data.length || 0);
-
+    document.getElementById("total").innerText = total;
+    document.getElementById("ib").innerText = ib;
+    document.getElementById("ob").innerText = ob;
+    document.getElementById("aht").innerText = toTime(ahtSum / final.length);
 });
 
-// PNG COPY
-function copyImage() {
-    html2canvas(document.body).then(canvas => {
-        canvas.toBlob(blob => {
-            navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob })
-            ]);
-            alert("Copied as Image ✅");
-        });
-    });
+// 🔥 RESET
+function resetApp() {
+    sessionStorage.clear();
+    location.href = "index.html";
 }
 
-// EXPORT
-function exportExcel() {
-    const data = JSON.parse(localStorage.getItem("dashboardData"));
-    const ws = XLSX.utils.json_to_sheet(data);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Report");
-    XLSX.writeFile(wb, "Dashboard.xlsx");
+// 🔥 Excel reader
+function readExcel(file, skip) {
+    return new Promise(res => {
+        let reader = new FileReader();
+        reader.onload = e => {
+            let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+            let data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1});
+            res(data.slice(skip));
+        };
+        reader.readAsArrayBuffer(file);
+    });
 }

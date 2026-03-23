@@ -10,13 +10,18 @@
     <h1>Welcome Chandan Sir</h1>
 </div>
 
-<div id="main" class="hidden">
-    <h2>Agent Performance Dashboard</h2>
+<div id="main" class="hidden container">
+    <div class="upload-box">
+        <h2>Agent Performance Dashboard</h2>
 
-    <input type="file" id="aprFile"><br>
-    <input type="file" id="cdrFile"><br>
+        <label>APR Report</label><br>
+        <input type="file" id="aprFile"><br>
 
-    <button onclick="processFiles()">Generate Report</button>
+        <label>CDR Report</label><br>
+        <input type="file" id="cdrFile"><br>
+
+        <button onclick="processFiles()">Generate Report</button>
+    </div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

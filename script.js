@@ -10,7 +10,7 @@ setTimeout(() => {
     }
 }, 2000);
 
-// Idle reset
+// Auto reset
 function resetTimer() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(resetApp, 300000);
@@ -25,16 +25,11 @@ function toSeconds(time) {
 }
 
 function toTime(sec) {
-    sec = Math.round(sec); // 🔥 remove decimal
+    sec = Math.round(sec);
     let h = Math.floor(sec/3600);
     let m = Math.floor((sec%3600)/60);
     let s = sec%60;
-
-    return [
-        String(h).padStart(2,'0'),
-        String(m).padStart(2,'0'),
-        String(s).padStart(2,'0')
-    ].join(":");
+    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
 async function processFiles() {
@@ -45,7 +40,6 @@ async function processFiles() {
     let final = [];
     let ivr = 0;
 
-    // IVR HIT
     cdr.forEach(c => {
         if ((c[7] || "").toUpperCase().includes("INBOUND")) ivr++;
     });
@@ -86,7 +80,6 @@ async function processFiles() {
     window.location.href = "dashboard.html";
 }
 
-// DASHBOARD
 document.addEventListener("DOMContentLoaded", () => {
 
     let stored = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -107,12 +100,11 @@ document.addEventListener("DOMContentLoaded", () => {
         ob += r.ob;
         ahtSum += r.aht;
 
-        let tr = document.createElement("tr");
-
-        // 🔥 CONDITIONS
         let netClass = r.net > 28800 ? "green3d" : "";
         let breakClass = r.breakTime > 2100 ? "red3d" : "";
         let meetingClass = r.meeting > 2100 ? "red3d" : "";
+
+        let tr = document.createElement("tr");
 
         tr.innerHTML = `
         <td>${r.empID}</td>
@@ -136,13 +128,11 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("aht").innerText = toTime(ahtSum / final.length);
 });
 
-// RESET
 function resetApp() {
     sessionStorage.clear();
     location.href = "index.html";
 }
 
-// PNG COPY
 function copyImage() {
     let element = document.getElementById("table");
 
@@ -151,12 +141,10 @@ function copyImage() {
             navigator.clipboard.write([
                 new ClipboardItem({ "image/png": blob })
             ]);
-            alert("Copied ✅");
         });
     });
 }
 
-// Excel reader
 function readExcel(file, skip) {
     return new Promise(res => {
         let reader = new FileReader();

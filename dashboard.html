@@ -6,7 +6,7 @@
 </head>
 <body>
 
-<h2>Agent Dashboard</h2>
+<h2>Agent Performance Dashboard</h2>
 
 <div class="cards">
 <div class="card">IVR Hit<br><span id="ivr"></span></div>
@@ -16,26 +16,29 @@
 <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
+<button onclick="copyImage()">Copy PNG</button>
 <button onclick="resetApp()">Reset</button>
 
 <table id="table">
 <thead>
 <tr>
-<th>ID</th>
-<th>Name</th>
+<th>Employee ID</th>
+<th>Agent Full Name</th>
 <th>Total Login</th>
 <th>Net Login</th>
-<th>Break</th>
-<th>Meeting</th>
+<th>Total Break</th>
+<th>Total Meeting</th>
 <th>AHT</th>
-<th>Total Mature</th>
-<th>IB</th>
-<th>OB</th>
+<th>Total Mature Call</th>
+<th>IB Mature</th>
+<th>OB Mature</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>

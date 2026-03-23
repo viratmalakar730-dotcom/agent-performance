@@ -1,24 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Agent Dashboard</title>
+<title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="container">
-<h2>Agent Performance Dashboard</h2>
+<div id="welcome" class="welcome">
+    <h1>Welcome Chandan Sir</h1>
+</div>
 
-<label>APR Report:</label><br>
-<input type="file" id="aprFile"><br><br>
+<div id="main" class="hidden">
+    <h2>Agent Performance Dashboard</h2>
 
-<label>CDR Report:</label><br>
-<input type="file" id="cdrFile"><br><br>
+    <input type="file" id="aprFile"><br>
+    <input type="file" id="cdrFile"><br>
 
-<button onclick="processFiles()">Generate Report</button>
-
-<div id="loading" class="loading">⏳ Processing...</div>
-
+    <button onclick="processFiles()">Generate Report</button>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

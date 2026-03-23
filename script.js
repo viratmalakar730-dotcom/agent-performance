@@ -1,6 +1,6 @@
 let idleTimer;
 
-// Welcome screen
+// Welcome
 setTimeout(() => {
     let w = document.getElementById("welcome");
     let m = document.getElementById("main");
@@ -10,12 +10,11 @@ setTimeout(() => {
     }
 }, 2000);
 
-// Auto reset 5 min
+// Idle reset
 function resetTimer() {
     clearTimeout(idleTimer);
     idleTimer = setTimeout(resetApp, 300000);
 }
-
 document.onmousemove = resetTimer;
 document.onkeypress = resetTimer;
 
@@ -26,10 +25,16 @@ function toSeconds(time) {
 }
 
 function toTime(sec) {
+    sec = Math.round(sec); // 🔥 remove decimal
     let h = Math.floor(sec/3600);
     let m = Math.floor((sec%3600)/60);
     let s = sec%60;
-    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
+
+    return [
+        String(h).padStart(2,'0'),
+        String(m).padStart(2,'0'),
+        String(s).padStart(2,'0')
+    ].join(":");
 }
 
 async function processFiles() {
@@ -40,6 +45,7 @@ async function processFiles() {
     let final = [];
     let ivr = 0;
 
+    // IVR HIT
     cdr.forEach(c => {
         if ((c[7] || "").toUpperCase().includes("INBOUND")) ivr++;
     });
@@ -64,11 +70,14 @@ async function processFiles() {
 
         let total = calls.length;
 
-        let ib = calls.filter(c => (c[7] || "").toUpperCase().includes("INBOUND")).length;
+        let ib = calls.filter(c =>
+            (c[7] || "").toUpperCase().includes("INBOUND")
+        ).length;
+
         let ob = total - ib;
 
         let totalTalk = toSeconds(row[5]);
-        let aht = total ? totalTalk / total : 0;
+        let aht = total ? Math.round(totalTalk / total) : 0;
 
         final.push({empID,name,login,net,breakTime,meeting,aht,total,ib,ob});
     });
@@ -77,6 +86,7 @@ async function processFiles() {
     window.location.href = "dashboard.html";
 }
 
+// DASHBOARD
 document.addEventListener("DOMContentLoaded", () => {
 
     let stored = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -99,13 +109,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         let tr = document.createElement("tr");
 
+        // 🔥 CONDITIONS
+        let netClass = r.net > 28800 ? "green3d" : "";
+        let breakClass = r.breakTime > 2100 ? "red3d" : "";
+        let meetingClass = r.meeting > 2100 ? "red3d" : "";
+
         tr.innerHTML = `
         <td>${r.empID}</td>
         <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td>${toTime(r.net)}</td>
-        <td>${toTime(r.breakTime)}</td>
-        <td>${toTime(r.meeting)}</td>
+        <td class="${netClass}">${toTime(r.net)}</td>
+        <td class="${breakClass}">${toTime(r.breakTime)}</td>
+        <td class="${meetingClass}">${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
         <td>${r.total}</td>
         <td>${r.ib}</td>
@@ -121,24 +136,27 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("aht").innerText = toTime(ahtSum / final.length);
 });
 
-// Reset
+// RESET
 function resetApp() {
     sessionStorage.clear();
     location.href = "index.html";
 }
 
-// PNG copy
+// PNG COPY
 function copyImage() {
-    html2canvas(document.body).then(canvas => {
+    let element = document.getElementById("table");
+
+    html2canvas(element, { scale: 2 }).then(canvas => {
         canvas.toBlob(blob => {
             navigator.clipboard.write([
                 new ClipboardItem({ "image/png": blob })
             ]);
+            alert("Copied ✅");
         });
     });
 }
 
-// Excel read
+// Excel reader
 function readExcel(file, skip) {
     return new Promise(res => {
         let reader = new FileReader();

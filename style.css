@@ -16,12 +16,28 @@ input, button {
 
 .loading {
     display: none;
-    margin-top: 20px;
+}
+
+.cards {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: gold;
+    color: black;
+    padding: 15px;
+    border-radius: 10px;
+    width: 180px;
+    font-weight: bold;
 }
 
 table {
     margin: auto;
-    margin-top: 30px;
+    margin-top: 20px;
     border-collapse: collapse;
     width: 95%;
     background: white;
@@ -36,12 +52,4 @@ th {
 td, th {
     padding: 10px;
     border: 1px solid black;
-}
-
-.green {
-    background: #d4edda;
-}
-
-.red {
-    background: #f8d7da;
 }

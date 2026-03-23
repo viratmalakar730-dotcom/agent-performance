@@ -5,51 +5,46 @@ body {
     text-align: center;
 }
 
-.container {
-    margin-top: 80px;
+.hidden { display: none; }
+
+.welcome {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 2rem;
+    animation: fadeOut 2s forwards;
 }
 
-input, button {
-    padding: 10px;
-    margin: 10px;
-}
-
-.loading {
-    display: none;
+@keyframes fadeOut {
+    0% {opacity:1;}
+    100% {opacity:0; visibility:hidden;}
 }
 
 .cards {
     display: flex;
     justify-content: center;
-    gap: 15px;
-    margin: 20px;
+    gap: 10px;
     flex-wrap: wrap;
 }
 
 .card {
     background: gold;
     color: black;
-    padding: 15px;
-    border-radius: 10px;
-    width: 180px;
-    font-weight: bold;
+    padding: 10px;
+    border-radius: 8px;
 }
 
 table {
+    width: 95%;
     margin: auto;
     margin-top: 20px;
-    border-collapse: collapse;
-    width: 95%;
     background: white;
     color: black;
+    border-collapse: collapse;
 }
 
-th {
-    background: navy;
-    color: white;
-}
-
-td, th {
-    padding: 10px;
+th, td {
+    padding: 8px;
     border: 1px solid black;
 }

@@ -5,6 +5,7 @@ body {
     color: white;
 }
 
+/* GOLD HEADER */
 h2 {
     text-align: center;
     font-size: 30px;
@@ -20,6 +21,7 @@ h2 {
     100% { background-position: 300% }
 }
 
+/* CENTER BOX */
 .container {
     height: 100vh;
     display: flex;
@@ -48,6 +50,7 @@ button {
     border-radius: 8px;
     cursor: pointer;
     margin: 10px;
+    box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
 }
 
 .cards {
@@ -58,12 +61,15 @@ button {
 }
 
 .card {
-    background: gold;
+    background: linear-gradient(145deg, gold, #ffcc00);
     color: black;
     padding: 15px;
     border-radius: 10px;
+    font-weight: bold;
+    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
 }
 
+/* TABLE */
 table {
     margin: auto;
     margin-top: 20px;
@@ -71,6 +77,9 @@ table {
     border-collapse: collapse;
     background: white;
     color: black;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
 th {
@@ -82,6 +91,19 @@ td, th {
     border: 1px solid black;
 }
 
+/* 🔥 3D CONDITIONS */
+.green3d {
+    background: linear-gradient(145deg, #00ff88, #00cc66);
+    font-weight: bold;
+}
+
+.red3d {
+    background: linear-gradient(145deg, #ff4d4d, #cc0000);
+    color: white;
+    font-weight: bold;
+}
+
+/* WELCOME */
 .welcome {
     height: 100vh;
     display: flex;

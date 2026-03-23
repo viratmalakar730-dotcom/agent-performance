@@ -34,18 +34,8 @@ function toTime(sec) {
 
 async function processFiles() {
 
-    const aprFile = document.getElementById("aprFile").files[0];
-    const cdrFile = document.getElementById("cdrFile").files[0];
-
-    if (!aprFile || !cdrFile) {
-        alert("Upload both files ❌");
-        return;
-    }
-
-    document.getElementById("loading").style.display = "block";
-
-    const apr = await readExcel(aprFile, 3);
-    const cdr = await readExcel(cdrFile, 2);
+    const apr = await readExcel(document.getElementById("aprFile").files[0], 3);
+    const cdr = await readExcel(document.getElementById("cdrFile").files[0], 2);
 
     let final = [];
 
@@ -53,26 +43,23 @@ async function processFiles() {
 
         if (!row[1]) return;
 
-        let empID = row[1];   // B
-        let name = row[2];    // C
-        let totalLogin = toSeconds(row[3]); // D
+        let empID = row[1];
+        let name = row[2];
+        let totalLogin = toSeconds(row[3]);
 
-        let lunch = toSeconds(row[19]); // T
-        let tea = toSeconds(row[22]);   // W
-        let shortb = toSeconds(row[24]); // Y
+        let totalBreak =
+            toSeconds(row[19]) +
+            toSeconds(row[22]) +
+            toSeconds(row[24]);
 
         let meeting =
-            toSeconds(row[20]) + // U
-            toSeconds(row[23]);  // X
+            toSeconds(row[20]) +
+            toSeconds(row[23]);
 
-        let totalBreak = lunch + tea + shortb;
         let netLogin = totalLogin - totalBreak;
 
-        // 🔥 FINAL CORRECT FILTER
         let calls = cdr.filter(c => {
-
             let dispo = (c[25] || "").toString().toLowerCase();
-
             return c[1] == empID &&
                    (dispo.includes("callmatured") || dispo.includes("transfer"));
         });
@@ -85,22 +72,13 @@ async function processFiles() {
 
         let ob = totalCalls - ib;
 
-        // 🔥 AHT = APR TOTAL TALK TIME / TOTAL CALL
-        let totalTalk = toSeconds(row[5]); // APR column F
-
+        let totalTalk = toSeconds(row[5]);
         let aht = totalCalls ? totalTalk / totalCalls : 0;
 
         final.push({
-            empID,
-            name,
-            totalLogin,
-            netLogin,
-            totalBreak,
-            meeting,
-            aht,
-            totalCalls,
-            ib,
-            ob
+            empID, name, totalLogin, netLogin,
+            totalBreak, meeting, aht,
+            totalCalls, ib, ob
         });
     });
 
@@ -108,18 +86,22 @@ async function processFiles() {
     window.location.href = "dashboard.html";
 }
 
-// DASHBOARD
+// DASHBOARD LOAD
 document.addEventListener("DOMContentLoaded", () => {
 
     const data = JSON.parse(localStorage.getItem("dashboardData") || "[]");
     const table = document.querySelector("#dataTable tbody");
 
+    let totalCalls = 0, totalIB = 0, totalOB = 0, totalAHT = 0;
+
     data.forEach(r => {
 
-        let rowClass = r.netLogin >= 28800 ? "green" : "red";
+        totalCalls += r.totalCalls;
+        totalIB += r.ib;
+        totalOB += r.ob;
+        totalAHT += r.aht;
 
         const tr = document.createElement("tr");
-        tr.className = rowClass;
 
         tr.innerHTML = `
         <td>${r.empID}</td>
@@ -136,7 +118,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
         table.appendChild(tr);
     });
+
+    document.getElementById("totalCalls").innerText = totalCalls;
+    document.getElementById("ibCalls").innerText = totalIB;
+    document.getElementById("obCalls").innerText = totalOB;
+    document.getElementById("aht").innerText = Math.round(totalAHT / data.length || 0);
+
 });
+
+// PNG COPY
+function copyImage() {
+    html2canvas(document.body).then(canvas => {
+        canvas.toBlob(blob => {
+            navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })
+            ]);
+            alert("Copied as Image ✅");
+        });
+    });
+}
 
 // EXPORT
 function exportExcel() {

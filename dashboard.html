@@ -8,7 +8,17 @@
 
 <h2>Agent Performance Dashboard</h2>
 
+<!-- SUMMARY CARDS -->
+<div class="cards">
+<div class="card">IVR Hit<br><span id="ivr"></span></div>
+<div class="card">Total Mature Calls<br><span id="totalCalls"></span></div>
+<div class="card">IB Mature<br><span id="ibCalls"></span></div>
+<div class="card">OB Mature<br><span id="obCalls"></span></div>
+<div class="card">Overall AHT<br><span id="aht"></span></div>
+</div>
+
 <button onclick="exportExcel()">Export Excel</button>
+<button onclick="copyImage()">Copy PNG</button>
 
 <table id="dataTable">
 <thead>
@@ -28,6 +38,7 @@
 <tbody></tbody>
 </table>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 

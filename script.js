@@ -1,6 +1,6 @@
 let idleTimer;
 
-// 🔥 Welcome animation
+// Welcome screen
 setTimeout(() => {
     let w = document.getElementById("welcome");
     let m = document.getElementById("main");
@@ -10,15 +10,12 @@ setTimeout(() => {
     }
 }, 2000);
 
-// 🔥 Auto reset (5 min)
+// Auto reset 5 min
 function resetTimer() {
     clearTimeout(idleTimer);
-    idleTimer = setTimeout(() => {
-        resetApp();
-    }, 300000);
+    idleTimer = setTimeout(resetApp, 300000);
 }
 
-document.onload = resetTimer;
 document.onmousemove = resetTimer;
 document.onkeypress = resetTimer;
 
@@ -44,9 +41,7 @@ async function processFiles() {
     let ivr = 0;
 
     cdr.forEach(c => {
-        if ((c[7] || "").toString().toUpperCase().includes("INBOUND")) {
-            ivr++;
-        }
+        if ((c[7] || "").toUpperCase().includes("INBOUND")) ivr++;
     });
 
     apr.forEach(row => {
@@ -63,7 +58,8 @@ async function processFiles() {
 
         let calls = cdr.filter(c => {
             let d = (c[25] || "").toLowerCase();
-            return c[1] == empID && (d.includes("callmatured") || d.includes("transfer"));
+            return c[1] == empID &&
+                   (d.includes("callmatured") || d.includes("transfer"));
         });
 
         let total = calls.length;
@@ -71,7 +67,7 @@ async function processFiles() {
         let ib = calls.filter(c => (c[7] || "").toUpperCase().includes("INBOUND")).length;
         let ob = total - ib;
 
-        let totalTalk = toSeconds(row[5]); // APR Talk Time
+        let totalTalk = toSeconds(row[5]);
         let aht = total ? totalTalk / total : 0;
 
         final.push({empID,name,login,net,breakTime,meeting,aht,total,ib,ob});
@@ -81,7 +77,6 @@ async function processFiles() {
     window.location.href = "dashboard.html";
 }
 
-// 🔥 Dashboard
 document.addEventListener("DOMContentLoaded", () => {
 
     let stored = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -126,13 +121,24 @@ document.addEventListener("DOMContentLoaded", () => {
     document.getElementById("aht").innerText = toTime(ahtSum / final.length);
 });
 
-// 🔥 RESET
+// Reset
 function resetApp() {
     sessionStorage.clear();
     location.href = "index.html";
 }
 
-// 🔥 Excel reader
+// PNG copy
+function copyImage() {
+    html2canvas(document.body).then(canvas => {
+        canvas.toBlob(blob => {
+            navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })
+            ]);
+        });
+    });
+}
+
+// Excel read
 function readExcel(file, skip) {
     return new Promise(res => {
         let reader = new FileReader();

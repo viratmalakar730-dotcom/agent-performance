@@ -1,27 +1,19 @@
 body {
     margin: 0;
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Segoe UI';
     background: linear-gradient(135deg, #0b1f3a, #020617);
     color: white;
+    text-align: center;
 }
 
-/* GOLD HEADER */
+/* HEADER */
 h2 {
-    text-align: center;
-    font-size: 30px;
-    background: linear-gradient(90deg, gold, #ffd700, #fff3b0, gold);
-    background-size: 300%;
+    background: linear-gradient(90deg, gold, #ffd700, #fff3b0);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
-    animation: shine 3s linear infinite;
 }
 
-@keyframes shine {
-    0% { background-position: 0% }
-    100% { background-position: 300% }
-}
-
-/* CENTER BOX */
+/* CENTER */
 .container {
     height: 100vh;
     display: flex;
@@ -33,26 +25,30 @@ h2 {
     background: rgba(255,255,255,0.05);
     padding: 40px;
     border-radius: 15px;
-    backdrop-filter: blur(10px);
-    box-shadow: 0 0 20px rgba(255,215,0,0.3);
 }
 
+/* INPUT */
 input {
     padding: 10px;
     margin: 10px;
-    width: 250px;
 }
 
+/* BUTTON */
 button {
-    padding: 10px 20px;
+    padding: 10px;
+    margin: 10px;
     background: gold;
     border: none;
     border-radius: 8px;
-    cursor: pointer;
-    margin: 10px;
-    box-shadow: 3px 3px 10px rgba(0,0,0,0.5);
 }
 
+/* LOADING */
+.loading {
+    display: none;
+    color: gold;
+}
+
+/* CARDS */
 .cards {
     display: flex;
     justify-content: center;
@@ -61,47 +57,32 @@ button {
 }
 
 .card {
-    background: linear-gradient(145deg, gold, #ffcc00);
+    background: gold;
     color: black;
     padding: 15px;
     border-radius: 10px;
-    font-weight: bold;
-    box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
 }
 
 /* TABLE */
 table {
+    width: 95%;
     margin: auto;
     margin-top: 20px;
-    width: 95%;
-    border-collapse: collapse;
     background: white;
     color: black;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    border-collapse: collapse;
 }
 
-th {
-    background: gold;
-}
-
-td, th {
+th, td {
     padding: 10px;
     border: 1px solid black;
+    text-align: center;
 }
 
-/* 🔥 3D CONDITIONS */
-.green3d {
-    background: linear-gradient(145deg, #00ff88, #00cc66);
-    font-weight: bold;
-}
-
-.red3d {
-    background: linear-gradient(145deg, #ff4d4d, #cc0000);
-    color: white;
-    font-weight: bold;
-}
+/* CALL COLORS */
+.high { background: #00cc66; color:white; }
+.medium { background: #ffcc00; }
+.low { background: #ff4d4d; color:white; }
 
 /* WELCOME */
 .welcome {
@@ -109,7 +90,6 @@ td, th {
     display: flex;
     justify-content: center;
     align-items: center;
-    font-size: 2rem;
 }
 
 .hidden { display: none; }

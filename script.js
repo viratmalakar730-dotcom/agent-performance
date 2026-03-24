@@ -1,158 +1,147 @@
-let idleTimer;
-
 // Welcome
 setTimeout(() => {
-    let w = document.getElementById("welcome");
-    let m = document.getElementById("main");
-    if (w && m) {
-        w.style.display = "none";
-        m.classList.remove("hidden");
-    }
-}, 2000);
+    document.getElementById("welcome").style.display="none";
+    document.getElementById("main").classList.remove("hidden");
+},2000);
 
-// Auto reset
-function resetTimer() {
-    clearTimeout(idleTimer);
-    idleTimer = setTimeout(resetApp, 300000);
-}
-document.onmousemove = resetTimer;
-document.onkeypress = resetTimer;
-
-function toSeconds(time) {
-    if (!time) return 0;
-    let t = time.toString().split(":").map(Number);
-    return (t[0]||0)*3600 + (t[1]||0)*60 + (t[2]||0);
+function toSeconds(t){
+    if(!t) return 0;
+    let a=t.split(":").map(Number);
+    return a[0]*3600+a[1]*60+a[2];
 }
 
-function toTime(sec) {
-    sec = Math.round(sec);
-    let h = Math.floor(sec/3600);
-    let m = Math.floor((sec%3600)/60);
-    let s = sec%60;
+function toTime(sec){
+    sec=Math.round(sec);
+    let h=Math.floor(sec/3600);
+    let m=Math.floor((sec%3600)/60);
+    let s=sec%60;
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-async function processFiles() {
+async function processFiles(){
 
-    const apr = await readExcel(document.getElementById("aprFile").files[0], 3);
-    const cdr = await readExcel(document.getElementById("cdrFile").files[0], 2);
+    document.getElementById("loading").style.display="block";
 
-    let final = [];
-    let ivr = 0;
+    const apr=await readExcel(document.getElementById("aprFile").files[0],3);
+    const cdr=await readExcel(document.getElementById("cdrFile").files[0],2);
 
-    cdr.forEach(c => {
-        if ((c[7] || "").toUpperCase().includes("INBOUND")) ivr++;
+    let final=[],ivr=0;
+
+    cdr.forEach(c=>{
+        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
     });
 
-    apr.forEach(row => {
+    apr.forEach(r=>{
 
-        let empID = row[1];
-        let name = row[2];
+        let emp=r[1],name=r[2];
+        let login=toSeconds(r[3]);
 
-        let login = toSeconds(row[3]);
+        let br=toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
+        let meet=toSeconds(r[20])+toSeconds(r[23]);
 
-        let breakTime = toSeconds(row[19]) + toSeconds(row[22]) + toSeconds(row[24]);
-        let meeting = toSeconds(row[20]) + toSeconds(row[23]);
+        let net=login-br;
 
-        let net = login - breakTime;
-
-        let calls = cdr.filter(c => {
-            let d = (c[25] || "").toLowerCase();
-            return c[1] == empID &&
-                   (d.includes("callmatured") || d.includes("transfer"));
+        let calls=cdr.filter(c=>{
+            let d=(c[25]||"").toLowerCase();
+            return c[1]==emp&&(d.includes("callmatured")||d.includes("transfer"));
         });
 
-        let total = calls.length;
+        let total=calls.length;
 
-        let ib = calls.filter(c =>
-            (c[7] || "").toUpperCase().includes("INBOUND")
-        ).length;
+        let ib=calls.filter(c=>(c[7]||"").toUpperCase().includes("INBOUND")).length;
+        let ob=total-ib;
 
-        let ob = total - ib;
+        let aht=total?Math.round(toSeconds(r[5])/total):0;
 
-        let totalTalk = toSeconds(row[5]);
-        let aht = total ? Math.round(totalTalk / total) : 0;
-
-        final.push({empID,name,login,net,breakTime,meeting,aht,total,ib,ob});
+        final.push({emp,name,login,net,br,meet,aht,total,ib,ob});
     });
 
-    sessionStorage.setItem("data", JSON.stringify({final, ivr}));
-    window.location.href = "dashboard.html";
+    sessionStorage.setItem("data",JSON.stringify({final,ivr}));
+    location="dashboard.html";
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded",()=>{
 
-    let stored = JSON.parse(sessionStorage.getItem("data") || "{}");
-    if (!stored.final) return;
+    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+    if(!d.final) return;
 
-    let {final, ivr} = stored;
+    let {final,ivr}=d;
 
-    document.getElementById("ivr").innerText = ivr;
+    final.sort((a,b)=>b.total-a.total);
 
-    let total=0, ib=0, ob=0, ahtSum=0;
+    let max=Math.max(...final.map(x=>x.total));
 
-    const table = document.querySelector("#table tbody");
+    document.getElementById("ivr").innerText=ivr;
 
-    final.forEach(r => {
+    let total=0,ib=0,ob=0,aht=0;
 
-        total += r.total;
-        ib += r.ib;
-        ob += r.ob;
-        ahtSum += r.aht;
+    const tb=document.querySelector("#table tbody");
 
-        let netClass = r.net > 28800 ? "green3d" : "";
-        let breakClass = r.breakTime > 2100 ? "red3d" : "";
-        let meetingClass = r.meeting > 2100 ? "red3d" : "";
+    final.forEach(r=>{
 
-        let tr = document.createElement("tr");
+        total+=r.total;
+        ib+=r.ib;
+        ob+=r.ob;
+        aht+=r.aht;
 
-        tr.innerHTML = `
-        <td>${r.empID}</td>
+        let cls=r.total>max*0.7?"high":r.total>max*0.4?"medium":"low";
+
+        let tr=document.createElement("tr");
+
+        tr.innerHTML=`
+        <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td class="${netClass}">${toTime(r.net)}</td>
-        <td class="${breakClass}">${toTime(r.breakTime)}</td>
-        <td class="${meetingClass}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.br)}</td>
+        <td>${toTime(r.meet)}</td>
         <td>${toTime(r.aht)}</td>
-        <td>${r.total}</td>
+        <td class="${cls}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
 
-        table.appendChild(tr);
+        tb.appendChild(tr);
     });
 
-    document.getElementById("total").innerText = total;
-    document.getElementById("ib").innerText = ib;
-    document.getElementById("ob").innerText = ob;
-    document.getElementById("aht").innerText = toTime(ahtSum / final.length);
+    document.getElementById("total").innerText=total;
+    document.getElementById("ib").innerText=ib;
+    document.getElementById("ob").innerText=ob;
+    document.getElementById("aht").innerText=toTime(aht/final.length);
 });
 
-function resetApp() {
-    sessionStorage.clear();
-    location.href = "index.html";
+// SEARCH
+function searchAgent(){
+    let v=document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
+    });
 }
 
-function copyImage() {
-    let element = document.getElementById("table");
-
-    html2canvas(element, { scale: 2 }).then(canvas => {
-        canvas.toBlob(blob => {
-            navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob })
-            ]);
+// PNG COPY
+function copyImage(){
+    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
+        c.toBlob(b=>{
+            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+            alert("Copied ✅");
         });
     });
 }
 
-function readExcel(file, skip) {
-    return new Promise(res => {
-        let reader = new FileReader();
-        reader.onload = e => {
-            let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-            let data = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header:1});
-            res(data.slice(skip));
+// RESET
+function resetApp(){
+    sessionStorage.clear();
+    location="index.html";
+}
+
+function readExcel(f,s){
+    return new Promise(res=>{
+        let r=new FileReader();
+        r.onload=e=>{
+            let wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+            let d=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+            res(d.slice(s));
         };
-        reader.readAsArrayBuffer(file);
+        r.readAsArrayBuffer(f);
     });
 }

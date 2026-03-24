@@ -9,14 +9,70 @@ body {
     font-weight: bold;
 }
 
-/* HEADER */
+/* 🔥 HEADER TITLE */
 h2 {
-    text-align: center;
-    font-size: 30px;
+    font-size: 32px;
     color: gold;
+    margin-top: 20px;
 }
 
-/* TABLE */
+/* 🔥 SUMMARY CARDS */
+.cards {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    margin: 20px;
+    flex-wrap: wrap;
+}
+
+.card {
+    background: linear-gradient(145deg, #ffd700, #ffcc00);
+    color: black;
+    padding: 15px 20px;
+    border-radius: 12px;
+    font-weight: bold;
+    min-width: 160px;
+
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.5),
+        inset -3px -3px 6px rgba(0,0,0,0.4);
+}
+
+.card span {
+    display: block;
+    font-size: 20px;
+    margin-top: 5px;
+}
+
+/* 🔍 SEARCH */
+#search {
+    padding: 10px;
+    margin: 10px;
+    width: 250px;
+    border-radius: 8px;
+    border: none;
+}
+
+/* 🔘 BUTTON */
+button {
+    padding: 10px 15px;
+    margin: 10px;
+    background: linear-gradient(145deg, gold, #ffcc00);
+    border: none;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+
+    box-shadow:
+        2px 2px 6px rgba(0,0,0,0.5),
+        inset 1px 1px 3px rgba(255,255,255,0.4);
+}
+
+button:hover {
+    transform: scale(1.05);
+}
+
+/* 📊 TABLE */
 table {
     width: 95%;
     margin: auto;
@@ -24,76 +80,121 @@ table {
     border-collapse: collapse;
     background: white;
     color: black;
+    border-radius: 10px;
+    overflow: hidden;
 }
 
-/* HEADER STYLE */
+/* 🔵 HEADER */
 th {
     background: #0b3d91;
     color: white;
-    font-weight: bold;
     padding: 12px;
     text-transform: uppercase;
+    font-weight: bold;
 }
 
-/* CELL STYLE */
+/* 📌 CELLS */
 td {
-    font-weight: bold;
     padding: 10px;
     border: 1px solid black;
     text-align: center;
+    font-weight: bold;
 }
 
-/* EMPLOYEE ID + NAME */
+/* ✨ EMPLOYEE STYLE */
 td:nth-child(1),
 td:nth-child(2) {
     font-style: italic;
     font-weight: bold;
 }
 
-/* 🔥 NET LOGIN GREEN 3D */
+/* 🟢 NET LOGIN 3D */
 .netGreen {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
-    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.4),
-                inset -3px -3px 6px rgba(0,0,0,0.4);
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.4),
+        inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
-/* 🔴 BREAK RED 3D */
+/* 🔴 BREAK */
 .breakRed {
     background: linear-gradient(145deg, #ff1744, #ff5252);
     color: white;
-    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.3),
-                inset -3px -3px 6px rgba(0,0,0,0.5);
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.3),
+        inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
-/* 🔴 MEETING RED 3D */
+/* 🔴 MEETING */
 .meetingRed {
     background: linear-gradient(145deg, #d50000, #ff1744);
     color: white;
-    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.3),
-                inset -3px -3px 6px rgba(0,0,0,0.5);
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.3),
+        inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
 /* 🟢 HIGH CALL */
 .green {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
-    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.4),
-                inset -3px -3px 6px rgba(0,0,0,0.4);
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.4),
+        inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
 /* 🟡 MID CALL */
 .yellow {
     background: linear-gradient(145deg, #ffd600, #ffea00);
     color: black;
-    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.5),
-                inset -3px -3px 6px rgba(0,0,0,0.3);
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.5),
+        inset -3px -3px 6px rgba(0,0,0,0.3);
 }
 
 /* 🔴 LOW CALL */
 .red {
     background: linear-gradient(145deg, #ff1744, #ff5252);
     color: white;
-    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.3),
-                inset -3px -3px 6px rgba(0,0,0,0.5);
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.3),
+        inset -3px -3px 6px rgba(0,0,0,0.5);
+}
+
+/* 📂 UPLOAD PAGE */
+.container {
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.upload-box {
+    background: linear-gradient(145deg, #0b3d91, #001f4d);
+    padding: 40px;
+    border-radius: 15px;
+
+    box-shadow:
+        inset 2px 2px 6px rgba(255,255,255,0.2),
+        inset -3px -3px 6px rgba(0,0,0,0.6);
+}
+
+/* LABEL */
+.label {
+    color: gold;
+    font-weight: bold;
+}
+
+/* LOADING */
+.loading {
+    display: none;
+    color: gold;
+    margin-top: 10px;
+}
+
+/* 🎯 HOVER EFFECT */
+tr:hover {
+    background: #ffe066;
+    transition: 0.2s;
 }

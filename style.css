@@ -1,72 +1,17 @@
 body {
     margin: 0;
-    font-family: 'Segoe UI';
+    font-family: 'Trade Gothic Next Heavy', 'Segoe UI', sans-serif;
     background: linear-gradient(135deg, #0b1f3a, #020617);
     color: white;
     text-align: center;
+    font-weight: bold;
 }
 
 /* HEADER */
 h2 {
-    background: linear-gradient(90deg, gold, #ffd700);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
-
-/* CENTER */
-.container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.upload-box {
-    background: rgba(255,255,255,0.05);
-    padding: 40px;
-    border-radius: 15px;
-}
-
-/* LABEL */
-.label {
+    text-align: center;
+    font-size: 30px;
     color: gold;
-    font-weight: bold;
-}
-
-/* INPUT */
-input {
-    padding: 10px;
-    margin: 10px;
-}
-
-/* BUTTON */
-button {
-    padding: 10px;
-    margin: 10px;
-    background: gold;
-    border: none;
-    border-radius: 8px;
-}
-
-/* LOADING */
-.loading {
-    display: none;
-    color: gold;
-}
-
-/* CARDS */
-.cards {
-    display: flex;
-    justify-content: center;
-    gap: 10px;
-    flex-wrap: wrap;
-}
-
-.card {
-    background: gold;
-    color: black;
-    padding: 15px;
-    border-radius: 10px;
 }
 
 /* TABLE */
@@ -74,44 +19,63 @@ table {
     width: 95%;
     margin: auto;
     margin-top: 20px;
+    border-collapse: collapse;
     background: white;
     color: black;
-    border-collapse: collapse;
 }
 
-td, th {
+/* HEADER STYLE */
+th {
+    background: #0b3d91;
+    color: white;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* ALL TEXT BOLD */
+td {
+    font-weight: bold;
     padding: 10px;
     border: 1px solid black;
     text-align: center;
 }
 
-/* 🔥 3D COLORS */
+/* EMP ID + NAME */
+td:nth-child(1),
+td:nth-child(2) {
+    font-style: italic;
+    font-weight: bold;
+}
+
+/* 🔥 NET LOGIN GREEN */
+.netGreen {
+    background: linear-gradient(145deg, #00c853, #00e676);
+    color: white;
+}
+
+/* 🔴 BREAK RED */
+.breakRed {
+    background: linear-gradient(145deg, #ff1744, #ff5252);
+    color: white;
+}
+
+/* 🔴 MEETING RED */
+.meetingRed {
+    background: linear-gradient(145deg, #d50000, #ff1744);
+    color: white;
+}
+
+/* 🔥 CALL COLORS */
 .green {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
-    box-shadow: inset 2px 2px 5px rgba(255,255,255,0.5),
-                inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
 .yellow {
     background: linear-gradient(145deg, #ffd600, #ffea00);
-    color: black;
-    box-shadow: inset 2px 2px 5px rgba(255,255,255,0.6),
-                inset -3px -3px 6px rgba(0,0,0,0.3);
 }
 
 .red {
     background: linear-gradient(145deg, #ff1744, #ff5252);
     color: white;
-    box-shadow: inset 2px 2px 5px rgba(255,255,255,0.4),
-                inset -3px -3px 6px rgba(0,0,0,0.5);
 }
-
-.welcome {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.hidden { display: none; }

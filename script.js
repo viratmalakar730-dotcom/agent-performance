@@ -116,9 +116,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
         let callCls = getGradientClass(r.total, max);
 
         // 🔥 CONDITIONAL
-        let netCls = r.net > 29700 ? "netGreen" : ""; // 8:15
-        let breakCls = r.breakTime > 2100 ? "breakRed" : ""; // 35 min
-        let meetingCls = r.meeting > 2100 ? "meetingRed" : "";
+        let netCls = r.net >= 28800 ? "netGreen" : "";   // 08:00:00
+        let breakCls = r.breakTime > 2100 ? "breakRed" : ""; // 00:35:00
+        let meetingCls = r.meeting > 2100 ? "meetingRed" : ""; // 00:35:00
 
         let tr = document.createElement("tr");
 

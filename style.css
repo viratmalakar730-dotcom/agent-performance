@@ -8,7 +8,7 @@ body {
 
 /* HEADER */
 h2 {
-    background: linear-gradient(90deg, gold, #ffd700, #fff3b0);
+    background: linear-gradient(90deg, gold, #ffd700);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -25,6 +25,12 @@ h2 {
     background: rgba(255,255,255,0.05);
     padding: 40px;
     border-radius: 15px;
+}
+
+/* LABEL */
+.label {
+    color: gold;
+    font-weight: bold;
 }
 
 /* INPUT */
@@ -73,18 +79,34 @@ table {
     border-collapse: collapse;
 }
 
-th, td {
+td, th {
     padding: 10px;
     border: 1px solid black;
     text-align: center;
 }
 
-/* CALL COLORS */
-.high { background: #00cc66; color:white; }
-.medium { background: #ffcc00; }
-.low { background: #ff4d4d; color:white; }
+/* 🔥 3D COLORS */
+.green {
+    background: linear-gradient(145deg, #00c853, #00e676);
+    color: white;
+    box-shadow: inset 2px 2px 5px rgba(255,255,255,0.5),
+                inset -3px -3px 6px rgba(0,0,0,0.4);
+}
 
-/* WELCOME */
+.yellow {
+    background: linear-gradient(145deg, #ffd600, #ffea00);
+    color: black;
+    box-shadow: inset 2px 2px 5px rgba(255,255,255,0.6),
+                inset -3px -3px 6px rgba(0,0,0,0.3);
+}
+
+.red {
+    background: linear-gradient(145deg, #ff1744, #ff5252);
+    color: white;
+    box-shadow: inset 2px 2px 5px rgba(255,255,255,0.4),
+                inset -3px -3px 6px rgba(0,0,0,0.5);
+}
+
 .welcome {
     height: 100vh;
     display: flex;

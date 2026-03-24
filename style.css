@@ -1,6 +1,8 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
+
 body {
     margin: 0;
-    font-family: 'Trade Gothic Next Heavy', 'Segoe UI', sans-serif;
+    font-family: 'Oswald', sans-serif;
     background: linear-gradient(135deg, #0b1f3a, #020617);
     color: white;
     text-align: center;
@@ -29,10 +31,11 @@ th {
     background: #0b3d91;
     color: white;
     font-weight: bold;
-    padding: 10px;
+    padding: 12px;
+    text-transform: uppercase;
 }
 
-/* ALL TEXT BOLD */
+/* CELL STYLE */
 td {
     font-weight: bold;
     padding: 10px;
@@ -40,42 +43,57 @@ td {
     text-align: center;
 }
 
-/* EMP ID + NAME */
+/* EMPLOYEE ID + NAME */
 td:nth-child(1),
 td:nth-child(2) {
     font-style: italic;
     font-weight: bold;
 }
 
-/* 🔥 NET LOGIN GREEN */
+/* 🔥 NET LOGIN GREEN 3D */
 .netGreen {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
+    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.4),
+                inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
-/* 🔴 BREAK RED */
+/* 🔴 BREAK RED 3D */
 .breakRed {
     background: linear-gradient(145deg, #ff1744, #ff5252);
     color: white;
+    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.3),
+                inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
-/* 🔴 MEETING RED */
+/* 🔴 MEETING RED 3D */
 .meetingRed {
     background: linear-gradient(145deg, #d50000, #ff1744);
     color: white;
+    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.3),
+                inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
-/* 🔥 CALL COLORS */
+/* 🟢 HIGH CALL */
 .green {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
+    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.4),
+                inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
+/* 🟡 MID CALL */
 .yellow {
     background: linear-gradient(145deg, #ffd600, #ffea00);
+    color: black;
+    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.5),
+                inset -3px -3px 6px rgba(0,0,0,0.3);
 }
 
+/* 🔴 LOW CALL */
 .red {
     background: linear-gradient(145deg, #ff1744, #ff5252);
     color: white;
+    box-shadow: inset 2px 2px 6px rgba(255,255,255,0.3),
+                inset -3px -3px 6px rgba(0,0,0,0.5);
 }

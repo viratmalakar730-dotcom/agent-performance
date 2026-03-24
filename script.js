@@ -1,51 +1,128 @@
+// 🔥 TIME CONVERT
 function toSeconds(t){
     if(!t) return 0;
-    let a=t.toString().split(":").map(Number);
-    return (a[0]||0)*3600+(a[1]||0)*60+(a[2]||0);
+    let a = t.toString().split(":").map(Number);
+    return (a[0]||0)*3600 + (a[1]||0)*60 + (a[2]||0);
 }
 
 function toTime(sec){
-    sec=Math.max(0,Math.round(sec));
-    let h=Math.floor(sec/3600);
-    let m=Math.floor((sec%3600)/60);
-    let s=sec%60;
+    sec = Math.max(0, Math.round(sec));
+    let h = Math.floor(sec/3600);
+    let m = Math.floor((sec%3600)/60);
+    let s = sec%60;
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
+// 🔥 COLOR GRADIENT
 function getGradientClass(val,max){
-    let p=val/max;
-    if(p>=0.75) return "green";
-    if(p>=0.45) return "yellow";
+    let p = val/max;
+    if(p >= 0.75) return "green";
+    if(p >= 0.45) return "yellow";
     return "red";
 }
 
-document.addEventListener("DOMContentLoaded",()=>{
+// 🔥 FILE PROCESS
+async function processFiles(){
 
-    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+    document.getElementById("loading").style.display="block";
+
+    const apr = await readExcel(document.getElementById("aprFile").files[0],3);
+    const cdr = await readExcel(document.getElementById("cdrFile").files[0],2);
+
+    let final = [];
+    let ivr = 0;
+
+    // 🔥 IVR HIT
+    cdr.forEach(c=>{
+        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
+    });
+
+    // 🔥 MAIN LOOP
+    apr.forEach(r=>{
+
+        if(!r[1]) return;
+
+        let emp = r[1];
+        let name = r[2];
+
+        let login = toSeconds(r[3]);
+
+        let breakTime =
+            (toSeconds(r[19])||0) +
+            (toSeconds(r[22])||0) +
+            (toSeconds(r[24])||0);
+
+        let meeting =
+            (toSeconds(r[20])||0) +
+            (toSeconds(r[23])||0);
+
+        let net = Math.max(0, login - breakTime);
+
+        // 🔥 CALL FILTER
+        let calls = cdr.filter(c=>{
+            let d = (c[25]||"").toLowerCase();
+            return c[1] == emp &&
+                (d.includes("callmatured") || d.includes("transfer"));
+        });
+
+        let total = calls.length;
+
+        let ib = calls.filter(c =>
+            (c[7]||"").toUpperCase().includes("INBOUND")
+        ).length;
+
+        let ob = total - ib;
+
+        let aht = total ? Math.round(toSeconds(r[5]) / total) : 0;
+
+        final.push({
+            emp, name, login, net,
+            breakTime, meeting,
+            aht, total, ib, ob
+        });
+    });
+
+    sessionStorage.setItem("data", JSON.stringify({final, ivr}));
+    location = "dashboard.html";
+}
+
+// 🔥 DASHBOARD LOAD
+document.addEventListener("DOMContentLoaded", ()=>{
+
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
     if(!d.final) return;
 
-    let {final,ivr}=d;
+    let {final, ivr} = d;
 
-    final.sort((a,b)=>b.total-a.total);
+    // 🔥 SORT (HIGH → LOW)
+    final.sort((a,b)=>b.total - a.total);
 
-    let max=Math.max(...final.map(x=>x.total));
+    let max = Math.max(...final.map(x=>x.total));
 
-    document.getElementById("ivr").innerText=ivr;
+    const tb = document.querySelector("#table tbody");
 
-    const tb=document.querySelector("#table tbody");
+    let totalCalls = 0;
+    let totalIB = 0;
+    let totalOB = 0;
+    let totalTalk = 0;
 
     final.forEach(r=>{
 
-        let callCls=getGradientClass(r.total,max);
+        totalCalls += r.total;
+        totalIB += r.ib;
+        totalOB += r.ob;
+        totalTalk += (r.aht * r.total);
 
-        // 🔥 CONDITIONAL FORMATTING
-        let netCls = r.net > 29700 ? "netGreen" : "";   // 8:15 hr
+        let callCls = getGradientClass(r.total, max);
+
+        // 🔥 CONDITIONAL
+        let netCls = r.net > 29700 ? "netGreen" : ""; // 8:15
         let breakCls = r.breakTime > 2100 ? "breakRed" : ""; // 35 min
         let meetingCls = r.meeting > 2100 ? "meetingRed" : "";
 
-        let tr=document.createElement("tr");
+        let tr = document.createElement("tr");
 
-        tr.innerHTML=`
+        tr.innerHTML = `
         <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
@@ -61,4 +138,56 @@ document.addEventListener("DOMContentLoaded",()=>{
         tb.appendChild(tr);
     });
 
+    // 🔥 SUMMARY
+    document.getElementById("ivr").innerText = ivr;
+    document.getElementById("total").innerText = totalCalls;
+    document.getElementById("ib").innerText = totalIB;
+    document.getElementById("ob").innerText = totalOB;
+
+    let overallAHT = totalCalls ? totalTalk / totalCalls : 0;
+    document.getElementById("aht").innerText = toTime(overallAHT);
 });
+
+// 🔍 SEARCH
+function searchAgent(){
+    let v = document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.style.display = r.innerText.toLowerCase().includes(v) ? "" : "none";
+    });
+}
+
+// 🖼 PNG COPY
+function copyImage(){
+    html2canvas(document.getElementById("table"), {scale:2}).then(c=>{
+        c.toBlob(b=>{
+            navigator.clipboard.write([
+                new ClipboardItem({"image/png": b})
+            ]);
+            alert("✅ Table Copied Successfully!");
+        });
+    });
+}
+
+// 🔄 RESET
+function resetApp(){
+    sessionStorage.clear();
+    location = "index.html";
+}
+
+// 📂 READ EXCEL
+function readExcel(file, skipRows){
+    return new Promise(resolve=>{
+        let reader = new FileReader();
+
+        reader.onload = e=>{
+            let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+            let data = XLSX.utils.sheet_to_json(
+                wb.Sheets[wb.SheetNames[0]],
+                {header:1}
+            );
+            resolve(data.slice(skipRows));
+        };
+
+        reader.readAsArrayBuffer(file);
+    });
+}

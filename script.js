@@ -13,7 +13,7 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-// 🔥 COLOR GRADIENT
+// 🔥 GRADIENT
 function getGradientClass(val,max){
     let p = val/max;
     if(p >= 0.75) return "green";
@@ -23,8 +23,6 @@ function getGradientClass(val,max){
 
 // 🔥 FILE PROCESS
 async function processFiles(){
-
-    document.getElementById("loading").style.display="block";
 
     const apr = await readExcel(document.getElementById("aprFile").files[0],3);
     const cdr = await readExcel(document.getElementById("cdrFile").files[0],2);
@@ -46,13 +44,13 @@ async function processFiles(){
         let login = toSeconds(r[3]);
 
         let breakTime =
-            (toSeconds(r[19])||0) +
-            (toSeconds(r[22])||0) +
-            (toSeconds(r[24])||0);
+            toSeconds(r[19]) +
+            toSeconds(r[22]) +
+            toSeconds(r[24]);
 
         let meeting =
-            (toSeconds(r[20])||0) +
-            (toSeconds(r[23])||0);
+            toSeconds(r[20]) +
+            toSeconds(r[23]);
 
         let net = Math.max(0, login - breakTime);
 
@@ -150,69 +148,89 @@ function copyImage(){
             navigator.clipboard.write([
                 new ClipboardItem({"image/png": b})
             ]);
-            alert("✅ Table Copied!");
+            alert("✅ Copied!");
         });
     });
 }
 
-// 📊 EXCEL EXPORT (ERROR FIXED)
+// 📊 EXCEL EXPORT (FINAL STYLED)
 function exportExcel(){
 
-    if(typeof XLSX === "undefined"){
-        alert("XLSX not loaded ❌\nCheck CDN");
-        return;
-    }
-
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    if(!d.final || d.final.length === 0){
-        alert("No Data Found ❌");
-        return;
-    }
+    if(!d.final) return;
 
     let data = d.final;
 
-    let ws_data = [
-        ["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]
-    ];
+    let ws_data = [["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
 
     data.forEach(r=>{
         ws_data.push([
-            r.emp,
-            r.name,
+            r.emp, r.name,
             toTime(r.login),
             toTime(r.net),
             toTime(r.breakTime),
             toTime(r.meeting),
             toTime(r.aht),
-            r.total,
-            r.ib,
-            r.ob
+            r.total, r.ib, r.ob
         ]);
     });
 
-    // 🔥 SAFE METHOD
-    let ws = XLSX.utils.json_to_sheet(
-        ws_data.map(row => ({
-            "Employee ID": row[0],
-            "Agent Full Name": row[1],
-            "Total Login": row[2],
-            "Net Login": row[3],
-            "Total Break": row[4],
-            "Total Meeting": row[5],
-            "AHT": row[6],
-            "Total Mature Call": row[7],
-            "IB Mature": row[8],
-            "OB Mature": row[9]
-        }))
-    );
+    let ws = XLSX.utils.aoa_to_sheet(ws_data);
+    let range = XLSX.utils.decode_range(ws['!ref']);
+
+    let max = Math.max(...data.map(x=>x.total));
+
+    // HEADER
+    for(let C=0; C<=range.e.c; C++){
+        let cell = ws[XLSX.utils.encode_cell({r:0,c:C})];
+        cell.s = {
+            fill:{fgColor:{rgb:"0B3D91"}},
+            font:{color:{rgb:"FFFFFF"},bold:true},
+            alignment:{horizontal:"center"}
+        };
+    }
+
+    // DATA STYLE
+    for(let R=1; R<=range.e.r; R++){
+        for(let C=0; C<=range.e.c; C++){
+
+            let cell = ws[XLSX.utils.encode_cell({r:R,c:C})];
+            if(!cell) continue;
+
+            cell.s = {font:{bold:true},alignment:{horizontal:"center"}};
+
+            let val = ws_data[R][C];
+
+            if(C===3 && toSeconds(val)>=28800){
+                cell.s.fill={fgColor:{rgb:"00C853"}};
+            }
+
+            if(C===4 && toSeconds(val)>2100){
+                cell.s.fill={fgColor:{rgb:"FF1744"}};
+            }
+
+            if(C===5 && toSeconds(val)>2100){
+                cell.s.fill={fgColor:{rgb:"D50000"}};
+            }
+
+            if(C===7){
+                let p = val/max;
+                if(p>=0.75) cell.s.fill={fgColor:{rgb:"00C853"}};
+                else if(p>=0.45) cell.s.fill={fgColor:{rgb:"FFD600"}};
+                else cell.s.fill={fgColor:{rgb:"FF3D00"}};
+            }
+        }
+    }
+
+    ws['!cols'] = [
+        {wch:12},{wch:25},{wch:15},{wch:15},{wch:15},
+        {wch:15},{wch:12},{wch:18},{wch:12},{wch:12}
+    ];
 
     let wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
 
-    XLSX.writeFile(wb, "Agent_Performance_Report.xlsx");
-
-    alert("✅ Excel Downloaded");
+    XLSX.writeFile(wb, "Agent_Report.xlsx");
 }
 
 // 🔄 RESET

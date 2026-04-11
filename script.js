@@ -1,9 +1,5 @@
-// ================= GLOBAL =================
-let crmEnabled = false;
-
-// ================= TIME =================
 function toSeconds(t){
-    if(!t || t === "-") return 0;
+    if(!t) return 0;
     let a = t.toString().split(":").map(Number);
     return (a[0]||0)*3600 + (a[1]||0)*60 + (a[2]||0);
 }
@@ -16,8 +12,17 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
+function getGradientClass(val,max){
+    let p = val/max;
+    if(p >= 0.75) return "green";
+    if(p >= 0.45) return "yellow";
+    return "red";
+}
+
 // ================= PROCESS =================
 function processFiles(){
+
+    document.getElementById("loading").style.display="block";
 
     let aprFile = document.getElementById("aprFile").files[0];
     let cdrFile = document.getElementById("cdrFile").files[0];
@@ -31,16 +36,14 @@ function processFiles(){
     let reader2 = new FileReader();
 
     reader1.onload = function(e1){
-
         let wb1 = XLSX.read(e1.target.result, {type:'binary'});
-        let apr = XLSX.utils.sheet_to_json(wb1.Sheets[wb1.SheetNames[0]], {header:1});
+        let data1 = XLSX.utils.sheet_to_json(wb1.Sheets[wb1.SheetNames[0]]);
 
         reader2.onload = function(e2){
-
             let wb2 = XLSX.read(e2.target.result, {type:'binary'});
-            let cdr = XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]], {header:1});
+            let data2 = XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]]);
 
-            generateDashboard(apr, cdr);
+            generateDashboard(data1, data2);
         };
 
         reader2.readAsBinaryString(cdrFile);
@@ -54,77 +57,40 @@ function generateDashboard(apr, cdr){
 
     let final = [];
 
-    // 🔥 CLEAN DATA
-    let aprData = apr.slice(2); // remove top 2 rows
-    let cdrData = cdr.slice(1); // remove top 1 row
+    apr.forEach(r=>{
 
-    // 🔥 IVR HIT (Skill = INBOUND → Column H = index 7)
-    let ivr = cdrData.filter(r => (r[7] || "").toString().toUpperCase() === "INBOUND").length;
+        let emp = r["Agent Name"];
+        let name = r["Agent Full Name"];
 
-    aprData.forEach(r=>{
-
-        let emp = r[1]; // Column B
-        let name = r[2]; // Column C
-
-        if(!emp) return;
-
-        // 🔥 TIME CALCULATION
-        let login = toSeconds(r[3]); // D
-
-        let breakTime =
-            toSeconds(r[19]) + // T
-            toSeconds(r[22]) + // W
-            toSeconds(r[24]);  // Y
-
-        let meeting =
-            toSeconds(r[20]) + // U
-            toSeconds(r[23]);  // X
+        let login = toSeconds(r["Total Login Time"]);
+        let breakTime = toSeconds(r["Total Break Duration"]);
+        let meeting = toSeconds(r["MEETING"]);
 
         let net = login - breakTime;
 
-        // 🔥 VALID CALL FILTER
-        let empCalls = cdrData.filter(x=>{
-            let dispo = (x[25] || "").toString().toLowerCase(); // Z
-            return x[1] == emp &&
-                (dispo.includes("callmatured") || dispo.includes("transfer"));
-        });
+        let empCDR = cdr.filter(x=>x.Username == emp);
 
-        let total = empCalls.length;
+        let total = empCDR.length;
+        let ib = empCDR.filter(x=>x["Call Type"]=="Inbound").length;
+        let ob = empCDR.filter(x=>x["Call Type"]=="Outbound").length;
 
-        // 🔥 IB / OB
-        let ib = empCalls.filter(x => (x[7] || "").toString().toUpperCase() === "INBOUND").length;
-        let ob = total - ib;
-
-        // 🔥 AHT (APR Column F = index 5)
-        let totalTalk = toSeconds(r[5]);
-        let aht = total ? totalTalk / total : 0;
+        let totalTalk = empCDR.reduce((s,x)=>s + toSeconds(x["Talk Duration"]),0);
+        let aht = total ? totalTalk/total : 0;
 
         final.push({
-            emp,
-            name,
-            login,
-            breakTime,
-            meeting,
-            net,
-            total,
-            ib,
-            ob,
-            aht
+            emp,name,login,breakTime,meeting,net,
+            total,ib,ob,aht
         });
     });
 
-    // 🔥 SORTING
-    final.sort((a,b)=>b.total - a.total);
+    let ivr = cdr.length;
 
-    sessionStorage.setItem("data", JSON.stringify({
-        final,
-        ivr
-    }));
+    sessionStorage.setItem("data", JSON.stringify({final, ivr}));
 
     location = "dashboard.html";
 }
 
-// ================= DASHBOARD LOAD =================
+// ================= LOAD =================
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -132,7 +98,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     let {final, ivr} = d;
 
-    let tb = document.querySelector("#table tbody");
+    final.sort((a,b)=>b.total - a.total);
+
+    let max = Math.max(...final.map(x=>x.total));
+
+    const tb = document.querySelector("#table tbody");
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
@@ -143,17 +113,23 @@ document.addEventListener("DOMContentLoaded", ()=>{
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
+        let callCls=getGradientClass(r.total,max);
+
+        let netCls=r.net>=28800?"netGreen":"";
+        let breakCls=r.breakTime>2100?"breakRed":"";
+        let meetingCls=r.meeting>2100?"meetingRed":"";
+
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td>${r.emp}</td>
-        <td>${r.name}</td>
+        <td><b><i>${r.emp}</i></b></td>
+        <td><b><i>${r.name}</i></b></td>
         <td>${toTime(r.login)}</td>
-        <td class="${r.net>=28800?"netGreen":""}">${toTime(r.net)}</td>
-        <td class="${r.breakTime>2100?"breakRed":""}">${toTime(r.breakTime)}</td>
-        <td class="${r.meeting>2100?"meetingRed":""}">${toTime(r.meeting)}</td>
+        <td class="${netCls}">${toTime(r.net)}</td>
+        <td class="${breakCls}">${toTime(r.breakTime)}</td>
+        <td class="${meetingCls}">${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td>${r.total}</td>
+        <td class="${callCls}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -176,6 +152,42 @@ function searchAgent(){
     document.querySelectorAll("#table tbody tr").forEach(r=>{
         r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
     });
+}
+
+// ================= PNG =================
+function copyImage(){
+    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
+        c.toBlob(b=>{
+            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+            alert("Copied!");
+        });
+    });
+}
+
+// ================= EXCEL =================
+function exportExcel(){
+
+    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+    if(!d.final) return;
+
+    let data=d.final;
+
+    let ws_data=[["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
+
+    data.forEach(r=>{
+        ws_data.push([
+            r.emp,r.name,
+            toTime(r.login),toTime(r.net),
+            toTime(r.breakTime),toTime(r.meeting),
+            toTime(r.aht),r.total,r.ib,r.ob
+        ]);
+    });
+
+    let ws=XLSX.utils.aoa_to_sheet(ws_data);
+    let wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
+
+    XLSX.writeFile(wb,"Agent_Report.xlsx");
 }
 
 // ================= RESET =================

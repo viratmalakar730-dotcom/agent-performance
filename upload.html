@@ -9,17 +9,23 @@
 <div class="container">
 <div class="upload-box">
 
-<h2>Upload Reports</h2>
+<h2>Agent Performance Dashboard</h2>
 
-<input type="file" id="aprFile"><br><br>
-<input type="file" id="cdrFile"><br><br>
+<label class="label">APR Report</label>
+<input type="file" id="aprFile"><br>
 
-<button onclick="processFiles()">Generate Dashboard</button>
-<button onclick="logout()">Logout</button>
+<label class="label">CDR Report</label>
+<input type="file" id="cdrFile"><br>
+
+<button onclick="processFiles()">Generate Report</button>
+<button onclick="resetApp()">Logout</button>
+
+<div id="loading" class="loading">Processing... ⏳</div>
 
 </div>
 </div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 </body>
 </html>

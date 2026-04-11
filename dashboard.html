@@ -15,21 +15,19 @@
     <div class="card">IB Mature<br><span id="ib"></span></div>
     <div class="card">OB Mature<br><span id="ob"></span></div>
     <div class="card">Overall AHT<br><span id="aht"></span></div>
+    <div class="card">Total Tagging<br><span id="tagging"></span></div> <!-- NEW -->
 </div>
 
-<!-- 🔍 SEARCH -->
 <div style="text-align:center;">
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 </div>
 
-<!-- 🔘 BUTTONS -->
 <div style="text-align:center; margin:20px;">
     <button onclick="copyImage()">Copy PNG</button>
     <button onclick="exportExcel()">Export Excel</button>
     <button onclick="resetApp()">Reset</button>
 </div>
 
-<!-- 📊 TABLE -->
 <table id="table">
 <thead>
 <tr>
@@ -43,17 +41,16 @@
 <th>Total Mature Call</th>
 <th>IB Mature</th>
 <th>OB Mature</th>
+<th>Tagging</th> <!-- NEW -->
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<!-- ❤️ FOOTER -->
 <div style="text-align:center; margin-top:20px; font-weight:bold;">
     ❤️ Powered by Chandan Malakar ❤️
 </div>
 
-<!-- LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 

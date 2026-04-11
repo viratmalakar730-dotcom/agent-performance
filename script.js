@@ -32,12 +32,10 @@ async function processFiles(){
     let final = [];
     let ivr = 0;
 
-    // 🔥 IVR HIT
     cdr.forEach(c=>{
         if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
     });
 
-    // 🔥 MAIN LOOP
     apr.forEach(r=>{
 
         if(!r[1]) return;
@@ -58,7 +56,6 @@ async function processFiles(){
 
         let net = Math.max(0, login - breakTime);
 
-        // 🔥 CALL FILTER
         let calls = cdr.filter(c=>{
             let d = (c[25]||"").toLowerCase();
             return c[1] == emp &&
@@ -94,7 +91,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     let {final, ivr} = d;
 
-    // 🔥 SORT (HIGH → LOW)
     final.sort((a,b)=>b.total - a.total);
 
     let max = Math.max(...final.map(x=>x.total));
@@ -115,10 +111,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
         let callCls = getGradientClass(r.total, max);
 
-        // 🔥 CONDITIONAL
-        let netCls = r.net >= 28800 ? "netGreen" : "";   // 08:00:00
-        let breakCls = r.breakTime > 2100 ? "breakRed" : ""; // 00:35:00
-        let meetingCls = r.meeting > 2100 ? "meetingRed" : ""; // 00:35:00
+        let netCls = r.net >= 28800 ? "netGreen" : "";
+        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
+        let meetingCls = r.meeting > 2100 ? "meetingRed" : "";
 
         let tr = document.createElement("tr");
 
@@ -166,6 +161,19 @@ function copyImage(){
             alert("✅ Table Copied Successfully!");
         });
     });
+}
+
+// 📊 EXCEL EXPORT 🔥
+function exportExcel(){
+
+    let table = document.getElementById("table");
+
+    let wb = XLSX.utils.book_new();
+    let ws = XLSX.utils.table_to_sheet(table);
+
+    XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+
+    XLSX.writeFile(wb, "Agent_Performance_Report.xlsx");
 }
 
 // 🔄 RESET

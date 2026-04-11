@@ -1,72 +1,38 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Agent Performance Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <h2>Agent Performance Dashboard</h2>
 
-<div class="cards">
-    <div class="card">IVR Hit<br><span id="ivr"></span></div>
-    <div class="card">Total Mature Calls<br><span id="total"></span></div>
-    <div class="card">IB Mature<br><span id="ib"></span></div>
-    <div class="card">OB Mature<br><span id="ob"></span></div>
-    <div class="card">Overall AHT<br><span id="aht"></span></div>
+<div id="captureArea">
+
+<div class="timerBox" id="timer"></div>
+
+<table id="table">
+<thead>
+<tr>
+<th>ID</th>
+<th>Name</th>
+<th>Total</th>
+<th>IB</th>
+<th>OB</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+<div class="footer">
+❤️ Powered by Chandan Malakar
 </div>
-
-<input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
-
-<div style="text-align:center; margin:20px;">
-    <button onclick="copyImage()">Copy PNG</button>
-    <button onclick="exportExcel()">Export Excel</button>
-    <button onclick="resetApp()">Reset</button>
-</div>
-
-<!-- 🔥 PNG CLEAN AREA -->
-<div id="captureArea" style="background:white; padding:20px; border-radius:10px;">
-
-    <div style="text-align:center;">
-        <img src="logo.png" width="80">
-    </div>
-
-    <div style="font-size:22px; font-weight:bold; color:#0b3d91;">
-        Agent Performance Dashboard
-    </div>
-
-    <div style="text-align:center; color:#0b3d91; font-size:18px; margin:10px;">
-        Report Time: <span id="reportTime"></span>
-    </div>
-
-    <table id="table">
-        <thead>
-        <tr>
-            <th>Employee ID</th>
-            <th>Agent Full Name</th>
-            <th>Total Login</th>
-            <th>Net Login</th>
-            <th>Total Break</th>
-            <th>Total Meeting</th>
-            <th>AHT</th>
-            <th>Total Mature Call</th>
-            <th>IB Mature</th>
-            <th>OB Mature</th>
-        </tr>
-        </thead>
-        <tbody></tbody>
-    </table>
-
-    <div style="text-align:center; margin-top:20px; font-weight:bold; color:#0b3d91;">
-        ❤️ Powered by Chandan Malakar ❤️
-    </div>
 
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<button onclick="logout()">Logout</button>
 
 <script src="script.js"></script>
-
 </body>
 </html>

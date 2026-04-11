@@ -1,13 +1,12 @@
-// ================= GLOBAL =================
 let crmEnabled = false;
 
-// ================= CRM TOGGLE =================
+// ================= TOGGLE =================
 function toggleCRM(){
     crmEnabled = !crmEnabled;
     document.getElementById("crmBox").style.display = crmEnabled ? "block" : "none";
 }
 
-// ================= TIME FUNCTIONS =================
+// ================= TIME =================
 function toSeconds(t){
     if(!t) return 0;
     let a = t.toString().split(":").map(Number);
@@ -29,7 +28,7 @@ function getGradientClass(val,max){
     return "red";
 }
 
-// ================= PROCESS FILES =================
+// ================= PROCESS =================
 function processFiles(){
 
     document.getElementById("loading").style.display="block";
@@ -47,39 +46,39 @@ function processFiles(){
     let reader2 = new FileReader();
 
     reader1.onload = function(e1){
-        let wb1 = XLSX.read(e1.target.result, {type:'binary'});
-        let apr = XLSX.utils.sheet_to_json(wb1.Sheets[wb1.SheetNames[0]]);
+        let apr = XLSX.utils.sheet_to_json(XLSX.read(e1.target.result,{type:'binary'}).Sheets.Sheet1);
 
         reader2.onload = function(e2){
-            let wb2 = XLSX.read(e2.target.result, {type:'binary'});
-            let cdr = XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]]);
+            let cdr = XLSX.utils.sheet_to_json(XLSX.read(e2.target.result,{type:'binary'}).Sheets.Sheet1);
 
-            // ===== CRM DATA =====
-            if(crmEnabled && crmFile){
-
-                let reader3 = new FileReader();
-
-                reader3.onload = function(e3){
-                    let wb3 = XLSX.read(e3.target.result, {type:'binary'});
-                    let crm = XLSX.utils.sheet_to_json(wb3.Sheets[wb3.SheetNames[0]]);
-
-                    let taggingMap = {};
-
-                    crm.forEach(r=>{
-                        let emp = r["CreatedByID"]; // Column AK
-                        if(emp){
-                            taggingMap[emp] = (taggingMap[emp] || 0) + 1;
-                        }
-                    });
-
-                    generateDashboard(apr, cdr, taggingMap);
-                };
-
-                reader3.readAsBinaryString(crmFile);
-
-            } else {
-                generateDashboard(apr, cdr, {});
+            if(!crmEnabled){
+                generateDashboard(apr, cdr, null);
+                return;
             }
+
+            if(crmEnabled && !crmFile){
+                alert("Upload CRM File");
+                return;
+            }
+
+            let reader3 = new FileReader();
+
+            reader3.onload = function(e3){
+                let crm = XLSX.utils.sheet_to_json(XLSX.read(e3.target.result,{type:'binary'}).Sheets.Sheet1);
+
+                let taggingMap = {};
+
+                crm.forEach(r=>{
+                    let emp = r["CreatedByID"];
+                    if(emp){
+                        taggingMap[emp] = (taggingMap[emp] || 0) + 1;
+                    }
+                });
+
+                generateDashboard(apr, cdr, taggingMap);
+            };
+
+            reader3.readAsBinaryString(crmFile);
         };
 
         reader2.readAsBinaryString(cdrFile);
@@ -88,7 +87,7 @@ function processFiles(){
     reader1.readAsBinaryString(aprFile);
 }
 
-// ================= GENERATE DASHBOARD =================
+// ================= GENERATE =================
 function generateDashboard(apr, cdr, taggingMap){
 
     let final = [];
@@ -113,43 +112,47 @@ function generateDashboard(apr, cdr, taggingMap){
         let totalTalk = empCDR.reduce((s,x)=>s + toSeconds(x["Talk Duration"]),0);
         let aht = total ? totalTalk/total : 0;
 
-        let tagging = taggingMap[emp] || 0;
+        let tagging = taggingMap ? (taggingMap[emp] || 0) : null;
 
         final.push({
-            emp,
-            name,
-            login,
-            breakTime,
-            meeting,
-            net,
-            total,
-            ib,
-            ob,
-            aht,
-            tagging
+            emp,name,login,breakTime,meeting,net,
+            total,ib,ob,aht,tagging
         });
     });
 
-    let ivr = cdr.length;
-
-    sessionStorage.setItem("data", JSON.stringify({final, ivr}));
+    sessionStorage.setItem("data", JSON.stringify({
+        final,
+        ivr: cdr.length,
+        crmEnabled: taggingMap ? true : false
+    }));
 
     location = "dashboard.html";
 }
 
-// ================= DASHBOARD LOAD =================
+// ================= LOAD DASHBOARD =================
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
     if(!d.final) return;
 
-    let {final, ivr} = d;
+    let {final, ivr, crmEnabled} = d;
 
-    final.sort((a,b)=>b.total - a.total);
+    let tb = document.querySelector("#table tbody");
+    let headerRow = document.getElementById("headerRow");
+    let cards = document.getElementById("cards");
 
-    let max = Math.max(...final.map(x=>x.total));
+    // 🔥 ADD CRM COLUMN + CARD ONLY IF ENABLED
+    if(crmEnabled){
 
-    const tb = document.querySelector("#table tbody");
+        let th = document.createElement("th");
+        th.innerText = "Tagging";
+        headerRow.appendChild(th);
+
+        let card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML = `Total Tagging<br><span id="tagging"></span>`;
+        cards.appendChild(card);
+    }
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0,totalTagging=0;
 
@@ -159,28 +162,25 @@ document.addEventListener("DOMContentLoaded", ()=>{
         totalIB+=r.ib;
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
-        totalTagging+=(r.tagging || 0);
 
-        let callCls=getGradientClass(r.total,max);
-
-        let netCls=r.net>=28800?"netGreen":"";
-        let breakCls=r.breakTime>2100?"breakRed":"";
-        let meetingCls=r.meeting>2100?"meetingRed":"";
+        if(crmEnabled){
+            totalTagging += r.tagging || 0;
+        }
 
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
+        <td>${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
+        <td>${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
-        <td>${r.tagging || 0}</td>
+        ${crmEnabled ? `<td>${r.tagging}</td>` : ``}
         `;
 
         tb.appendChild(tr);
@@ -190,13 +190,11 @@ document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById("total").innerText=totalCalls;
     document.getElementById("ib").innerText=totalIB;
     document.getElementById("ob").innerText=totalOB;
+    document.getElementById("aht").innerText=toTime(totalTalk/totalCalls || 0);
 
-    let overallAHT=totalCalls?totalTalk/totalCalls:0;
-    document.getElementById("aht").innerText=toTime(overallAHT);
-
-    // 🔥 NEW TAGGING CARD
-    let tagEl = document.getElementById("tagging");
-    if(tagEl) tagEl.innerText = totalTagging;
+    if(crmEnabled){
+        document.getElementById("tagging").innerText = totalTagging;
+    }
 });
 
 // ================= SEARCH =================
@@ -207,7 +205,7 @@ function searchAgent(){
     });
 }
 
-// ================= PNG COPY =================
+// ================= PNG =================
 function copyImage(){
     html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
         c.toBlob(b=>{
@@ -217,39 +215,43 @@ function copyImage(){
     });
 }
 
-// ================= EXCEL EXPORT =================
+// ================= EXCEL =================
 function exportExcel(){
 
     let d=JSON.parse(sessionStorage.getItem("data")||"{}");
     if(!d.final) return;
 
-    let data=d.final;
+    let {final, crmEnabled} = d;
 
-    let ws_data=[[
+    let headers=[
         "Employee ID","Agent Full Name","Total Login","Net Login",
         "Total Break","Total Meeting","AHT",
-        "Total Mature Call","IB Mature","OB Mature","Tagging"
-    ]];
+        "Total Mature Call","IB Mature","OB Mature"
+    ];
 
-    data.forEach(r=>{
-        ws_data.push([
+    if(crmEnabled) headers.push("Tagging");
+
+    let ws_data=[headers];
+
+    final.forEach(r=>{
+        let row=[
             r.emp,r.name,
             toTime(r.login),toTime(r.net),
             toTime(r.breakTime),toTime(r.meeting),
             toTime(r.aht),
-            r.total,r.ib,r.ob,
-            r.tagging || 0
-        ]);
+            r.total,r.ib,r.ob
+        ];
+
+        if(crmEnabled) row.push(r.tagging);
+
+        ws_data.push(row);
     });
 
     let ws=XLSX.utils.aoa_to_sheet(ws_data);
     let wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
 
-    let now=new Date();
-    let name=`Agent_Report_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}.xlsx`;
-
-    XLSX.writeFile(wb,name);
+    XLSX.writeFile(wb,"Agent_Report.xlsx");
 }
 
 // ================= RESET =================

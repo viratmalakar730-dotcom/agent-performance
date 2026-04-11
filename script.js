@@ -13,7 +13,7 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-// 🔥 GRADIENT
+// 🔥 COLOR GRADIENT
 function getGradientClass(val,max){
     let p = val/max;
     if(p >= 0.75) return "green";
@@ -46,13 +46,13 @@ async function processFiles(){
         let login = toSeconds(r[3]);
 
         let breakTime =
-            toSeconds(r[19]) +
-            toSeconds(r[22]) +
-            toSeconds(r[24]);
+            (toSeconds(r[19])||0) +
+            (toSeconds(r[22])||0) +
+            (toSeconds(r[24])||0);
 
         let meeting =
-            toSeconds(r[20]) +
-            toSeconds(r[23]);
+            (toSeconds(r[20])||0) +
+            (toSeconds(r[23])||0);
 
         let net = Math.max(0, login - breakTime);
 
@@ -155,8 +155,13 @@ function copyImage(){
     });
 }
 
-// 📊 EXCEL EXPORT (FINAL WORKING)
+// 📊 EXCEL EXPORT (ERROR FIXED)
 function exportExcel(){
+
+    if(typeof XLSX === "undefined"){
+        alert("XLSX not loaded ❌\nCheck CDN");
+        return;
+    }
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
@@ -186,12 +191,21 @@ function exportExcel(){
         ]);
     });
 
-    let ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-    ws['!cols'] = [
-        {wch:12},{wch:25},{wch:15},{wch:15},{wch:15},
-        {wch:15},{wch:12},{wch:18},{wch:12},{wch:12}
-    ];
+    // 🔥 SAFE METHOD
+    let ws = XLSX.utils.json_to_sheet(
+        ws_data.map(row => ({
+            "Employee ID": row[0],
+            "Agent Full Name": row[1],
+            "Total Login": row[2],
+            "Net Login": row[3],
+            "Total Break": row[4],
+            "Total Meeting": row[5],
+            "AHT": row[6],
+            "Total Mature Call": row[7],
+            "IB Mature": row[8],
+            "OB Mature": row[9]
+        }))
+    );
 
     let wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Dashboard");

@@ -18,6 +18,15 @@
         <label class="label">CDR Report</label>
         <input type="file" id="cdrFile"><br>
 
+        <!-- 🔥 CRM TOGGLE -->
+        <button onclick="toggleCRM()">Add CRM Report</button>
+
+        <!-- 🔥 CRM FILE (HIDDEN DEFAULT) -->
+        <div id="crmBox" style="display:none;">
+            <label class="label">CRM Report</label>
+            <input type="file" id="crmFile"><br>
+        </div>
+
         <button onclick="processFiles()">Generate Report</button>
 
         <div id="loading" class="loading">Processing... ⏳</div>

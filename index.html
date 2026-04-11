@@ -1,24 +1,32 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Upload Reports</title>
+<title>Upload</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="upload-box">
-    <h2>Welcome in Agent Performance Report</h2>
+<div class="container">
 
-    <label>Upload APR Report</label>
-    <input type="file" id="aprFile">
+    <div class="upload-box">
 
-    <label>Upload CDR Report</label>
-    <input type="file" id="cdrFile">
+        <h2>Agent Performance Dashboard</h2>
 
-    <button onclick="processFiles()">Generate Report</button>
+        <label class="label">APR Report</label>
+        <input type="file" id="aprFile"><br>
+
+        <label class="label">CDR Report</label>
+        <input type="file" id="cdrFile"><br>
+
+        <button onclick="processFiles()">Generate Report</button>
+
+        <div id="loading" class="loading">Processing... ⏳</div>
+
+    </div>
+
 </div>
 
-<script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 
 </body>

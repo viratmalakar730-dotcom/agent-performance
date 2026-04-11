@@ -1,200 +1,168 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
-
-body {
-    margin: 0;
-    font-family: 'Oswald', sans-serif;
-    background: linear-gradient(135deg, #0b1f3a, #020617);
-    color: white;
-    text-align: center;
-    font-weight: bold;
+function toSeconds(t){
+    if(!t) return 0;
+    let a = t.toString().split(":").map(Number);
+    return (a[0]||0)*3600 + (a[1]||0)*60 + (a[2]||0);
 }
 
-/* 🔥 HEADER TITLE */
-h2 {
-    font-size: 32px;
-    color: gold;
-    margin-top: 20px;
+function toTime(sec){
+    sec = Math.max(0, Math.round(sec));
+    let h = Math.floor(sec/3600);
+    let m = Math.floor((sec%3600)/60);
+    let s = sec%60;
+    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-/* 🔥 SUMMARY CARDS */
-.cards {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 20px;
-    flex-wrap: wrap;
+function getGradientClass(val,max){
+    let p = val/max;
+    if(p >= 0.75) return "green";
+    if(p >= 0.45) return "yellow";
+    return "red";
 }
 
-.card {
-    background: linear-gradient(145deg, #ffd700, #ffcc00);
-    color: black;
-    padding: 15px 20px;
-    border-radius: 12px;
-    font-weight: bold;
-    min-width: 160px;
-
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.5),
-        inset -3px -3px 6px rgba(0,0,0,0.4);
+// 🔥 EXTRACT TIME
+function extractReportTime(aprRaw){
+    let row = aprRaw[1]?.[0] || "";
+    let match = row.match(/to\s([\d\-:\s]+)/i);
+    if(!match) return "";
+    let d = new Date(match[1].trim());
+    let day = String(d.getDate()).padStart(2,'0');
+    let month = d.toLocaleString('en-US',{month:'short'});
+    let year = String(d.getFullYear()).slice(-2);
+    let time = d.toLocaleTimeString('en-US',{hour12:true});
+    return `${day}-${month}-${year} ${time}`;
 }
 
-.card span {
-    display: block;
-    font-size: 20px;
-    margin-top: 5px;
+// 📂 READ
+function readExcel(file, skipRows){
+    return new Promise(resolve=>{
+        let reader = new FileReader();
+        reader.onload = e=>{
+            let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+            let data = XLSX.utils.sheet_to_json(
+                wb.Sheets[wb.SheetNames[0]],
+                {header:1}
+            );
+            resolve(data.slice(skipRows));
+        };
+        reader.readAsArrayBuffer(file);
+    });
 }
 
-/* 🔍 SEARCH */
-#search {
-    padding: 10px;
-    margin: 10px;
-    width: 250px;
-    border-radius: 8px;
-    border: none;
+// 🔥 PROCESS
+async function processFiles(){
+
+    let aprFile = document.getElementById("aprFile").files[0];
+    let cdrFile = document.getElementById("cdrFile").files[0];
+
+    if(!aprFile || !cdrFile){
+        alert("Upload both files");
+        return;
+    }
+
+    document.getElementById("loading").style.display = "block";
+
+    let aprRaw = await readExcel(aprFile,0);
+    let reportTime = extractReportTime(aprRaw);
+
+    let apr = aprRaw.slice(3);
+    let cdr = await readExcel(cdrFile,2);
+
+    let final=[], ivr=0;
+
+    cdr.forEach(c=>{
+        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
+    });
+
+    apr.forEach(r=>{
+        if(!r[1]) return;
+
+        let emp=r[1], name=r[2];
+        let login=toSeconds(r[3]);
+
+        let breakTime=toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
+        let meeting=toSeconds(r[20])+toSeconds(r[23]);
+        let net=login-breakTime;
+
+        let calls=cdr.filter(c=>{
+            return c[1]==emp &&
+            ((c[25]||"").toLowerCase().includes("callmatured") ||
+             (c[25]||"").toLowerCase().includes("transfer"));
+        });
+
+        let total=calls.length;
+        let ib=calls.filter(c=>(c[7]||"").includes("INBOUND")).length;
+        let ob=total-ib;
+        let aht=total?Math.round(toSeconds(r[5])/total):0;
+
+        final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
+    });
+
+    sessionStorage.setItem("data",JSON.stringify({final,ivr,reportTime}));
+    location="dashboard.html";
 }
 
-/* 🔘 BUTTON */
-button {
-    padding: 10px 15px;
-    margin: 10px;
-    background: linear-gradient(145deg, gold, #ffcc00);
-    border: none;
-    border-radius: 8px;
-    font-weight: bold;
-    cursor: pointer;
+// LOAD
+document.addEventListener("DOMContentLoaded",()=>{
 
-    box-shadow:
-        2px 2px 6px rgba(0,0,0,0.5),
-        inset 1px 1px 3px rgba(255,255,255,0.4);
+    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+    if(!d.final) return;
+
+    document.getElementById("reportTime").innerText=d.reportTime||"";
+
+    let {final,ivr}=d;
+
+    final.sort((a,b)=>b.total-a.total);
+
+    let max=Math.max(...final.map(x=>x.total));
+    let tb=document.querySelector("#table tbody");
+
+    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
+
+    final.forEach(r=>{
+        totalCalls+=r.total;
+        totalIB+=r.ib;
+        totalOB+=r.ob;
+        totalTalk+=(r.aht*r.total);
+
+        let tr=document.createElement("tr");
+
+        tr.innerHTML=`
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
+        <td>${toTime(r.login)}</td>
+        <td class="${r.net>=28800?"netGreen":""}">${toTime(r.net)}</td>
+        <td class="${r.breakTime>2100?"breakRed":""}">${toTime(r.breakTime)}</td>
+        <td class="${r.meeting>2100?"meetingRed":""}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.aht)}</td>
+        <td class="${getGradientClass(r.total,max)}">${r.total}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
+        `;
+
+        tb.appendChild(tr);
+    });
+
+    document.getElementById("ivr").innerText=ivr;
+    document.getElementById("total").innerText=totalCalls;
+    document.getElementById("ib").innerText=totalIB;
+    document.getElementById("ob").innerText=totalOB;
+
+    let overallAHT=totalCalls?totalTalk/totalCalls:0;
+    document.getElementById("aht").innerText=toTime(overallAHT);
+});
+
+// PNG
+function copyImage(){
+    html2canvas(document.getElementById("captureArea"),{scale:3}).then(c=>{
+        c.toBlob(b=>{
+            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+            alert("Copied PNG");
+        });
+    });
 }
 
-button:hover {
-    transform: scale(1.05);
-}
-
-/* 📊 TABLE */
-table {
-    width: 95%;
-    margin: auto;
-    margin-top: 20px;
-    border-collapse: collapse;
-    background: white;
-    color: black;
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-/* 🔵 HEADER */
-th {
-    background: #0b3d91;
-    color: white;
-    padding: 12px;
-    text-transform: uppercase;
-    font-weight: bold;
-}
-
-/* 📌 CELLS */
-td {
-    padding: 10px;
-    border: 1px solid black;
-    text-align: center;
-    font-weight: bold;
-}
-
-/* ✨ EMPLOYEE STYLE */
-td:nth-child(1),
-td:nth-child(2) {
-    font-style: italic;
-    font-weight: bold;
-}
-
-/* 🟢 NET LOGIN 3D */
-.netGreen {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.4),
-        inset -3px -3px 6px rgba(0,0,0,0.4);
-}
-
-/* 🔴 BREAK */
-.breakRed {
-    background: linear-gradient(145deg, #ff1744, #ff5252);
-    color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.3),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
-}
-
-/* 🔴 MEETING */
-.meetingRed {
-    background: linear-gradient(145deg, #d50000, #ff1744);
-    color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.3),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
-}
-
-/* 🟢 HIGH CALL */
-.green {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.4),
-        inset -3px -3px 6px rgba(0,0,0,0.4);
-}
-
-/* 🟡 MID CALL */
-.yellow {
-    background: linear-gradient(145deg, #ffd600, #ffea00);
-    color: black;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.5),
-        inset -3px -3px 6px rgba(0,0,0,0.3);
-}
-
-/* 🔴 LOW CALL */
-.red {
-    background: linear-gradient(145deg, #ff1744, #ff5252);
-    color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.3),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
-}
-
-/* 📂 UPLOAD PAGE */
-.container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.upload-box {
-    background: linear-gradient(145deg, #0b3d91, #001f4d);
-    padding: 40px;
-    border-radius: 15px;
-
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.2),
-        inset -3px -3px 6px rgba(0,0,0,0.6);
-}
-
-/* LABEL */
-.label {
-    color: gold;
-    font-weight: bold;
-}
-
-/* LOADING */
-.loading {
-    display: none;
-    color: gold;
-    margin-top: 10px;
-}
-
-/* 🎯 HOVER EFFECT */
-tr:hover {
-    background: #ffe066;
-    transition: 0.2s;
+// RESET
+function resetApp(){
+    sessionStorage.clear();
+    location="index.html";
 }

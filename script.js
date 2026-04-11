@@ -1,27 +1,26 @@
 // ================= 🔐 LOGIN =================
-const supervisor = { id:"Supervisor", pass:"Bfil@123" };
+const supervisor = { id:"Supervisor", pass:"1962" };
 const agent = { id:"1962", pass:"1962" };
 
 function login(){
 
-    let role = document.getElementById("role")?.value;
-    let user = document.getElementById("user")?.value;
-    let pass = document.getElementById("pass")?.value;
+    let user = document.getElementById("user")?.value.trim();
+    let pass = document.getElementById("pass")?.value.trim();
 
-    if(role === "supervisor"){
-        if(user === supervisor.id && pass === supervisor.pass){
-            sessionStorage.setItem("role","supervisor");
-            location = "index.html";
-        } else alert("Invalid Supervisor ❌");
+    if(user === supervisor.id && pass === supervisor.pass){
+        sessionStorage.setItem("role","supervisor");
+        location = "upload.html";
+        return;
     }
 
-    else{
-        if(user === agent.id && pass === agent.pass){
-            sessionStorage.setItem("role","agent");
-            sessionStorage.setItem("loginTime", Date.now());
-            location = "dashboard.html";
-        } else alert("Invalid Agent ❌");
+    if(user === agent.id && pass === agent.pass){
+        sessionStorage.setItem("role","agent");
+        sessionStorage.setItem("loginTime", Date.now());
+        location = "dashboard.html";
+        return;
     }
+
+    alert("Invalid ID or Password ❌");
 }
 
 // ================= 🔥 TIMER =================
@@ -132,10 +131,12 @@ async function processFiles(){
     let final = [];
     let ivr = 0;
 
+    // IVR HIT
     cdr.forEach(c=>{
         if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
     });
 
+    // MAIN CALCULATION
     apr.forEach(r=>{
 
         if(!r[1]) return;

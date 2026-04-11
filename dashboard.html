@@ -20,7 +20,7 @@
 <!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<!-- 🔘 ACTION BUTTONS -->
+<!-- 🔘 BUTTONS -->
 <div style="margin:20px;">
     <button onclick="copyImage()">Copy PNG</button>
     <button onclick="exportExcel()">Export Excel</button>
@@ -29,32 +29,31 @@
 
 <!-- 📊 TABLE -->
 <table id="table">
-    <thead>
-        <tr>
-            <th>Employee ID</th>
-            <th>Agent Full Name</th>
-            <th>Total Login</th>
-            <th>Net Login</th>
-            <th>Total Break</th>
-            <th>Total Meeting</th>
-            <th>AHT</th>
-            <th>Total Mature Call</th>
-            <th>IB Mature</th>
-            <th>OB Mature</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+<thead>
+<tr>
+<th>Employee ID</th>
+<th>Agent Full Name</th>
+<th>Total Login</th>
+<th>Net Login</th>
+<th>Total Break</th>
+<th>Total Meeting</th>
+<th>AHT</th>
+<th>Total Mature Call</th>
+<th>IB Mature</th>
+<th>OB Mature</th>
+</tr>
+</thead>
+<tbody></tbody>
 </table>
 
-<!-- 📦 LIBRARIES -->
+<!-- LIBRARIES -->
 
-<!-- PNG Copy -->
+<!-- PNG -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- 🔥 IMPORTANT: Correct XLSX (FIXES YOUR ERROR) -->
-<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- 🔥 FINAL EXCEL LIB (IMPORTANT) -->
+<script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
-<!-- YOUR SCRIPT -->
 <script src="script.js"></script>
 
 </body>

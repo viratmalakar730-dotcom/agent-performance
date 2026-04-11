@@ -1,32 +1,31 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Upload</title>
+<title>Login Panel</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
+<div class="upload-box">
 
-    <div class="upload-box">
+<h2>Login Panel</h2>
 
-        <h2>Agent Performance Dashboard</h2>
+<select id="role">
+<option value="supervisor">Supervisor</option>
+<option value="agent">Agent</option>
+</select><br><br>
 
-        <label class="label">APR Report</label>
-        <input type="file" id="aprFile"><br>
+<input type="text" id="user" placeholder="Enter ID"><br><br>
+<input type="password" id="pass" placeholder="Enter Password"><br><br>
 
-        <label class="label">CDR Report</label>
-        <input type="file" id="cdrFile"><br>
-
-        <button onclick="processFiles()">Generate Report</button>
-
-        <div id="loading" class="loading">Processing... ⏳</div>
-
-    </div>
+<button onclick="login()">Login</button>
 
 </div>
+</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database.js"></script>
 <script src="script.js"></script>
 
 </body>

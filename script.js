@@ -158,51 +158,50 @@ function copyImage(){
 // 📊 EXCEL EXPORT (FINAL FIXED)
 function exportExcel(){
 
-    try{
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
-        let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-        if(!d.final || d.final.length === 0){
-            alert("No Data Found ❌");
-            return;
-        }
-
-        let data = d.final;
-
-        let ws_data = [
-            ["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]
-        ];
-
-        data.forEach(r=>{
-            ws_data.push([
-                r.emp,
-                r.name,
-                toTime(r.login),
-                toTime(r.net),
-                toTime(r.breakTime),
-                toTime(r.meeting),
-                toTime(r.aht),
-                r.total,
-                r.ib,
-                r.ob
-            ]);
-        });
-
-        let ws = XLSX.utils.aoa_to_sheet(ws_data);
-        let wb = XLSX.utils.book_new();
-
-        XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
-
-        XLSX.writeFile(wb, "Agent_Report.xlsx");
-
-        alert("✅ Excel Downloaded");
-
-    }catch(e){
-        console.error(e);
-        alert("Export Failed ❌");
+    if(!d.final || d.final.length === 0){
+        alert("No Data Found ❌");
+        return;
     }
-}
 
+    let data = d.final;
+
+    let ws_data = [
+        ["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]
+    ];
+
+    data.forEach(r=>{
+        ws_data.push([
+            r.emp,
+            r.name,
+            toTime(r.login),
+            toTime(r.net),
+            toTime(r.breakTime),
+            toTime(r.meeting),
+            toTime(r.aht),
+            r.total,
+            r.ib,
+            r.ob
+        ]);
+    });
+
+    // 🔥 SHEET CREATE
+    let ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    // 🔥 COLUMN WIDTH (IMPORTANT)
+    ws['!cols'] = [
+        {wch:12},{wch:25},{wch:15},{wch:15},{wch:15},
+        {wch:15},{wch:12},{wch:18},{wch:12},{wch:12}
+    ];
+
+    let wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+
+    // 🔥 FORCE DOWNLOAD (FIXED)
+    XLSX.writeFile(wb, "Agent_Performance_Report.xlsx");
+
+}
 // 🔄 RESET
 function resetApp(){
     sessionStorage.clear();

@@ -1,4 +1,3 @@
-// 🔥 TIME CONVERT
 function toSeconds(t){
     if(!t) return 0;
     let a = t.toString().split(":").map(Number);
@@ -13,7 +12,6 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-// 🔥 GRADIENT
 function getGradientClass(val,max){
     let p = val/max;
     if(p >= 0.75) return "green";
@@ -21,79 +19,7 @@ function getGradientClass(val,max){
     return "red";
 }
 
-// 🔥 PROCESS FILES (UPLOAD PAGE)
-async function processFiles(){
-
-    const aprFile = document.getElementById("aprFile").files[0];
-    const cdrFile = document.getElementById("cdrFile").files[0];
-
-    if(!aprFile || !cdrFile){
-        alert("Please upload both APR & CDR files ❌");
-        return;
-    }
-
-    const apr = await readExcel(aprFile,3);
-    const cdr = await readExcel(cdrFile,2);
-
-    let final = [];
-    let ivr = 0;
-
-    // 🔥 IVR HIT
-    cdr.forEach(c=>{
-        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
-    });
-
-    // 🔥 MAIN CALCULATION
-    apr.forEach(r=>{
-
-        if(!r[1]) return;
-
-        let emp = (r[1] || "").toString().trim();
-        let name = r[2];
-
-        let login = toSeconds(r[3]);
-
-        let breakTime =
-            toSeconds(r[19]) +
-            toSeconds(r[22]) +
-            toSeconds(r[24]);
-
-        let meeting =
-            toSeconds(r[20]) +
-            toSeconds(r[23]);
-
-        let net = Math.max(0, login - breakTime);
-
-        let calls = cdr.filter(c=>{
-            let empCDR = (c[1] || "").toString().trim();
-            let disp = (c[25]||"").toLowerCase();
-
-            return empCDR === emp &&
-                (disp.includes("callmatured") || disp.includes("transfer"));
-        });
-
-        let total = calls.length;
-
-        let ib = calls.filter(c =>
-            (c[7]||"").toUpperCase().includes("INBOUND")
-        ).length;
-
-        let ob = total - ib;
-
-        let aht = total ? Math.round(toSeconds(r[5]) / total) : 0;
-
-        final.push({
-            emp, name, login, net,
-            breakTime, meeting,
-            aht, total, ib, ob
-        });
-    });
-
-    sessionStorage.setItem("data", JSON.stringify({final, ivr}));
-    location = "dashboard.html";
-}
-
-// 🔥 LOAD DASHBOARD
+// LOAD DASHBOARD
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -107,24 +33,24 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     const tb = document.querySelector("#table tbody");
 
-    let totalCalls=0, totalIB=0, totalOB=0, totalTalk=0;
+    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
     final.forEach(r=>{
 
-        totalCalls += r.total;
-        totalIB += r.ib;
-        totalOB += r.ob;
-        totalTalk += (r.aht * r.total);
+        totalCalls+=r.total;
+        totalIB+=r.ib;
+        totalOB+=r.ob;
+        totalTalk+=(r.aht*r.total);
 
-        let callCls = getGradientClass(r.total, max);
+        let callCls=getGradientClass(r.total,max);
 
-        let netCls = r.net >= 28800 ? "netGreen" : "";
-        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
-        let meetingCls = r.meeting > 2100 ? "meetingRed" : "";
+        let netCls=r.net>=28800?"netGreen":"";
+        let breakCls=r.breakTime>2100?"breakRed":"";
+        let meetingCls=r.meeting>2100?"meetingRed":"";
 
-        let tr = document.createElement("tr");
+        let tr=document.createElement("tr");
 
-        tr.innerHTML = `
+        tr.innerHTML=`
         <td><b><i>${r.emp}</i></b></td>
         <td><b><i>${r.name}</i></b></td>
         <td>${toTime(r.login)}</td>
@@ -140,42 +66,42 @@ document.addEventListener("DOMContentLoaded", ()=>{
         tb.appendChild(tr);
     });
 
-    document.getElementById("ivr").innerText = ivr;
-    document.getElementById("total").innerText = totalCalls;
-    document.getElementById("ib").innerText = totalIB;
-    document.getElementById("ob").innerText = totalOB;
+    document.getElementById("ivr").innerText=ivr;
+    document.getElementById("total").innerText=totalCalls;
+    document.getElementById("ib").innerText=totalIB;
+    document.getElementById("ob").innerText=totalOB;
 
-    let overallAHT = totalCalls ? totalTalk / totalCalls : 0;
-    document.getElementById("aht").innerText = toTime(overallAHT);
+    let overallAHT=totalCalls?totalTalk/totalCalls:0;
+    document.getElementById("aht").innerText=toTime(overallAHT);
 });
 
-// 🔍 SEARCH
+// SEARCH
 function searchAgent(){
-    let v = document.getElementById("search").value.toLowerCase();
+    let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
-        r.style.display = r.innerText.toLowerCase().includes(v) ? "" : "none";
+        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
     });
 }
 
-// 🖼 PNG COPY
+// PNG COPY
 function copyImage(){
-    html2canvas(document.getElementById("table"), {scale:2}).then(c=>{
+    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
         c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png": b})]);
-            alert("✅ Copied!");
+            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+            alert("Copied!");
         });
     });
 }
 
-// 📊 EXCEL EXPORT (FINAL PREMIUM)
+// EXCEL EXPORT (FINAL)
 function exportExcel(){
 
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
     if(!d.final) return;
 
-    let data = d.final;
+    let data=d.final;
 
-    let ws_data = [["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
+    let ws_data=[["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
 
     data.forEach(r=>{
         ws_data.push([
@@ -186,28 +112,21 @@ function exportExcel(){
         ]);
     });
 
-    let ws = XLSX.utils.aoa_to_sheet(ws_data);
-    let range = XLSX.utils.decode_range(ws['!ref']);
-    let max = Math.max(...data.map(x=>x.total));
+    let ws=XLSX.utils.aoa_to_sheet(ws_data);
+    let range=XLSX.utils.decode_range(ws['!ref']);
+    let max=Math.max(...data.map(x=>x.total));
 
-    let border = {
-        top:{style:"thin"}, bottom:{style:"thin"},
-        left:{style:"thin"}, right:{style:"thin"}
-    };
+    let border={top:{style:"thin"},bottom:{style:"thin"},left:{style:"thin"},right:{style:"thin"}};
 
-    for(let R=0; R<=range.e.r; R++){
-        for(let C=0; C<=range.e.c; C++){
+    for(let R=0;R<=range.e.r;R++){
+        for(let C=0;C<=range.e.c;C++){
 
-            let cell = ws[XLSX.utils.encode_cell({r:R,c:C})];
+            let cell=ws[XLSX.utils.encode_cell({r:R,c:C})];
             if(!cell) continue;
 
-            cell.s = {
-                font:{bold:true},
-                alignment:{horizontal:"center"},
-                border:border
-            };
+            cell.s={font:{bold:true},alignment:{horizontal:"center"},border:border};
 
-            let val = ws_data[R][C];
+            let val=ws_data[R][C];
 
             if(R===0){
                 cell.s.fill={fgColor:{rgb:"0B3D91"}};
@@ -231,7 +150,7 @@ function exportExcel(){
             }
 
             if(C===7 && R>0){
-                let p = val/max;
+                let p=val/max;
                 if(p>=0.75) cell.s.fill={fgColor:{rgb:"00C853"}};
                 else if(p>=0.45) cell.s.fill={fgColor:{rgb:"FFD600"}};
                 else cell.s.fill={fgColor:{rgb:"FF3D00"}};
@@ -239,38 +158,17 @@ function exportExcel(){
         }
     }
 
-    ws['!cols'] = ws_data[0].map((col, i) => {
-        let maxLen = Math.max(...ws_data.map(r => (r[i] ? r[i].toString().length : 10)));
-        return {wch: maxLen + 5};
-    });
+    let wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
 
-    let wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+    let now=new Date();
+    let name=`Agent_Report_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}.xlsx`;
 
-    let now = new Date();
-    let name = `Agent_Report_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}.xlsx`;
-
-    XLSX.writeFile(wb, name);
+    XLSX.writeFile(wb,name);
 }
 
-// 🔄 RESET
+// RESET
 function resetApp(){
     sessionStorage.clear();
     location="index.html";
-}
-
-// 📂 READ EXCEL
-function readExcel(file, skipRows){
-    return new Promise(resolve=>{
-        let reader = new FileReader();
-        reader.onload = e=>{
-            let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-            let data = XLSX.utils.sheet_to_json(
-                wb.Sheets[wb.SheetNames[0]],
-                {header:1}
-            );
-            resolve(data.slice(skipRows));
-        };
-        reader.readAsArrayBuffer(file);
-    });
 }

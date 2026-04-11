@@ -17,11 +17,17 @@
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
+<!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<button onclick="copyImage()">Copy PNG</button>
-<button onclick="resetApp()">Reset</button>
+<!-- 🔘 ACTION BUTTONS -->
+<div>
+    <button onclick="copyImage()">Copy PNG</button>
+    <button onclick="exportExcel()">Export Excel</button> <!-- 🔥 NEW -->
+    <button onclick="resetApp()">Reset</button>
+</div>
 
+<!-- 📊 TABLE -->
 <table id="table">
 <thead>
 <tr>
@@ -40,7 +46,12 @@
 <tbody></tbody>
 </table>
 
+<!-- 🔥 LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- 🔥 IMPORTANT: Excel support -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
 <script src="script.js"></script>
 
 </body>

@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Agent Performance Dashboard</title>
-<link rel="stylesheet" href="style.css">
+    <title>Agent Performance Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -24,14 +24,18 @@
     <button onclick="resetApp()">Reset</button>
 </div>
 
-<!-- 🔥 PNG CAPTURE AREA -->
-<div id="captureArea">
+<!-- 🔥 PNG CLEAN AREA -->
+<div id="captureArea" style="background:white; padding:20px; border-radius:10px;">
 
     <div style="text-align:center;">
         <img src="logo.png" width="80">
     </div>
 
-    <div style="text-align:center; color:gold;">
+    <div style="font-size:22px; font-weight:bold; color:#0b3d91;">
+        Agent Performance Dashboard
+    </div>
+
+    <div style="text-align:center; color:#0b3d91; font-size:18px; margin:10px;">
         Report Time: <span id="reportTime"></span>
     </div>
 
@@ -53,13 +57,11 @@
         <tbody></tbody>
     </table>
 
-    <div style="text-align:center; margin-top:20px;">
+    <div style="text-align:center; margin-top:20px; font-weight:bold; color:#0b3d91;">
         ❤️ Powered by Chandan Malakar ❤️
     </div>
 
 </div>
-
-<div id="watermark">Chandan Malakar</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>

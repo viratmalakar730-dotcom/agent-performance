@@ -8,7 +8,7 @@
 
 <h2>Agent Performance Dashboard</h2>
 
-<!-- 🔥 SUMMARY CARDS -->
+<!-- 🔥 SUMMARY -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
@@ -20,10 +20,10 @@
 <!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<!-- 🔘 ACTION BUTTONS -->
+<!-- 🔘 BUTTONS -->
 <div>
     <button onclick="copyImage()">Copy PNG</button>
-    <button onclick="exportExcel()">Export Excel</button> <!-- 🔥 NEW -->
+    <button onclick="exportExcel()">Export Excel</button>
     <button onclick="resetApp()">Reset</button>
 </div>
 
@@ -46,11 +46,11 @@
 <tbody></tbody>
 </table>
 
-<!-- 🔥 LIBRARIES -->
+<!-- LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- 🔥 IMPORTANT: Excel support -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+<!-- 🔥 IMPORTANT FOR COLOR EXCEL -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx-style@0.8.13/dist/xlsx.full.min.js"></script>
 
 <script src="script.js"></script>
 

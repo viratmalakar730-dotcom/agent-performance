@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Agent Performance Dashboard</title>
+<title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -9,6 +9,7 @@
 <h2>Agent Performance Dashboard</h2>
 
 <div id="agentTimer"></div>
+<div id="reportTime"></div>
 
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
@@ -20,18 +21,12 @@
 
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<div style="margin:20px;">
+<br>
 <button onclick="copyImage()">Copy PNG</button>
 <button onclick="exportExcel()">Export Excel</button>
-<button onclick="resetApp()">Logout</button>
-</div>
+<button onclick="resetApp()">Reset</button>
 
-<div id="captureArea" style="background:white;padding:20px;border-radius:10px;">
-
-<div style="color:#0b3d91;">
-Report Time: <span id="reportTime"></span>
-</div>
-
+<div id="captureArea">
 <table id="table">
 <thead>
 <tr>
@@ -50,7 +45,7 @@ Report Time: <span id="reportTime"></span>
 <tbody></tbody>
 </table>
 
-<div style="margin-top:20px; color:#0b3d91;">
+<div style="margin-top:20px;font-weight:bold;">
 ❤️ Powered by Chandan Malakar ❤️
 </div>
 
@@ -58,6 +53,7 @@ Report Time: <span id="reportTime"></span>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
 <script src="script.js"></script>
 
 </body>

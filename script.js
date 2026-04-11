@@ -150,83 +150,57 @@ function copyImage(){
             navigator.clipboard.write([
                 new ClipboardItem({"image/png": b})
             ]);
-            alert("✅ Copied!");
+            alert("✅ Table Copied!");
         });
     });
 }
 
-// 📊 EXCEL EXPORT (COLORED)
+// 📊 EXCEL EXPORT (FINAL FIXED)
 function exportExcel(){
 
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-    if(!d.final) return;
+    try{
 
-    let data = d.final;
+        let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
-    let ws_data = [["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
-
-    data.forEach(r=>{
-        ws_data.push([
-            r.emp, r.name,
-            toTime(r.login),
-            toTime(r.net),
-            toTime(r.breakTime),
-            toTime(r.meeting),
-            toTime(r.aht),
-            r.total, r.ib, r.ob
-        ]);
-    });
-
-    let ws = XLSX.utils.aoa_to_sheet(ws_data);
-
-    let range = XLSX.utils.decode_range(ws['!ref']);
-
-    // HEADER
-    for(let C=0; C<=range.e.c; C++){
-        let cell = ws[XLSX.utils.encode_cell({r:0,c:C})];
-        cell.s = {
-            fill: { fgColor: { rgb: "1F4E78" } },
-            font: { color: { rgb: "FFFFFF" }, bold: true },
-            alignment: { horizontal: "center" }
-        };
-    }
-
-    let max = Math.max(...data.map(x=>x.total));
-
-    for(let R=1; R<=range.e.r; R++){
-        for(let C=0; C<=range.e.c; C++){
-
-            let cell = ws[XLSX.utils.encode_cell({r:R,c:C})];
-            if(!cell) continue;
-
-            cell.s = { font: { bold: true }, alignment:{horizontal:"center"} };
-
-            let val = ws_data[R][C];
-
-            if(C===3 && toSeconds(val)>=28800){
-                cell.s.fill = { fgColor:{rgb:"00C853"} };
-            }
-
-            if(C===4 && toSeconds(val)>2100){
-                cell.s.fill = { fgColor:{rgb:"FF1744"} };
-            }
-
-            if(C===5 && toSeconds(val)>2100){
-                cell.s.fill = { fgColor:{rgb:"D50000"} };
-            }
-
-            if(C===7){
-                let p = val/max;
-                if(p>=0.75) cell.s.fill={fgColor:{rgb:"00C853"}};
-                else if(p>=0.45) cell.s.fill={fgColor:{rgb:"FFD600"}};
-                else cell.s.fill={fgColor:{rgb:"FF3D00"}};
-            }
+        if(!d.final || d.final.length === 0){
+            alert("No Data Found ❌");
+            return;
         }
-    }
 
-    let wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
+        let data = d.final;
+
+        let ws_data = [
+            ["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]
+        ];
+
+        data.forEach(r=>{
+            ws_data.push([
+                r.emp,
+                r.name,
+                toTime(r.login),
+                toTime(r.net),
+                toTime(r.breakTime),
+                toTime(r.meeting),
+                toTime(r.aht),
+                r.total,
+                r.ib,
+                r.ob
+            ]);
+        });
+
+        let ws = XLSX.utils.aoa_to_sheet(ws_data);
+        let wb = XLSX.utils.book_new();
+
+        XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+
+        XLSX.writeFile(wb, "Agent_Report.xlsx");
+
+        alert("✅ Excel Downloaded");
+
+    }catch(e){
+        console.error(e);
+        alert("Export Failed ❌");
+    }
 }
 
 // 🔄 RESET

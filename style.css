@@ -1,102 +1,57 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
-
-body {
-    margin: 0;
-    font-family: 'Oswald', sans-serif;
-    background: linear-gradient(135deg, #0b1f3a, #020617);
-    color: white;
-    text-align: center;
-    font-weight: bold;
+body{
+ font-family:Arial;
+ background:#0b1f3a;
+ color:white;
+ text-align:center;
 }
 
-h2 {
-    font-size: 32px;
-    color: gold;
-    margin-top: 20px;
+.container{
+ height:100vh;
+ display:flex;
+ justify-content:center;
+ align-items:center;
 }
 
-/* SUMMARY */
-.cards {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 20px;
-    flex-wrap: wrap;
+.upload-box{
+ background:#001f4d;
+ padding:30px;
+ border-radius:12px;
 }
 
-.card {
-    background: linear-gradient(145deg, #ffd700, #ffcc00);
-    color: black;
-    padding: 15px 20px;
-    border-radius: 12px;
-    min-width: 160px;
+table{
+ width:90%;
+ margin:auto;
+ background:white;
+ color:black;
+ border-collapse:collapse;
 }
 
-/* SEARCH */
-#search {
-    padding: 10px;
-    margin: 10px;
-    width: 250px;
-    border-radius: 8px;
+td,th{
+ border:1px solid black;
+ padding:10px;
 }
 
-/* BUTTON */
-button {
-    padding: 10px 15px;
-    margin: 10px;
-    background: gold;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+.green{
+ background:linear-gradient(145deg,#00c853,#00e676);
+ color:white;
 }
 
-/* TABLE */
-table {
-    width: 100%;
-    border-collapse: collapse;
-    background: white;
-    color: black;
+.yellow{
+ background:linear-gradient(145deg,#ffd600,#ffea00);
 }
 
-th {
-    background: #0b3d91;
-    color: white;
-    padding: 12px;
+.red{
+ background:linear-gradient(145deg,#ff1744,#ff5252);
+ color:white;
 }
 
-td {
-    padding: 10px;
-    border: 1px solid black;
+.timerBox{
+ font-size:20px;
+ margin:10px;
+ color:yellow;
 }
 
-/* HIGHLIGHTS */
-.netGreen { background:#00c853; color:white; }
-.breakRed { background:#ff1744; color:white; }
-.meetingRed { background:#d50000; color:white; }
-
-.green { background:#00c853; color:white; }
-.yellow { background:#ffd600; }
-.red { background:#ff1744; color:white; }
-
-/* UPLOAD */
-.container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.upload-box {
-    background: #0b3d91;
-    padding: 40px;
-    border-radius: 15px;
-}
-
-.label {
-    color: gold;
-}
-
-.loading {
-    display: none;
-    color: gold;
+.footer{
+ margin-top:20px;
+ color:gold;
 }

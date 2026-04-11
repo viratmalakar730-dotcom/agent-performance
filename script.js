@@ -13,7 +13,7 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-// 🔥 COLOR GRADIENT
+// 🔥 GRADIENT
 function getGradientClass(val,max){
     let p = val/max;
     if(p >= 0.75) return "green";
@@ -46,13 +46,13 @@ async function processFiles(){
         let login = toSeconds(r[3]);
 
         let breakTime =
-            (toSeconds(r[19])||0) +
-            (toSeconds(r[22])||0) +
-            (toSeconds(r[24])||0);
+            toSeconds(r[19]) +
+            toSeconds(r[22]) +
+            toSeconds(r[24]);
 
         let meeting =
-            (toSeconds(r[20])||0) +
-            (toSeconds(r[23])||0);
+            toSeconds(r[20]) +
+            toSeconds(r[23]);
 
         let net = Math.max(0, login - breakTime);
 
@@ -72,18 +72,14 @@ async function processFiles(){
 
         let aht = total ? Math.round(toSeconds(r[5]) / total) : 0;
 
-        final.push({
-            emp, name, login, net,
-            breakTime, meeting,
-            aht, total, ib, ob
-        });
+        final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
     });
 
     sessionStorage.setItem("data", JSON.stringify({final, ivr}));
     location = "dashboard.html";
 }
 
-// 🔥 DASHBOARD LOAD
+// 🔥 LOAD DASHBOARD
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -97,10 +93,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     const tb = document.querySelector("#table tbody");
 
-    let totalCalls = 0;
-    let totalIB = 0;
-    let totalOB = 0;
-    let totalTalk = 0;
+    let totalCalls = 0, totalIB = 0, totalOB = 0, totalTalk = 0;
 
     final.forEach(r=>{
 
@@ -133,7 +126,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
         tb.appendChild(tr);
     });
 
-    // 🔥 SUMMARY
     document.getElementById("ivr").innerText = ivr;
     document.getElementById("total").innerText = totalCalls;
     document.getElementById("ib").innerText = totalIB;
@@ -158,35 +150,95 @@ function copyImage(){
             navigator.clipboard.write([
                 new ClipboardItem({"image/png": b})
             ]);
-            alert("✅ Table Copied Successfully!");
+            alert("✅ Copied!");
         });
     });
 }
 
-// 📊 EXCEL EXPORT 🔥
+// 📊 EXCEL EXPORT (COLORED)
 function exportExcel(){
 
-    let table = document.getElementById("table");
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+    if(!d.final) return;
+
+    let data = d.final;
+
+    let ws_data = [["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
+
+    data.forEach(r=>{
+        ws_data.push([
+            r.emp, r.name,
+            toTime(r.login),
+            toTime(r.net),
+            toTime(r.breakTime),
+            toTime(r.meeting),
+            toTime(r.aht),
+            r.total, r.ib, r.ob
+        ]);
+    });
+
+    let ws = XLSX.utils.aoa_to_sheet(ws_data);
+
+    let range = XLSX.utils.decode_range(ws['!ref']);
+
+    // HEADER
+    for(let C=0; C<=range.e.c; C++){
+        let cell = ws[XLSX.utils.encode_cell({r:0,c:C})];
+        cell.s = {
+            fill: { fgColor: { rgb: "1F4E78" } },
+            font: { color: { rgb: "FFFFFF" }, bold: true },
+            alignment: { horizontal: "center" }
+        };
+    }
+
+    let max = Math.max(...data.map(x=>x.total));
+
+    for(let R=1; R<=range.e.r; R++){
+        for(let C=0; C<=range.e.c; C++){
+
+            let cell = ws[XLSX.utils.encode_cell({r:R,c:C})];
+            if(!cell) continue;
+
+            cell.s = { font: { bold: true }, alignment:{horizontal:"center"} };
+
+            let val = ws_data[R][C];
+
+            if(C===3 && toSeconds(val)>=28800){
+                cell.s.fill = { fgColor:{rgb:"00C853"} };
+            }
+
+            if(C===4 && toSeconds(val)>2100){
+                cell.s.fill = { fgColor:{rgb:"FF1744"} };
+            }
+
+            if(C===5 && toSeconds(val)>2100){
+                cell.s.fill = { fgColor:{rgb:"D50000"} };
+            }
+
+            if(C===7){
+                let p = val/max;
+                if(p>=0.75) cell.s.fill={fgColor:{rgb:"00C853"}};
+                else if(p>=0.45) cell.s.fill={fgColor:{rgb:"FFD600"}};
+                else cell.s.fill={fgColor:{rgb:"FF3D00"}};
+            }
+        }
+    }
 
     let wb = XLSX.utils.book_new();
-    let ws = XLSX.utils.table_to_sheet(table);
-
     XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
-
-    XLSX.writeFile(wb, "Agent_Performance_Report.xlsx");
+    XLSX.writeFile(wb, "Agent_Report.xlsx");
 }
 
 // 🔄 RESET
 function resetApp(){
     sessionStorage.clear();
-    location = "index.html";
+    location="index.html";
 }
 
 // 📂 READ EXCEL
 function readExcel(file, skipRows){
     return new Promise(resolve=>{
         let reader = new FileReader();
-
         reader.onload = e=>{
             let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
             let data = XLSX.utils.sheet_to_json(
@@ -195,7 +247,6 @@ function readExcel(file, skipRows){
             );
             resolve(data.slice(skipRows));
         };
-
         reader.readAsArrayBuffer(file);
     });
 }

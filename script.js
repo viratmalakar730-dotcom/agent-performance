@@ -1,3 +1,4 @@
+// 🔥 TIME CONVERT
 function toSeconds(t){
     if(!t) return 0;
     let a = t.toString().split(":").map(Number);
@@ -19,7 +20,95 @@ function getGradientClass(val,max){
     return "red";
 }
 
-// LOAD DASHBOARD
+// 📂 READ EXCEL
+function readExcel(file, skipRows){
+    return new Promise(resolve=>{
+        let reader = new FileReader();
+        reader.onload = e=>{
+            let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
+            let data = XLSX.utils.sheet_to_json(
+                wb.Sheets[wb.SheetNames[0]],
+                {header:1}
+            );
+            resolve(data.slice(skipRows));
+        };
+        reader.readAsArrayBuffer(file);
+    });
+}
+
+// 🔥 PROCESS FILES (UPLOAD PAGE)
+async function processFiles(){
+
+    let aprFile = document.getElementById("aprFile")?.files[0];
+    let cdrFile = document.getElementById("cdrFile")?.files[0];
+
+    if(!aprFile || !cdrFile){
+        alert("Please upload both files ❌");
+        return;
+    }
+
+    let loading = document.getElementById("loading");
+    if(loading) loading.style.display = "block";
+
+    let apr = await readExcel(aprFile,3);
+    let cdr = await readExcel(cdrFile,2);
+
+    let final = [];
+    let ivr = 0;
+
+    // 🔥 IVR HIT
+    cdr.forEach(c=>{
+        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
+    });
+
+    // 🔥 MAIN CALCULATION
+    apr.forEach(r=>{
+
+        if(!r[1]) return;
+
+        let emp = (r[1]||"").toString().trim();
+        let name = r[2];
+
+        let login = toSeconds(r[3]);
+
+        let breakTime =
+            toSeconds(r[19]) +
+            toSeconds(r[22]) +
+            toSeconds(r[24]);
+
+        let meeting =
+            toSeconds(r[20]) +
+            toSeconds(r[23]);
+
+        let net = Math.max(0, login - breakTime);
+
+        let calls = cdr.filter(c=>{
+            let empCDR = (c[1]||"").toString().trim();
+            let disp = (c[25]||"").toLowerCase();
+
+            return empCDR === emp &&
+                (disp.includes("callmatured") || disp.includes("transfer"));
+        });
+
+        let total = calls.length;
+
+        let ib = calls.filter(c =>
+            (c[7]||"").toUpperCase().includes("INBOUND")
+        ).length;
+
+        let ob = total - ib;
+
+        let aht = total ? Math.round(toSeconds(r[5]) / total) : 0;
+
+        final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
+    });
+
+    sessionStorage.setItem("data", JSON.stringify({final, ivr}));
+
+    location = "dashboard.html";
+}
+
+// 🔥 LOAD DASHBOARD
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -75,7 +164,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById("aht").innerText=toTime(overallAHT);
 });
 
-// SEARCH
+// 🔍 SEARCH
 function searchAgent(){
     let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
@@ -83,7 +172,7 @@ function searchAgent(){
     });
 }
 
-// PNG COPY
+// 🖼 PNG COPY
 function copyImage(){
     html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
         c.toBlob(b=>{
@@ -93,7 +182,7 @@ function copyImage(){
     });
 }
 
-// EXCEL EXPORT (FINAL)
+// 📊 EXCEL EXPORT
 function exportExcel(){
 
     let d=JSON.parse(sessionStorage.getItem("data")||"{}");
@@ -113,61 +202,13 @@ function exportExcel(){
     });
 
     let ws=XLSX.utils.aoa_to_sheet(ws_data);
-    let range=XLSX.utils.decode_range(ws['!ref']);
-    let max=Math.max(...data.map(x=>x.total));
-
-    let border={top:{style:"thin"},bottom:{style:"thin"},left:{style:"thin"},right:{style:"thin"}};
-
-    for(let R=0;R<=range.e.r;R++){
-        for(let C=0;C<=range.e.c;C++){
-
-            let cell=ws[XLSX.utils.encode_cell({r:R,c:C})];
-            if(!cell) continue;
-
-            cell.s={font:{bold:true},alignment:{horizontal:"center"},border:border};
-
-            let val=ws_data[R][C];
-
-            if(R===0){
-                cell.s.fill={fgColor:{rgb:"0B3D91"}};
-                cell.s.font.color={rgb:"FFFFFF"};
-            }
-
-            if(R>0 && R%2===0){
-                cell.s.fill={fgColor:{rgb:"F2F2F2"}};
-            }
-
-            if(C===3 && R>0 && toSeconds(val)>=28800){
-                cell.s.fill={fgColor:{rgb:"00C853"}};
-            }
-
-            if(C===4 && R>0 && toSeconds(val)>2100){
-                cell.s.fill={fgColor:{rgb:"FF1744"}};
-            }
-
-            if(C===5 && R>0 && toSeconds(val)>2100){
-                cell.s.fill={fgColor:{rgb:"D50000"}};
-            }
-
-            if(C===7 && R>0){
-                let p=val/max;
-                if(p>=0.75) cell.s.fill={fgColor:{rgb:"00C853"}};
-                else if(p>=0.45) cell.s.fill={fgColor:{rgb:"FFD600"}};
-                else cell.s.fill={fgColor:{rgb:"FF3D00"}};
-            }
-        }
-    }
-
     let wb=XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
 
-    let now=new Date();
-    let name=`Agent_Report_${now.getFullYear()}-${now.getMonth()+1}-${now.getDate()}_${now.getHours()}-${now.getMinutes()}.xlsx`;
-
-    XLSX.writeFile(wb,name);
+    XLSX.writeFile(wb,"Agent_Report.xlsx");
 }
 
-// RESET
+// 🔄 RESET
 function resetApp(){
     sessionStorage.clear();
     location="index.html";

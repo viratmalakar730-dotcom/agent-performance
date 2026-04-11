@@ -155,7 +155,7 @@ function copyImage(){
     });
 }
 
-// 📊 EXCEL EXPORT (FINAL FIXED)
+// 📊 EXCEL EXPORT (FINAL WORKING)
 function exportExcel(){
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -186,10 +186,8 @@ function exportExcel(){
         ]);
     });
 
-    // 🔥 SHEET CREATE
     let ws = XLSX.utils.aoa_to_sheet(ws_data);
 
-    // 🔥 COLUMN WIDTH (IMPORTANT)
     ws['!cols'] = [
         {wch:12},{wch:25},{wch:15},{wch:15},{wch:15},
         {wch:15},{wch:12},{wch:18},{wch:12},{wch:12}
@@ -198,10 +196,11 @@ function exportExcel(){
     let wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
 
-    // 🔥 FORCE DOWNLOAD (FIXED)
     XLSX.writeFile(wb, "Agent_Performance_Report.xlsx");
 
+    alert("✅ Excel Downloaded");
 }
+
 // 🔄 RESET
 function resetApp(){
     sessionStorage.clear();

@@ -77,7 +77,7 @@ async function processFiles(){
     location = "dashboard.html";
 }
 
-// 🔥 LOAD DASHBOARD
+// 🔥 LOAD
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -141,19 +141,17 @@ function searchAgent(){
     });
 }
 
-// 🖼 PNG COPY
+// 🖼 PNG
 function copyImage(){
     html2canvas(document.getElementById("table"), {scale:2}).then(c=>{
         c.toBlob(b=>{
-            navigator.clipboard.write([
-                new ClipboardItem({"image/png": b})
-            ]);
-            alert("✅ Copied!");
+            navigator.clipboard.write([new ClipboardItem({"image/png": b})]);
+            alert("Copied!");
         });
     });
 }
 
-// 📊 EXCEL EXPORT (FINAL STYLED)
+// 📊 EXCEL (FINAL)
 function exportExcel(){
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -165,55 +163,54 @@ function exportExcel(){
 
     data.forEach(r=>{
         ws_data.push([
-            r.emp, r.name,
-            toTime(r.login),
-            toTime(r.net),
-            toTime(r.breakTime),
-            toTime(r.meeting),
-            toTime(r.aht),
-            r.total, r.ib, r.ob
+            r.emp,r.name,
+            toTime(r.login),toTime(r.net),
+            toTime(r.breakTime),toTime(r.meeting),
+            toTime(r.aht),r.total,r.ib,r.ob
         ]);
     });
 
     let ws = XLSX.utils.aoa_to_sheet(ws_data);
     let range = XLSX.utils.decode_range(ws['!ref']);
-
     let max = Math.max(...data.map(x=>x.total));
 
-    // HEADER
-    for(let C=0; C<=range.e.c; C++){
-        let cell = ws[XLSX.utils.encode_cell({r:0,c:C})];
-        cell.s = {
-            fill:{fgColor:{rgb:"0B3D91"}},
-            font:{color:{rgb:"FFFFFF"},bold:true},
-            alignment:{horizontal:"center"}
-        };
-    }
+    let border = {
+        top:{style:"thin"},bottom:{style:"thin"},
+        left:{style:"thin"},right:{style:"thin"}
+    };
 
-    // DATA STYLE
-    for(let R=1; R<=range.e.r; R++){
+    for(let R=0; R<=range.e.r; R++){
         for(let C=0; C<=range.e.c; C++){
 
             let cell = ws[XLSX.utils.encode_cell({r:R,c:C})];
             if(!cell) continue;
 
-            cell.s = {font:{bold:true},alignment:{horizontal:"center"}};
+            cell.s = {
+                font:{bold:true},
+                alignment:{horizontal:"center"},
+                border:border
+            };
 
             let val = ws_data[R][C];
 
-            if(C===3 && toSeconds(val)>=28800){
+            if(R===0){
+                cell.s.fill={fgColor:{rgb:"0B3D91"}};
+                cell.s.font.color={rgb:"FFFFFF"};
+            }
+
+            if(C===3 && R>0 && toSeconds(val)>=28800){
                 cell.s.fill={fgColor:{rgb:"00C853"}};
             }
 
-            if(C===4 && toSeconds(val)>2100){
+            if(C===4 && R>0 && toSeconds(val)>2100){
                 cell.s.fill={fgColor:{rgb:"FF1744"}};
             }
 
-            if(C===5 && toSeconds(val)>2100){
+            if(C===5 && R>0 && toSeconds(val)>2100){
                 cell.s.fill={fgColor:{rgb:"D50000"}};
             }
 
-            if(C===7){
+            if(C===7 && R>0){
                 let p = val/max;
                 if(p>=0.75) cell.s.fill={fgColor:{rgb:"00C853"}};
                 else if(p>=0.45) cell.s.fill={fgColor:{rgb:"FFD600"}};
@@ -221,11 +218,6 @@ function exportExcel(){
             }
         }
     }
-
-    ws['!cols'] = [
-        {wch:12},{wch:25},{wch:15},{wch:15},{wch:15},
-        {wch:15},{wch:12},{wch:18},{wch:12},{wch:12}
-    ];
 
     let wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
@@ -239,7 +231,7 @@ function resetApp(){
     location="index.html";
 }
 
-// 📂 READ EXCEL
+// 📂 READ
 function readExcel(file, skipRows){
     return new Promise(resolve=>{
         let reader = new FileReader();

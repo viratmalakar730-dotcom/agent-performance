@@ -1,12 +1,13 @@
+// ================= GLOBAL =================
 let crmEnabled = false;
 
-// ================= TOGGLE =================
+// ================= CRM TOGGLE =================
 function toggleCRM(){
     crmEnabled = !crmEnabled;
     document.getElementById("crmBox").style.display = crmEnabled ? "block" : "none";
 }
 
-// ================= TIME =================
+// ================= TIME FUNCTIONS =================
 function toSeconds(t){
     if(!t) return 0;
     let a = t.toString().split(":").map(Number);
@@ -28,7 +29,7 @@ function getGradientClass(val,max){
     return "red";
 }
 
-// ================= PROCESS =================
+// ================= PROCESS FILES =================
 function processFiles(){
 
     document.getElementById("loading").style.display="block";
@@ -46,16 +47,24 @@ function processFiles(){
     let reader2 = new FileReader();
 
     reader1.onload = function(e1){
-        let apr = XLSX.utils.sheet_to_json(XLSX.read(e1.target.result,{type:'binary'}).Sheets.Sheet1);
+
+        let wb1 = XLSX.read(e1.target.result, {type:'binary'});
+        let sheet1 = wb1.Sheets[wb1.SheetNames[0]];
+        let apr = XLSX.utils.sheet_to_json(sheet1, {header:1}); // 🔥 COLUMN MODE
 
         reader2.onload = function(e2){
-            let cdr = XLSX.utils.sheet_to_json(XLSX.read(e2.target.result,{type:'binary'}).Sheets.Sheet1);
 
+            let wb2 = XLSX.read(e2.target.result, {type:'binary'});
+            let sheet2 = wb2.Sheets[wb2.SheetNames[0]];
+            let cdr = XLSX.utils.sheet_to_json(sheet2, {header:1}); // 🔥 COLUMN MODE
+
+            // 🔥 CRM OFF → SAME OLD DASHBOARD
             if(!crmEnabled){
                 generateDashboard(apr, cdr, null);
                 return;
             }
 
+            // 🔥 CRM ON BUT FILE NOT SELECTED
             if(crmEnabled && !crmFile){
                 alert("Upload CRM File");
                 return;
@@ -64,12 +73,16 @@ function processFiles(){
             let reader3 = new FileReader();
 
             reader3.onload = function(e3){
-                let crm = XLSX.utils.sheet_to_json(XLSX.read(e3.target.result,{type:'binary'}).Sheets.Sheet1);
+
+                let wb3 = XLSX.read(e3.target.result, {type:'binary'});
+                let sheet3 = wb3.Sheets[wb3.SheetNames[0]];
+                let crm = XLSX.utils.sheet_to_json(sheet3, {header:1}); // 🔥 COLUMN MODE
 
                 let taggingMap = {};
 
-                crm.forEach(r=>{
-                    let emp = r["CreatedByID"];
+                // 👉 AK column = index 36
+                crm.slice(1).forEach(r=>{
+                    let emp = r[36];
                     if(emp){
                         taggingMap[emp] = (taggingMap[emp] || 0) + 1;
                     }
@@ -87,49 +100,60 @@ function processFiles(){
     reader1.readAsBinaryString(aprFile);
 }
 
-// ================= GENERATE =================
+// ================= GENERATE DASHBOARD =================
 function generateDashboard(apr, cdr, taggingMap){
 
     let final = [];
 
-    apr.forEach(r=>{
+    // 🔥 APR LOOP (skip header row)
+    apr.slice(1).forEach(r=>{
 
-        let emp = r["Agent Name"];
-        let name = r["Agent Full Name"];
+        let emp = r[1];   // Agent Name
+        let name = r[2];  // Full Name
 
-        let login = toSeconds(r["Total Login Time"]);
-        let breakTime = toSeconds(r["Total Break Duration"]);
-        let meeting = toSeconds(r["MEETING"]);
+        let login = toSeconds(r[3]);     // Total Login
+        let breakTime = toSeconds(r[28]); // Total Break
+        let meeting = toSeconds(r[20]);   // Meeting
 
         let net = login - breakTime;
 
-        let empCDR = cdr.filter(x=>x.Username == emp);
+        // 🔥 MATCH WITH CDR
+        let empCDR = cdr.slice(1).filter(x=>x[1] == emp);
 
         let total = empCDR.length;
-        let ib = empCDR.filter(x=>x["Call Type"]=="Inbound").length;
-        let ob = empCDR.filter(x=>x["Call Type"]=="Outbound").length;
+        let ib = empCDR.filter(x=>x[20] == "Inbound").length;
+        let ob = empCDR.filter(x=>x[20] == "Outbound").length;
 
-        let totalTalk = empCDR.reduce((s,x)=>s + toSeconds(x["Talk Duration"]),0);
+        let totalTalk = empCDR.reduce((s,x)=>s + toSeconds(x[13]),0);
         let aht = total ? totalTalk/total : 0;
 
         let tagging = taggingMap ? (taggingMap[emp] || 0) : null;
 
         final.push({
-            emp,name,login,breakTime,meeting,net,
-            total,ib,ob,aht,tagging
+            emp,
+            name,
+            login,
+            breakTime,
+            meeting,
+            net,
+            total,
+            ib,
+            ob,
+            aht,
+            tagging
         });
     });
 
     sessionStorage.setItem("data", JSON.stringify({
         final,
-        ivr: cdr.length,
+        ivr: cdr.length - 1,
         crmEnabled: taggingMap ? true : false
     }));
 
     location = "dashboard.html";
 }
 
-// ================= LOAD DASHBOARD =================
+// ================= DASHBOARD LOAD =================
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -137,11 +161,15 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     let {final, ivr, crmEnabled} = d;
 
-    let tb = document.querySelector("#table tbody");
-    let headerRow = document.getElementById("headerRow");
-    let cards = document.getElementById("cards");
+    final.sort((a,b)=>b.total - a.total);
 
-    // 🔥 ADD CRM COLUMN + CARD ONLY IF ENABLED
+    let max = Math.max(...final.map(x=>x.total));
+
+    const tb = document.querySelector("#table tbody");
+    const headerRow = document.getElementById("headerRow");
+    const cards = document.getElementById("cards");
+
+    // 🔥 CRM ENABLED → ADD COLUMN + CARD
     if(crmEnabled){
 
         let th = document.createElement("th");
@@ -167,20 +195,26 @@ document.addEventListener("DOMContentLoaded", ()=>{
             totalTagging += r.tagging || 0;
         }
 
+        let callCls=getGradientClass(r.total,max);
+
+        let netCls=r.net>=28800?"netGreen":"";
+        let breakCls=r.breakTime>2100?"breakRed":"";
+        let meetingCls=r.meeting>2100?"meetingRed":"";
+
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td>${r.emp}</td>
-        <td>${r.name}</td>
+        <td><b><i>${r.emp}</i></b></td>
+        <td><b><i>${r.name}</i></b></td>
         <td>${toTime(r.login)}</td>
-        <td>${toTime(r.net)}</td>
-        <td>${toTime(r.breakTime)}</td>
-        <td>${toTime(r.meeting)}</td>
+        <td class="${netCls}">${toTime(r.net)}</td>
+        <td class="${breakCls}">${toTime(r.breakTime)}</td>
+        <td class="${meetingCls}">${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td>${r.total}</td>
+        <td class="${callCls}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
-        ${crmEnabled ? `<td>${r.tagging}</td>` : ``}
+        ${crmEnabled ? `<td>${r.tagging || 0}</td>` : ``}
         `;
 
         tb.appendChild(tr);
@@ -190,7 +224,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById("total").innerText=totalCalls;
     document.getElementById("ib").innerText=totalIB;
     document.getElementById("ob").innerText=totalOB;
-    document.getElementById("aht").innerText=toTime(totalTalk/totalCalls || 0);
+
+    let overallAHT=totalCalls?totalTalk/totalCalls:0;
+    document.getElementById("aht").innerText=toTime(overallAHT);
 
     if(crmEnabled){
         document.getElementById("tagging").innerText = totalTagging;
@@ -242,7 +278,7 @@ function exportExcel(){
             r.total,r.ib,r.ob
         ];
 
-        if(crmEnabled) row.push(r.tagging);
+        if(crmEnabled) row.push(r.tagging || 0);
 
         ws_data.push(row);
     });

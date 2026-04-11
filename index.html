@@ -1,24 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Login Panel</title>
+<title>Upload</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
-<div class="upload-box">
 
-<h2>Agent Performance System</h2>
+    <div class="upload-box">
 
-<input type="text" id="user" placeholder="Enter ID"><br><br>
-<input type="password" id="pass" placeholder="Enter Password"><br><br>
+        <h2>Agent Performance Dashboard</h2>
 
-<button onclick="login()">Login</button>
+        <label class="label">APR Report</label>
+        <input type="file" id="aprFile"><br><br>
+
+        <label class="label">CDR Report</label>
+        <input type="file" id="cdrFile"><br><br>
+
+        <button onclick="processFiles()">Generate Report</button>
+
+        <div id="loading" class="loading">Processing... ⏳</div>
+
+    </div>
 
 </div>
-</div>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
+
 </body>
 </html>

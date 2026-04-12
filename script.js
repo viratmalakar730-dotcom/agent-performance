@@ -39,9 +39,12 @@ function getGradientClass(val,max){
 }
 
 
-// 🔍 COLUMN FINDER
+// 🔥 HEADER FINDER (FIXED)
 function findCol(header, name){
-    return header.findIndex(h => h && h.toString().toLowerCase().includes(name));
+    return header.findIndex(h => 
+        h && h.toString().toLowerCase().replace(/\s+/g,'')
+        .includes(name.toLowerCase().replace(/\s+/g,''))
+    );
 }
 
 
@@ -74,16 +77,16 @@ function processFiles(){
             // 🔥 HEADER DETECT
             let aprHeader = aprData[1];
 
-            let empCol = findCol(aprHeader, "agent name");
-            let nameCol = findCol(aprHeader, "agent full");
-            let loginCol = findCol(aprHeader, "login");
+            let empCol = findCol(aprHeader, "agentname");
+            let nameCol = findCol(aprHeader, "agentfullname");
+            let loginCol = findCol(aprHeader, "totallogintime");
 
-            let lunchCol = findCol(aprHeader, "lunch");
-            let teaCol = findCol(aprHeader, "tea");
-            let shortCol = findCol(aprHeader, "short");
+            let lunchCol = findCol(aprHeader, "lunchbreak");
+            let teaCol = findCol(aprHeader, "teabreak");
+            let shortCol = findCol(aprHeader, "shortbreak");
 
             let meetCol = findCol(aprHeader, "meeting");
-            let sysCol = findCol(aprHeader, "system");
+            let sysCol = findCol(aprHeader, "systemdown");
 
             // 🔥 REMOVE HEADER
             aprData.splice(0,2);
@@ -121,7 +124,7 @@ function processFiles(){
                 };
             });
 
-            // 🔥 CDR HEADER DETECT
+            // 🔥 CDR HEADER
             let cdrHeader = cdrData[0];
 
             let empColC = findCol(cdrHeader, "username");

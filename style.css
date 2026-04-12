@@ -9,11 +9,12 @@ body {
     font-weight: bold;
 }
 
-/* 🔥 HEADER TITLE */
+/* 🔥 HEADER */
 h2 {
     font-size: 32px;
     color: gold;
     margin-top: 20px;
+    text-shadow: 0 0 10px rgba(255,215,0,0.6);
 }
 
 /* 🔥 SUMMARY CARDS */
@@ -29,18 +30,19 @@ h2 {
     background: linear-gradient(145deg, #ffd700, #ffcc00);
     color: black;
     padding: 15px 20px;
-    border-radius: 12px;
+    border-radius: 14px;
     font-weight: bold;
     min-width: 160px;
 
     box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.5),
-        inset -3px -3px 6px rgba(0,0,0,0.4);
+        inset 3px 3px 8px rgba(255,255,255,0.6),
+        inset -4px -4px 8px rgba(0,0,0,0.4),
+        3px 3px 10px rgba(0,0,0,0.6);
 }
 
 .card span {
     display: block;
-    font-size: 20px;
+    font-size: 22px;
     margin-top: 5px;
 }
 
@@ -48,28 +50,29 @@ h2 {
 #search {
     padding: 10px;
     margin: 10px;
-    width: 250px;
-    border-radius: 8px;
+    width: 260px;
+    border-radius: 10px;
     border: none;
+    outline: none;
 }
 
 /* 🔘 BUTTON */
 button {
-    padding: 10px 15px;
+    padding: 10px 18px;
     margin: 10px;
     background: linear-gradient(145deg, gold, #ffcc00);
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     font-weight: bold;
     cursor: pointer;
 
     box-shadow:
-        2px 2px 6px rgba(0,0,0,0.5),
-        inset 1px 1px 3px rgba(255,255,255,0.4);
+        3px 3px 8px rgba(0,0,0,0.6),
+        inset 1px 1px 4px rgba(255,255,255,0.5);
 }
 
 button:hover {
-    transform: scale(1.05);
+    transform: scale(1.07);
 }
 
 /* 📊 TABLE */
@@ -80,15 +83,17 @@ table {
     border-collapse: collapse;
     background: white;
     color: black;
-    border-radius: 10px;
+    border-radius: 12px;
     overflow: hidden;
+
+    box-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
 
 /* 🔵 HEADER */
 th {
-    background: #0b3d91;
+    background: linear-gradient(145deg, #0b3d91, #001f4d);
     color: white;
-    padding: 12px;
+    padding: 14px;
     text-transform: uppercase;
     font-weight: bold;
 }
@@ -108,7 +113,7 @@ td:nth-child(2) {
     font-weight: bold;
 }
 
-/* 🟢 NET LOGIN 3D */
+/* 🟢 NET LOGIN */
 .netGreen {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
@@ -121,45 +126,30 @@ td:nth-child(2) {
 .breakRed {
     background: linear-gradient(145deg, #ff1744, #ff5252);
     color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.3),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
 /* 🔴 MEETING */
 .meetingRed {
     background: linear-gradient(145deg, #d50000, #ff1744);
     color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.3),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
 /* 🟢 HIGH CALL */
 .green {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.4),
-        inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
 /* 🟡 MID CALL */
 .yellow {
     background: linear-gradient(145deg, #ffd600, #ffea00);
     color: black;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.5),
-        inset -3px -3px 6px rgba(0,0,0,0.3);
 }
 
 /* 🔴 LOW CALL */
 .red {
     background: linear-gradient(145deg, #ff1744, #ff5252);
     color: white;
-    box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.3),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
 /* 📂 UPLOAD PAGE */
@@ -172,12 +162,13 @@ td:nth-child(2) {
 
 .upload-box {
     background: linear-gradient(145deg, #0b3d91, #001f4d);
-    padding: 40px;
-    border-radius: 15px;
+    padding: 45px;
+    border-radius: 18px;
 
     box-shadow:
-        inset 2px 2px 6px rgba(255,255,255,0.2),
-        inset -3px -3px 6px rgba(0,0,0,0.6);
+        inset 3px 3px 10px rgba(255,255,255,0.2),
+        inset -4px -4px 10px rgba(0,0,0,0.7),
+        0 0 20px rgba(0,0,0,0.8);
 }
 
 /* LABEL */
@@ -193,8 +184,21 @@ td:nth-child(2) {
     margin-top: 10px;
 }
 
-/* 🎯 HOVER EFFECT */
+/* 🎯 HOVER ROW */
 tr:hover {
     background: #ffe066;
     transition: 0.2s;
+}
+
+/* 📦 CAPTURE AREA */
+#captureArea {
+    padding: 15px;
+    border-radius: 10px;
+}
+
+/* ❤️ FOOTER */
+.footer {
+    margin-top: 20px;
+    font-weight: bold;
+    color: gold;
 }

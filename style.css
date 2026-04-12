@@ -1,249 +1,257 @@
 @import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
 
 body {
-    margin: 0;
-    font-family: 'Oswald', sans-serif;
-    background: linear-gradient(135deg, #0b1f3a, #020617);
-    color: white;
-    text-align: center;
-    font-weight: bold;
+margin: 0;
+font-family: 'Oswald', sans-serif;
+background: linear-gradient(135deg, #0b1f3a, #020617);
+color: white;
+text-align: center;
+font-weight: bold;
 }
 
 /* 🔥 TOP BANNER */
 .top-banner{
-    display:flex;
-    flex-direction:column;
-    align-items:center;
-    gap:14px;
-    margin-top:20px;
+display:flex;
+flex-direction:column;
+align-items:center;
+gap:12px;
+margin-top:20px;
 }
 
-/* 🔥 TITLE CARD (UPGRADED 3D) */
+/* 🔥 TITLE CARD (3D UPGRADE) */
 .title-card {
-    font-size: 34px;
-    color: gold;
-    padding: 18px 50px;
-    border-radius: 16px;
+font-size: 32px;
+color: gold;
+padding: 15px 40px;
+border-radius: 14px;
 
-    background: linear-gradient(145deg, #0b3d91, #001f4d);
+background: linear-gradient(145deg, #0b3d91, #001f4d);  
 
-    box-shadow:
-        10px 10px 25px rgba(0,0,0,0.9),
-        inset 3px 3px 8px rgba(255,255,255,0.2),
-        inset -5px -5px 10px rgba(0,0,0,0.8);
+box-shadow:  
+    8px 8px 20px rgba(0,0,0,0.9),  
+    inset 2px 2px 6px rgba(255,255,255,0.2),  
+    inset -4px -4px 8px rgba(0,0,0,0.7);  
 
-    text-shadow:
-        4px 4px 8px rgba(0,0,0,0.9),
-        0 0 15px gold;
+text-shadow:  
+    3px 3px 6px rgba(0,0,0,0.8),  
+    0 0 12px gold;
+
 }
 
-/* 🔥 REPORT TIME CARD (UPGRADED) */
+/* 🔥 REPORT TIME CARD */
 .time-card {
-    color: #00e5ff;
-    font-size: 17px;
-    padding: 10px 25px;
-    border-radius: 12px;
+color: #00e5ff;
+font-size: 16px;
+padding: 8px 20px;
+border-radius: 10px;
 
-    background: linear-gradient(145deg, #001f4d, #020617);
+background: linear-gradient(145deg, #001f4d, #020617);  
 
-    box-shadow:
-        8px 8px 20px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.2),
-        inset -4px -4px 8px rgba(0,0,0,0.7);
+box-shadow:  
+    6px 6px 16px rgba(0,0,0,0.9),  
+    inset 2px 2px 5px rgba(255,255,255,0.2),  
+    inset -3px -3px 6px rgba(0,0,0,0.7);  
 
-    text-shadow:
-        3px 3px 6px rgba(0,0,0,0.8),
-        0 0 12px #00e5ff;
+text-shadow:  
+    2px 2px 5px rgba(0,0,0,0.8),  
+    0 0 10px #00e5ff;
+
 }
 
 /* 🔥 CARDS */
 .cards {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin: 25px;
-    flex-wrap: wrap;
+display: flex;
+justify-content: center;
+gap: 15px;
+margin: 20px;
+flex-wrap: wrap;
 }
 
 .card {
-    background: linear-gradient(145deg, #ffd700, #ffcc00);
-    color: black;
-    padding: 18px 22px;
-    border-radius: 14px;
-    min-width: 170px;
+background: linear-gradient(145deg, #ffd700, #ffcc00);
+color: black;
+padding: 15px 20px;
+border-radius: 12px;
+min-width: 160px;
 
-    box-shadow:
-        6px 6px 16px rgba(0,0,0,0.8),
-        inset 3px 3px 7px rgba(255,255,255,0.6),
-        inset -4px -4px 7px rgba(0,0,0,0.6);
+box-shadow:  
+    5px 5px 15px rgba(0,0,0,0.7),  
+    inset 2px 2px 6px rgba(255,255,255,0.6),  
+    inset -3px -3px 6px rgba(0,0,0,0.5);
+
 }
 
 .card span {
-    font-size: 22px;
+font-size: 20px;
 }
 
 /* 🔍 SEARCH */
 #search {
-    padding: 10px;
-    margin: 10px;
-    width: 260px;
-    border-radius: 8px;
-    border: none;
+padding: 10px;
+margin: 10px;
+width: 260px;
+border-radius: 8px;
+border: none;
 }
 
 /* 🔘 BUTTON */
 button {
-    padding: 10px 15px;
-    margin: 10px;
-    background: linear-gradient(145deg, gold, #ffcc00);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+padding: 10px 15px;
+margin: 10px;
+background: linear-gradient(145deg, gold, #ffcc00);
+border: none;
+border-radius: 8px;
+cursor: pointer;
 
-    box-shadow:
-        4px 4px 10px rgba(0,0,0,0.7),
-        inset 1px 1px 3px rgba(255,255,255,0.6);
+box-shadow:  
+    3px 3px 8px rgba(0,0,0,0.6),  
+    inset 1px 1px 3px rgba(255,255,255,0.5);
+
 }
 
 button:hover {
-    transform: scale(1.05);
+transform: scale(1.05);
 }
 
 /* 📊 TABLE */
 table {
-    width: 95%;
-    margin: auto;
-    margin-top: 20px;
-    border-collapse: collapse;
-    background: white;
-    color: black;
-    border-radius: 12px;
-    overflow: hidden;
+width: 95%;
+margin: auto;
+margin-top: 20px;
+border-collapse: collapse;
+background: white;
+color: black;
+border-radius: 10px;
+overflow: hidden;
 
-    border: 3px solid #000;
-    box-shadow: 0 0 18px rgba(0,0,0,0.8);
+border: 2px solid #000;  
+box-shadow: 0 0 15px rgba(0,0,0,0.7);
+
 }
 
-/* 🔵 HEADER (STRONG 3D) */
+/* 🔵 HEADER (3D) */
 th {
-    background: linear-gradient(145deg, #0b3d91, #082c6c);
-    color: white;
-    padding: 14px;
+background: linear-gradient(145deg, #0b3d91, #082c6c);
+color: white;
+padding: 12px;
+font-weight: bold;
 
-    border: 2px solid #000;
+border: 2px solid #000;  
 
-    box-shadow:
-        inset 3px 3px 6px rgba(255,255,255,0.2),
-        inset -4px -4px 8px rgba(0,0,0,0.7);
+box-shadow:  
+    inset 2px 2px 5px rgba(255,255,255,0.2),  
+    inset -3px -3px 6px rgba(0,0,0,0.6);
+
 }
 
-/* 📌 CELLS (IMPROVED 3D) */
+/* 📌 CELLS (SOFT 3D) */
 td {
-    padding: 10px;
-    border: 2px solid #444;
-    text-align: center;
-    font-weight: bold;
+padding: 10px;
+border: 1.5px solid #444;
+text-align: center;
+font-weight: bold;
 
-    box-shadow:
-        inset 1px 1px 3px rgba(255,255,255,0.7),
-        inset -2px -2px 4px rgba(0,0,0,0.25);
+box-shadow:  
+    inset 1px 1px 2px rgba(255,255,255,0.6),  
+    inset -2px -2px 3px rgba(0,0,0,0.2);
+
 }
 
 /* ✨ EMPLOYEE STYLE */
 td:nth-child(1),
 td:nth-child(2) {
-    font-style: italic;
+font-style: italic;
 }
 
 /* 🔥 ROW CLICK HIGHLIGHT */
 .rowActive {
-    background: linear-gradient(145deg, #ffe066, #ffd700) !important;
-    color: black;
+background: linear-gradient(145deg, #ffe066, #ffd700) !important;
+color: black;
 
-    box-shadow:
-        inset 3px 3px 6px rgba(255,255,255,0.7),
-        inset -4px -4px 8px rgba(0,0,0,0.4);
+box-shadow:  
+    inset 2px 2px 5px rgba(255,255,255,0.6),  
+    inset -3px -3px 6px rgba(0,0,0,0.3);
+
 }
 
-/* ============================= */
-/* 🔥 CONDITIONAL 3D (UPGRADED) */
-/* ============================= */
+/* ============================= /
+/ 🔥 CONDITIONAL 3D /
+/ ============================= */
 
-/* 🟢 NET LOGIN */
 .netGreen {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
+background: linear-gradient(145deg, #00c853, #00e676);
+color: white;
 
-    box-shadow:
-        6px 6px 14px rgba(0,0,0,0.8),
-        inset 3px 3px 6px rgba(255,255,255,0.4),
-        inset -4px -4px 8px rgba(0,0,0,0.6);
+box-shadow:  
+    4px 4px 10px rgba(0,0,0,0.7),  
+    inset 2px 2px 5px rgba(255,255,255,0.4),  
+    inset -3px -3px 6px rgba(0,0,0,0.5);
+
 }
 
-/* 🔴 RED */
 .red3D {
-    background: linear-gradient(145deg, #d50000, #ff1744);
-    color: white;
+background: linear-gradient(145deg, #d50000, #ff1744);
+color: white;
 
-    box-shadow:
-        6px 6px 14px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.3),
-        inset -4px -4px 8px rgba(0,0,0,0.7);
+box-shadow:  
+    4px 4px 10px rgba(0,0,0,0.8),  
+    inset 2px 2px 5px rgba(255,255,255,0.3),  
+    inset -3px -3px 6px rgba(0,0,0,0.6);
+
 }
 
-/* 🟡 YELLOW */
 .yellow {
-    background: linear-gradient(145deg, #ffd600, #ffea00);
+background: linear-gradient(145deg, #ffd600, #ffea00);
 
-    box-shadow:
-        6px 6px 14px rgba(0,0,0,0.8),
-        inset 3px 3px 6px rgba(255,255,255,0.6),
-        inset -4px -4px 8px rgba(0,0,0,0.5);
+box-shadow:  
+    3px 3px 8px rgba(0,0,0,0.6),  
+    inset 2px 2px 4px rgba(255,255,255,0.5);
+
 }
 
-/* 🟢 GREEN */
 .green {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
+background: linear-gradient(145deg, #00c853, #00e676);
+color: white;
 
-    box-shadow:
-        6px 6px 14px rgba(0,0,0,0.8),
-        inset 3px 3px 6px rgba(255,255,255,0.4),
-        inset -4px -4px 8px rgba(0,0,0,0.6);
+box-shadow:  
+    3px 3px 8px rgba(0,0,0,0.6),  
+    inset 2px 2px 4px rgba(255,255,255,0.4);
+
 }
 
 /* 📂 UPLOAD PAGE */
 .container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+height: 100vh;
+display: flex;
+justify-content: center;
+align-items: center;
 }
 
 .upload-box {
-    background: linear-gradient(145deg, #0b3d91, #001f4d);
-    padding: 40px;
-    border-radius: 15px;
+background: linear-gradient(145deg, #0b3d91, #001f4d);
+padding: 40px;
+border-radius: 15px;
 
-    box-shadow:
-        6px 6px 18px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.2),
-        inset -4px -4px 8px rgba(0,0,0,0.6);
+box-shadow:  
+    5px 5px 15px rgba(0,0,0,0.8),  
+    inset 2px 2px 6px rgba(255,255,255,0.2),  
+    inset -3px -3px 6px rgba(0,0,0,0.6);
+
 }
 
 /* LABEL */
 .label {
-    color: gold;
+color: gold;
 }
 
 /* LOADING */
 .loading {
-    display: none;
-    color: gold;
+display: none;
+color: gold;
 }
 
 /* HOVER */
 tr:hover {
-    background: #ffe066;
-    transition: 0.2s;
+background: #ffe066;
+transition: 0.2s;
 }

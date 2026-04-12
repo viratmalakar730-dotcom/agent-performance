@@ -1,18 +1,20 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Live Dashboard</title>
+<title>Live Agent Performance Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
+<!-- 🔥 FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 </head>
+
 <body>
 
 <h2>Live Agent Performance Dashboard</h2>
 
-<!-- 🔥 SUMMARY -->
+<!-- 🔥 SUMMARY CARDS -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
@@ -21,6 +23,7 @@
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
+<!-- 📊 TABLE -->
 <table id="table">
 <thead>
 <tr>
@@ -39,8 +42,14 @@
 <tbody></tbody>
 </table>
 
+<!-- ❤️ FOOTER -->
+<div style="text-align:center; margin-top:20px; font-weight:bold;">
+    ❤️ Powered by Chandan Malakar ❤️
+</div>
+
 <script>
 
+// 🔥 FIREBASE CONFIG
 const firebaseConfig = {
   apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
   authDomain: "agent-performance-live.firebaseapp.com",
@@ -48,9 +57,14 @@ const firebaseConfig = {
   projectId: "agent-performance-live"
 };
 
-firebase.initializeApp(firebaseConfig);
+// 🔥 INIT
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
 const db = firebase.database();
 
+// 🔥 TIME FORMAT
 function toTime(sec){
     sec = Math.max(0, Math.round(sec));
     let h = Math.floor(sec/3600);
@@ -59,6 +73,7 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
+// 🔥 COLOR LOGIC
 function getGradientClass(val,max){
     let p = val/max;
     if(p >= 0.75) return "green";
@@ -66,12 +81,13 @@ function getGradientClass(val,max){
     return "red";
 }
 
+// 🔥 LIVE DATA LISTENER
 db.ref("liveData").on("value", snap => {
 
     let d = snap.val();
     if(!d) return;
 
-    let final = d.data;
+    let final = d.final || [];   // ✅ FIXED
     let ivr = d.ivr || 0;
 
     let tb = document.querySelector("#table tbody");
@@ -79,7 +95,9 @@ db.ref("liveData").on("value", snap => {
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
-    final.sort((a,b)=>b.total-a.total);
+    if(final.length === 0) return;
+
+    final.sort((a,b)=>b.total - a.total);
 
     let max = Math.max(...final.map(x=>x.total));
 
@@ -91,6 +109,7 @@ db.ref("liveData").on("value", snap => {
         totalTalk+=(r.aht*r.total);
 
         let callCls=getGradientClass(r.total,max);
+
         let netCls=r.net>=28800?"netGreen":"";
         let breakCls=r.breakTime>2100?"breakRed":"";
         let meetingCls=r.meeting>2100?"meetingRed":"";
@@ -113,6 +132,7 @@ db.ref("liveData").on("value", snap => {
         tb.appendChild(tr);
     });
 
+    // 🔥 SUMMARY
     document.getElementById("ivr").innerText=ivr;
     document.getElementById("total").innerText=totalCalls;
     document.getElementById("ib").innerText=totalIB;

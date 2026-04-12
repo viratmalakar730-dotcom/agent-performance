@@ -1,27 +1,22 @@
 // ===============================
-// 🔥 FIREBASE CONFIG
+// 🔥 FIREBASE CONFIG (NEW ADD)
 // ===============================
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
-
 const firebaseConfig = {
     apiKey: "YOUR_KEY",
     authDomain: "YOUR_DOMAIN",
     projectId: "YOUR_PROJECT_ID",
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-// ===============================
-// 🔥 SAVE TO CLOUD
-// ===============================
+// 🔥 SAVE CLOUD (NEW ADD)
 async function saveToCloud(payload){
     try{
-        await setDoc(doc(db,"dashboard","latest"), payload);
+        await db.collection("dashboard").doc("latest").set(payload);
         console.log("✅ Live Updated");
     }catch(e){
-        console.error("❌ Firebase Error:", e);
+        console.error("Firebase Error:", e);
     }
 }
 
@@ -166,133 +161,10 @@ async function processFiles(){
     // ===============================
     let payload = { final, ivr, reportTime };
 
-    // LOCAL (existing flow)
     sessionStorage.setItem("data", JSON.stringify(payload));
 
-    // CLOUD (LIVE FEATURE)
+    // 🔥 LIVE SYNC ADD
     saveToCloud(payload);
 
-    // REDIRECT
     location = "dashboard.html";
-}
-
-// ===============================
-// 🔥 FIX ERROR (GLOBAL ACCESS)
-// ===============================
-window.processFiles = processFiles;
-
-// ===============================
-// 🔥 DASHBOARD LOAD
-// ===============================
-document.addEventListener("DOMContentLoaded", ()=>{
-
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-    if(!d.final) return;
-
-    document.getElementById("reportTime").innerText = d.reportTime || "";
-
-    let {final, ivr} = d;
-
-    final.sort((a,b)=>b.total - a.total);
-
-    let max = Math.max(...final.map(x=>x.total));
-    let tb = document.querySelector("#table tbody");
-
-    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
-
-    final.forEach(r=>{
-
-        totalCalls += r.total;
-        totalIB += r.ib;
-        totalOB += r.ob;
-        totalTalk += (r.aht * r.total);
-
-        let tr = document.createElement("tr");
-
-        tr.innerHTML = `
-        <td>${r.emp}</td>
-        <td>${r.name}</td>
-        <td>${toTime(r.login)}</td>
-        <td class="${r.net>=28800?"netGreen":""}">${toTime(r.net)}</td>
-        <td class="${r.breakTime>2100?"breakRed":""}">${toTime(r.breakTime)}</td>
-        <td class="${r.meeting>2100?"meetingRed":""}">${toTime(r.meeting)}</td>
-        <td>${toTime(r.aht)}</td>
-        <td class="${getGradientClass(r.total,max)}">${r.total}</td>
-        <td>${r.ib}</td>
-        <td>${r.ob}</td>
-        `;
-
-        tb.appendChild(tr);
-    });
-
-    document.getElementById("ivr").innerText = ivr;
-    document.getElementById("total").innerText = totalCalls;
-    document.getElementById("ib").innerText = totalIB;
-    document.getElementById("ob").innerText = totalOB;
-
-    let overallAHT = totalCalls ? totalTalk / totalCalls : 0;
-    document.getElementById("aht").innerText = toTime(overallAHT);
-});
-
-// ===============================
-// 🔍 SEARCH
-// ===============================
-function searchAgent(){
-    let v = document.getElementById("search").value.toLowerCase();
-    document.querySelectorAll("#table tbody tr").forEach(r=>{
-        r.style.display = r.innerText.toLowerCase().includes(v) ? "" : "none";
-    });
-}
-
-// ===============================
-// 🖼 PNG COPY
-// ===============================
-function copyImage(){
-    html2canvas(document.getElementById("captureArea"),{
-        scale:3,
-        backgroundColor:"#ffffff"
-    }).then(canvas=>{
-        canvas.toBlob(blob=>{
-            navigator.clipboard.write([
-                new ClipboardItem({"image/png":blob})
-            ]);
-            alert("✅ Clean PNG Copied");
-        });
-    });
-}
-
-// ===============================
-// 📊 EXCEL EXPORT
-// ===============================
-function exportExcel(){
-
-    let d = JSON.parse(sessionStorage.getItem("data")||"{}");
-    if(!d.final) return;
-
-    let data = d.final;
-
-    let ws_data = [["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
-
-    data.forEach(r=>{
-        ws_data.push([
-            r.emp,r.name,
-            toTime(r.login),toTime(r.net),
-            toTime(r.breakTime),toTime(r.meeting),
-            toTime(r.aht),r.total,r.ib,r.ob
-        ]);
-    });
-
-    let ws = XLSX.utils.aoa_to_sheet(ws_data);
-    let wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
-
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-}
-
-// ===============================
-// 🔄 RESET
-// ===============================
-function resetApp(){
-    sessionStorage.clear();
-    location = "index.html";
 }

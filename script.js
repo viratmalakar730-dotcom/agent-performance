@@ -39,7 +39,13 @@ function getGradientClass(val,max){
 }
 
 
-// 🔥 PROCESS FILES (FINAL FIXED)
+// 🔍 COLUMN FINDER
+function findCol(header, name){
+    return header.findIndex(h => h && h.toString().toLowerCase().includes(name));
+}
+
+
+// 🔥 PROCESS FILES (FINAL)
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -65,53 +71,73 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
+            // 🔥 HEADER DETECT
+            let aprHeader = aprData[1];
+
+            let empCol = findCol(aprHeader, "agent name");
+            let nameCol = findCol(aprHeader, "agent full");
+            let loginCol = findCol(aprHeader, "login");
+
+            let lunchCol = findCol(aprHeader, "lunch");
+            let teaCol = findCol(aprHeader, "tea");
+            let shortCol = findCol(aprHeader, "short");
+
+            let meetCol = findCol(aprHeader, "meeting");
+            let sysCol = findCol(aprHeader, "system");
+
+            // 🔥 REMOVE HEADER
             aprData.splice(0,2);
-            cdrData.splice(0,1);
 
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP (YOUR MAPPING FIXED)
+            // 🔥 APR LOOP
             aprData.forEach(r=>{
 
-                let emp = r[1];
+                let emp = r[empCol];
                 if(!emp) return;
 
-                let login = toSeconds(r[3]);
+                let login = toSeconds(r[loginCol]);
 
-                // ✅ BREAK FIX
-                let lunch = toSeconds(r[20]);
-                let shortB = toSeconds(r[23]);
-                let tea = toSeconds(r[22]);
+                let breakTime =
+                    toSeconds(r[lunchCol]) +
+                    toSeconds(r[teaCol]) +
+                    toSeconds(r[shortCol]);
 
-                let breakTime = lunch + shortB + tea;
-
-                // ✅ MEETING FIX
-                let meeting = toSeconds(r[21]);
-                let systemDown = toSeconds(r[24]);
-
-                let totalMeeting = meeting + systemDown;
+                let meeting =
+                    toSeconds(r[meetCol]) +
+                    toSeconds(r[sysCol]);
 
                 map[emp] = {
                     emp: String(emp),
-                    name: r[2] || "",
-                    login: login,
-                    breakTime: breakTime,
-                    meeting: totalMeeting,
+                    name: r[nameCol] || "",
+                    login,
+                    breakTime,
+                    meeting,
                     net: login - breakTime,
                     total: 0,
                     ib: 0,
-                    talk: 0   // 🔥 AHT FIX
+                    talk: 0
                 };
             });
 
-            // 🔥 CDR LOOP (FINAL)
+            // 🔥 CDR HEADER DETECT
+            let cdrHeader = cdrData[0];
+
+            let empColC = findCol(cdrHeader, "username");
+            let skillCol = findCol(cdrHeader, "skill");
+            let dispoCol = findCol(cdrHeader, "disposition");
+            let talkCol = findCol(cdrHeader, "talk");
+
+            cdrData.splice(0,1);
+
+            // 🔥 CDR LOOP
             cdrData.forEach(r=>{
 
-                let emp = r[1];
-                let skill = r[7];
-                let dispo = (r[25] || "").toString().toLowerCase();
-                let talk = toSeconds(r[11]);
+                let emp = r[empColC];
+                let skill = r[skillCol];
+                let dispo = (r[dispoCol] || "").toLowerCase();
+                let talk = toSeconds(r[talkCol]);
 
                 if(skill === "INBOUND") ivr++;
 
@@ -120,7 +146,6 @@ function processFiles(){
                 if(dispo === "callmatured" || dispo === "transfer"){
 
                     map[emp].total++;
-
                     map[emp].talk += talk;
 
                     if(skill === "INBOUND"){
@@ -130,24 +155,19 @@ function processFiles(){
             });
 
             // 🔥 FINAL BUILD
-            let final = Object.values(map).map(r=>{
+            let final = Object.values(map).map(r=>({
 
-                let ob = r.total - r.ib;
-                let aht = r.total ? r.talk / r.total : 0;
-
-                return {
-                    emp: r.emp,
-                    name: r.name,
-                    login: r.login,
-                    net: r.net,
-                    breakTime: r.breakTime,
-                    meeting: r.meeting,
-                    aht: aht,
-                    total: r.total,
-                    ib: r.ib,
-                    ob: ob
-                };
-            });
+                emp: r.emp,
+                name: r.name,
+                login: r.login,
+                net: r.net,
+                breakTime: r.breakTime,
+                meeting: r.meeting,
+                aht: r.total ? r.talk / r.total : 0,
+                total: r.total,
+                ib: r.ib,
+                ob: r.total - r.ib
+            }));
 
             // 🔥 SAVE
             sessionStorage.setItem("data", JSON.stringify({
@@ -157,8 +177,8 @@ function processFiles(){
 
             if(firebaseDB){
                 firebaseDB.ref("dashboard").set({
-                    final: final,
-                    ivr: ivr
+                    final,
+                    ivr
                 });
             }
 
@@ -169,4 +189,112 @@ function processFiles(){
     }
 
     reader1.readAsBinaryString(aprFile);
+}
+
+
+// 🔥 LOAD DASHBOARD
+function loadDashboard(final, ivr){
+
+    const tb = document.querySelector("#table tbody");
+    if(!tb) return;
+
+    tb.innerHTML="";
+
+    let max = Math.max(...final.map(x=>x.total));
+
+    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
+
+    final.forEach(r=>{
+
+        totalCalls+=r.total;
+        totalIB+=r.ib;
+        totalOB+=r.ob;
+        totalTalk+=(r.aht*r.total);
+
+        let callCls=getGradientClass(r.total,max);
+        let netCls=r.net>=28800?"netGreen":"";
+        let breakCls=r.breakTime>2100?"breakRed":"";
+        let meetingCls=r.meeting>2100?"meetingRed":"";
+
+        let tr=document.createElement("tr");
+
+        tr.innerHTML=`
+        <td><b><i>${r.emp}</i></b></td>
+        <td><b><i>${r.name}</i></b></td>
+        <td>${toTime(r.login)}</td>
+        <td class="${netCls}">${toTime(r.net)}</td>
+        <td class="${breakCls}">${toTime(r.breakTime)}</td>
+        <td class="${meetingCls}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.aht)}</td>
+        <td class="${callCls}">${r.total}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
+        `;
+
+        tb.appendChild(tr);
+    });
+
+    document.getElementById("ivr").innerText=ivr;
+    document.getElementById("total").innerText=totalCalls;
+    document.getElementById("ib").innerText=totalIB;
+    document.getElementById("ob").innerText=totalOB;
+
+    let overallAHT=totalCalls?totalTalk/totalCalls:0;
+    document.getElementById("aht").innerText=toTime(overallAHT);
+}
+
+
+// 🔥 AUTO LOAD + LIVE
+document.addEventListener("DOMContentLoaded", ()=>{
+
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+    if(d.final){
+        loadDashboard(d.final, d.ivr);
+    }
+
+    if(window.location.pathname.includes("live") && firebaseDB){
+
+        firebaseDB.ref("dashboard").on("value",(snap)=>{
+            let data = snap.val();
+            if(data && data.final){
+                loadDashboard(data.final, data.ivr);
+            }
+        });
+    }
+});
+
+
+// 🔍 SEARCH
+function searchAgent(){
+    let v=document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
+    });
+}
+
+
+// 📸 PNG
+function copyImage(){
+    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
+        c.toBlob(b=>{
+            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+            alert("Copied!");
+        });
+    });
+}
+
+
+// 📊 EXCEL
+function exportExcel(){
+    let table = document.getElementById("table");
+    let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
+    XLSX.writeFile(wb, "Agent_Report.xlsx");
+}
+
+
+// 🔄 RESET
+function resetApp(){
+    sessionStorage.clear();
+    location="index.html";
 }

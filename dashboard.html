@@ -1,15 +1,13 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Agent Performance Dashboard</title>
+<title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h2 style="text-align:center;">Agent Performance Dashboard</h2>
+<h2>Agent Performance Dashboard</h2>
 
-<!-- 🔥 SUMMARY CARDS -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
@@ -18,20 +16,15 @@
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
-<!-- 🔍 SEARCH -->
 <div style="text-align:center;">
-    <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
+<input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 </div>
 
-<!-- 🔘 BUTTONS -->
 <div style="text-align:center; margin:20px;">
     <button onclick="copyImage()">Copy PNG</button>
     <button onclick="exportExcel()">Export Excel</button>
     <button onclick="resetApp()">Reset</button>
 </div>
-
-<!-- 📊 TABLE + CAPTURE AREA -->
-<div id="captureArea">
 
 <table id="table">
 <thead>
@@ -48,26 +41,16 @@
 <th>OB Mature</th>
 </tr>
 </thead>
-
 <tbody></tbody>
 </table>
 
-<!-- ❤️ FOOTER -->
 <div style="text-align:center; margin-top:20px; font-weight:bold;">
-    ❤️ Powered by Chandan Malakar ❤️
+❤️ Powered by Chandan Malakar ❤️
 </div>
 
-</div>
-
-<!-- 🔥 REQUIRED LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 
-<!-- 🔥 FIREBASE (ONLY ONCE) -->
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
-<!-- 🔥 MAIN SCRIPT -->
 <script src="script.js"></script>
 
 </body>

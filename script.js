@@ -39,7 +39,7 @@ function getGradientClass(val,max){
 }
 
 
-// 🔥 PROCESS FILES (YOUR ORIGINAL LOGIC - NO CHANGE)
+// 🔥 PROCESS FILES
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -71,28 +71,40 @@ function processFiles(){
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP (UNCHANGED)
+            // 🔥 APR LOOP
             aprData.forEach(r=>{
 
                 let emp = r[1];
                 if(!emp) return;
 
+                let login = toSeconds(r[3]);
+
+                let lunch = toSeconds(r[19]);
+                let tea = toSeconds(r[23]);
+                let shortB = toSeconds(r[21]);
+
+                let breakTime = lunch + tea + shortB;
+
+                let meeting = toSeconds(r[20]);
+                let systemDown = toSeconds(r[22]);
+
+                let totalMeeting = meeting + systemDown;
+
                 map[emp] = {
                     emp: String(emp),
                     name: r[2] || "",
-                    login: toSeconds(r[3]),
-                    breakTime: toSeconds(r[19]) + toSeconds(r[23]) + toSeconds(r[21]),
-                    meeting: toSeconds(r[20]) + toSeconds(r[22]),
+                    login: login,
+                    breakTime: breakTime,
+                    meeting: totalMeeting,
+                    net: login - breakTime,
                     aht: toSeconds(r[5]),
                     total: 0,
                     ib: 0,
                     ob: 0
                 };
-
-                map[emp].net = map[emp].login - map[emp].breakTime;
             });
 
-            // 🔥 CDR LOOP (UNCHANGED)
+            // 🔥 CDR LOOP
             cdrData.forEach(r=>{
 
                 let emp = r[1];
@@ -117,13 +129,13 @@ function processFiles(){
 
             let final = Object.values(map);
 
-            // 🔥 LOCAL SAVE
+            // 🔥 SAVE LOCAL
             sessionStorage.setItem("data", JSON.stringify({
                 final: final,
                 ivr: ivr
             }));
 
-            // 🔥 🔥 FIREBASE SAVE (UPDATED)
+            // 🔥 FIREBASE SAVE
             if(firebaseDB){
                 firebaseDB.ref("dashboard").set({
                     final: final,
@@ -142,7 +154,7 @@ function processFiles(){
 }
 
 
-// 🔥 LOAD DASHBOARD (UNCHANGED)
+// 🔥 LOAD DASHBOARD
 function loadDashboard(final, ivr){
 
     const tb = document.querySelector("#table tbody");
@@ -150,7 +162,7 @@ function loadDashboard(final, ivr){
 
     tb.innerHTML="";
 
-    final.sort((a,b)=>b.total - a.total);
+    // ❌ SORT REMOVED (NO ORDER CHANGE)
 
     let max = Math.max(...final.map(x=>x.total));
 
@@ -196,23 +208,19 @@ function loadDashboard(final, ivr){
 }
 
 
-// 🔥 AUTO LOAD + LIVE FIX
+// 🔥 AUTO LOAD + LIVE
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
-    // 🔹 NORMAL DASHBOARD LOAD
     if(d.final){
         loadDashboard(d.final, d.ivr);
     }
 
-    // 🔹 LIVE PAGE (UPDATED FIX)
     if(window.location.pathname.includes("live") && firebaseDB){
 
         firebaseDB.ref("dashboard").on("value",(snap)=>{
-
             let data = snap.val();
-
             if(data && data.final){
                 loadDashboard(data.final, data.ivr);
             }

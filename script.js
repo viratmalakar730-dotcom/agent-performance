@@ -1,5 +1,5 @@
 // ===============================
-// 🔥 FIREBASE CONFIG (TOP ME ADD)
+// 🔥 FIREBASE CONFIG
 // ===============================
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getFirestore, setDoc, doc } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
@@ -13,7 +13,9 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// 🔥 SAVE CLOUD FUNCTION
+// ===============================
+// 🔥 SAVE DATA TO CLOUD
+// ===============================
 async function saveToCloud(payload){
     try{
         await setDoc(doc(db,"dashboard","latest"), payload);
@@ -85,7 +87,7 @@ function readExcel(file, skipRows){
 }
 
 // ===============================
-// 🔥 PROCESS FILES (PRIMARY PAGE)
+// 🔥 PROCESS FILES
 // ===============================
 async function processFiles(){
 
@@ -113,7 +115,7 @@ async function processFiles(){
         if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
     });
 
-    // MAIN LOGIC
+    // MAIN CALCULATION
     apr.forEach(r=>{
 
         if(!r[1]) return;
@@ -159,20 +161,23 @@ async function processFiles(){
         });
     });
 
-    // 🔥 SAVE LOCAL (OLD FLOW SAME)
-    let payload = {
-        final,
-        ivr,
-        reportTime
-    };
+    // 🔥 SAVE DATA
+    let payload = { final, ivr, reportTime };
 
+    // LOCAL (OLD FLOW)
     sessionStorage.setItem("data", JSON.stringify(payload));
 
-    // 🔥 SAVE CLOUD (NEW 🔥)
+    // CLOUD (NEW LIVE FEATURE)
     saveToCloud(payload);
 
+    // REDIRECT
     location = "dashboard.html";
 }
+
+// ===============================
+// 🔥 MAKE FUNCTION GLOBAL (FIX ERROR)
+// ===============================
+window.processFiles = processFiles;
 
 // ===============================
 // 🔥 DASHBOARD LOAD
@@ -227,4 +232,65 @@ document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById("aht").innerText = toTime(overallAHT);
 });
 
-// बाकी functions same (search, export, reset etc.)
+// ===============================
+// 🔍 SEARCH
+// ===============================
+function searchAgent(){
+    let v = document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.style.display = r.innerText.toLowerCase().includes(v) ? "" : "none";
+    });
+}
+
+// ===============================
+// 🖼 PNG COPY
+// ===============================
+function copyImage(){
+    html2canvas(document.getElementById("captureArea"),{
+        scale:3,
+        backgroundColor:"#ffffff"
+    }).then(canvas=>{
+        canvas.toBlob(blob=>{
+            navigator.clipboard.write([
+                new ClipboardItem({"image/png":blob})
+            ]);
+            alert("✅ Clean PNG Copied");
+        });
+    });
+}
+
+// ===============================
+// 📊 EXCEL EXPORT
+// ===============================
+function exportExcel(){
+
+    let d = JSON.parse(sessionStorage.getItem("data")||"{}");
+    if(!d.final) return;
+
+    let data = d.final;
+
+    let ws_data = [["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
+
+    data.forEach(r=>{
+        ws_data.push([
+            r.emp,r.name,
+            toTime(r.login),toTime(r.net),
+            toTime(r.breakTime),toTime(r.meeting),
+            toTime(r.aht),r.total,r.ib,r.ob
+        ]);
+    });
+
+    let ws = XLSX.utils.aoa_to_sheet(ws_data);
+    let wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+
+    XLSX.writeFile(wb, "Agent_Report.xlsx");
+}
+
+// ===============================
+// 🔄 RESET
+// ===============================
+function resetApp(){
+    sessionStorage.clear();
+    location = "index.html";
+}

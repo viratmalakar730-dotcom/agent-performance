@@ -71,6 +71,7 @@ function generateDashboard(apr, cdr){
 
     let map = {};
 
+    // 🔥 APR DATA
     apr.forEach(r=>{
         let emp = r[1];
         if(!emp) return;
@@ -92,6 +93,7 @@ function generateDashboard(apr, cdr){
 
     let ivr = 0;
 
+    // 🔥 CDR DATA
     cdr.forEach(r=>{
         let emp = r[1];
         let skill = r[7];
@@ -102,6 +104,7 @@ function generateDashboard(apr, cdr){
         if(!map[emp]) return;
 
         if(dispo === "callmatured" || dispo === "transfer"){
+
             map[emp].total++;
 
             if(skill === "INBOUND"){
@@ -114,16 +117,16 @@ function generateDashboard(apr, cdr){
 
     let final = Object.values(map);
 
-    // SAVE SESSION
+    // 🔥 SAVE SESSION
     sessionStorage.setItem("data", JSON.stringify({
         final: final,
         ivr: ivr
     }));
 
-    // 🔥 SAVE TO FIREBASE
+    // 🔥 FIREBASE SAVE (FIXED)
     if(typeof firebase !== "undefined"){
         firebase.database().ref("liveData").set({
-            data: final,
+            final: final,   // ✅ IMPORTANT FIX
             ivr: ivr,
             updated: new Date().toISOString()
         });
@@ -156,6 +159,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
         totalTalk+=(r.aht*r.total);
 
         let callCls=getGradientClass(r.total,max);
+
         let netCls=r.net>=28800?"netGreen":"";
         let breakCls=r.breakTime>2100?"breakRed":"";
         let meetingCls=r.meeting>2100?"meetingRed":"";
@@ -187,7 +191,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     document.getElementById("aht").innerText=toTime(overallAHT);
 });
 
-// SEARCH
+// 🔍 SEARCH
 function searchAgent(){
     let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
@@ -195,7 +199,7 @@ function searchAgent(){
     });
 }
 
-// PNG
+// 📸 PNG
 function copyImage(){
     html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
         c.toBlob(b=>{
@@ -205,14 +209,14 @@ function copyImage(){
     });
 }
 
-// EXCEL
+// 📊 EXCEL
 function exportExcel(){
     let table = document.getElementById("table");
     let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
     XLSX.writeFile(wb, "Agent_Report.xlsx");
 }
 
-// RESET
+// 🔄 RESET
 function resetApp(){
     sessionStorage.clear();
     location="index.html";

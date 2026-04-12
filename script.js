@@ -278,11 +278,3 @@ document.addEventListener("click", function(e){
 
     row.classList.add("rowActive");
 });
-
-
-// ===============================
-// 🔄 AUTO REFRESH (2 MIN)
-// ===============================
-setInterval(()=>{
-    location.reload();
-},120000);

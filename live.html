@@ -3,83 +3,126 @@
 <head>
 <title>Live Dashboard</title>
 <link rel="stylesheet" href="style.css">
+
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 </head>
 <body>
 
-<h2>Live Agent Dashboard</h2>
+<h2>Live Agent Performance Dashboard</h2>
 
+<!-- 🔥 SUMMARY -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
     <div class="card">IB Mature<br><span id="ib"></span></div>
     <div class="card">OB Mature<br><span id="ob"></span></div>
+    <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
 <table id="table">
 <thead>
 <tr>
 <th>Employee ID</th>
-<th>Name</th>
-<th>Total</th>
-<th>IB</th>
-<th>OB</th>
+<th>Agent Full Name</th>
+<th>Total Login</th>
+<th>Net Login</th>
+<th>Total Break</th>
+<th>Total Meeting</th>
+<th>AHT</th>
+<th>Total Mature Call</th>
+<th>IB Mature</th>
+<th>OB Mature</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
-
 <script>
+
 const firebaseConfig = {
   apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
   authDomain: "agent-performance-live.firebaseapp.com",
-  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-  projectId: "agent-performance-live",
-  storageBucket: "agent-performance-live.firebasestorage.app",
-  messagingSenderId: "659246273681",
-  appId: "1:659246273681:web:dcc9881594904598315b30"
+  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com",
+  projectId: "agent-performance-live"
 };
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-// 🔴 LIVE LISTENER
-db.ref("dashboard").on("value", snap => {
+function toTime(sec){
+    sec = Math.max(0, Math.round(sec));
+    let h = Math.floor(sec/3600);
+    let m = Math.floor((sec%3600)/60);
+    let s = sec%60;
+    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
+}
 
-    let data = snap.val();
-    if(!data) return;
+function getGradientClass(val,max){
+    let p = val/max;
+    if(p >= 0.75) return "green";
+    if(p >= 0.45) return "yellow";
+    return "red";
+}
 
-    document.getElementById("ivr").innerText = data.ivr;
+db.ref("liveData").on("value", snap => {
+
+    let d = snap.val();
+    if(!d) return;
+
+    let final = d.data;
+    let ivr = d.ivr || 0;
 
     let tb = document.querySelector("#table tbody");
     tb.innerHTML = "";
 
-    let totalCalls = 0;
-    let totalIB = 0;
-    let totalOB = 0;
+    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
-    data.final.forEach(r=>{
-        totalCalls += r.total;
-        totalIB += r.ib;
-        totalOB += r.ob;
+    final.sort((a,b)=>b.total-a.total);
 
-        tb.innerHTML += `
-        <tr>
-        <td>${r.emp}</td>
-        <td>${r.name}</td>
-        <td>${r.total}</td>
+    let max = Math.max(...final.map(x=>x.total));
+
+    final.forEach(r=>{
+
+        totalCalls+=r.total;
+        totalIB+=r.ib;
+        totalOB+=r.ob;
+        totalTalk+=(r.aht*r.total);
+
+        let callCls=getGradientClass(r.total,max);
+        let netCls=r.net>=28800?"netGreen":"";
+        let breakCls=r.breakTime>2100?"breakRed":"";
+        let meetingCls=r.meeting>2100?"meetingRed":"";
+
+        let tr=document.createElement("tr");
+
+        tr.innerHTML=`
+        <td><b><i>${r.emp}</i></b></td>
+        <td><b><i>${r.name}</i></b></td>
+        <td>${toTime(r.login)}</td>
+        <td class="${netCls}">${toTime(r.net)}</td>
+        <td class="${breakCls}">${toTime(r.breakTime)}</td>
+        <td class="${meetingCls}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.aht)}</td>
+        <td class="${callCls}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
-        </tr>`;
+        `;
+
+        tb.appendChild(tr);
     });
 
-    document.getElementById("total").innerText = totalCalls;
-    document.getElementById("ib").innerText = totalIB;
-    document.getElementById("ob").innerText = totalOB;
+    document.getElementById("ivr").innerText=ivr;
+    document.getElementById("total").innerText=totalCalls;
+    document.getElementById("ib").innerText=totalIB;
+    document.getElementById("ob").innerText=totalOB;
+
+    let overallAHT=totalCalls?totalTalk/totalCalls:0;
+    document.getElementById("aht").innerText=toTime(overallAHT);
+
 });
+
 </script>
 
 </body>

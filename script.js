@@ -33,7 +33,7 @@ function getGradientClass(val,max){
 }
 
 
-// 🔥 PROCESS FILES (FINAL COLUMN BASED)
+// 🔥 PROCESS FILES (FINAL FIXED)
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -59,7 +59,7 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            // 🔥 REMOVE HEADER ROWS
+            // 🔥 REMOVE HEADERS
             aprData.splice(0,2);
             cdrData.splice(0,1);
 
@@ -72,53 +72,81 @@ function processFiles(){
                 let emp = r[1];
                 if(!emp) return;
 
+                let login = toSeconds(r[3]);
+
+                // ✅ BREAK = T + W + Y
+                let breakTime = toSeconds(r[19]) + toSeconds(r[23]) + toSeconds(r[21]);
+
+                // ✅ MEETING = U + X
+                let meeting = toSeconds(r[20]) + toSeconds(r[22]);
+
                 map[emp] = {
                     emp: String(emp),
                     name: r[2] || "",
-                    login: toSeconds(r[3]),
-                    breakTime: toSeconds(r[19]) + toSeconds(r[23]) + toSeconds(r[21]),
-                    meeting: toSeconds(r[20]) + toSeconds(r[22]),
-                    aht: toSeconds(r[5]),
+                    login: login,
+                    breakTime: breakTime,
+                    meeting: meeting,
+                    net: login - breakTime, // ✅ FIXED
                     total: 0,
                     ib: 0,
-                    ob: 0
+                    ob: 0,
+                    talk: 0 // 🔥 for AHT
                 };
-
-                map[emp].net = map[emp].login - map[emp].breakTime;
             });
 
-            // 🔥 CDR LOOP
+            // 🔥 CDR LOOP (FINAL FIX)
             cdrData.forEach(r=>{
 
                 let emp = r[1];
                 let skill = r[7];
                 let dispo = (r[25] || "").toString().toLowerCase();
+                let talk = toSeconds(r[11]); // 🔥 TALK TIME
 
+                // ✅ IVR HIT
                 if(skill === "INBOUND") ivr++;
 
                 if(!map[emp]) return;
 
+                // ✅ VALID CALL
                 if(dispo === "callmatured" || dispo === "transfer"){
 
                     map[emp].total++;
 
+                    map[emp].talk += talk;
+
                     if(skill === "INBOUND"){
                         map[emp].ib++;
-                    }else{
-                        map[emp].ob++;
                     }
                 }
             });
 
-            let final = Object.values(map);
+            // 🔥 FINAL BUILD
+            let final = Object.values(map).map(r=>{
 
-            // 🔥 SAVE LOCAL
+                let ob = r.total - r.ib;
+
+                let aht = r.total ? r.talk / r.total : 0;
+
+                return {
+                    emp: r.emp,
+                    name: r.name,
+                    login: r.login,
+                    net: r.net,
+                    breakTime: r.breakTime,
+                    meeting: r.meeting,
+                    aht: aht,
+                    total: r.total,
+                    ib: r.ib,
+                    ob: ob
+                };
+            });
+
+            // 🔥 SAVE
             sessionStorage.setItem("data", JSON.stringify({
                 final: final,
                 ivr: ivr
             }));
 
-            // 🔥 SAVE FIREBASE
             firebaseDB.ref("dashboard").set({
                 final: final,
                 ivr: ivr
@@ -197,7 +225,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
         loadDashboard(d.final, d.ivr);
     }
 
-    // 🔥 LIVE PAGE
     if(window.location.pathname.includes("live")){
         firebaseDB.ref("dashboard").on("value",(snap)=>{
             let d=snap.val();
@@ -205,38 +232,3 @@ document.addEventListener("DOMContentLoaded", ()=>{
         });
     }
 });
-
-
-// 🔍 SEARCH
-function searchAgent(){
-    let v=document.getElementById("search").value.toLowerCase();
-    document.querySelectorAll("#table tbody tr").forEach(r=>{
-        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
-    });
-}
-
-
-// 📸 PNG
-function copyImage(){
-    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
-        c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
-            alert("Copied!");
-        });
-    });
-}
-
-
-// 📊 EXCEL
-function exportExcel(){
-    let table = document.getElementById("table");
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-}
-
-
-// 🔄 RESET
-function resetApp(){
-    sessionStorage.clear();
-    location="index.html";
-}

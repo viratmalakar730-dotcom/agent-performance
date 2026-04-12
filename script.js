@@ -39,7 +39,7 @@ function getGradientClass(val,max){
 }
 
 
-// 🔥 PROCESS FILES
+// 🔥 PROCESS FILES (FINAL FIXED)
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -71,7 +71,7 @@ function processFiles(){
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP
+            // 🔥 APR LOOP (YOUR MAPPING FIXED)
             aprData.forEach(r=>{
 
                 let emp = r[1];
@@ -79,14 +79,16 @@ function processFiles(){
 
                 let login = toSeconds(r[3]);
 
-                let lunch = toSeconds(r[19]);
-                let tea = toSeconds(r[23]);
-                let shortB = toSeconds(r[21]);
+                // ✅ BREAK FIX
+                let lunch = toSeconds(r[20]);
+                let shortB = toSeconds(r[23]);
+                let tea = toSeconds(r[22]);
 
-                let breakTime = lunch + tea + shortB;
+                let breakTime = lunch + shortB + tea;
 
-                let meeting = toSeconds(r[20]);
-                let systemDown = toSeconds(r[22]);
+                // ✅ MEETING FIX
+                let meeting = toSeconds(r[21]);
+                let systemDown = toSeconds(r[24]);
 
                 let totalMeeting = meeting + systemDown;
 
@@ -97,19 +99,19 @@ function processFiles(){
                     breakTime: breakTime,
                     meeting: totalMeeting,
                     net: login - breakTime,
-                    aht: toSeconds(r[5]),
                     total: 0,
                     ib: 0,
-                    ob: 0
+                    talk: 0   // 🔥 AHT FIX
                 };
             });
 
-            // 🔥 CDR LOOP
+            // 🔥 CDR LOOP (FINAL)
             cdrData.forEach(r=>{
 
                 let emp = r[1];
                 let skill = r[7];
                 let dispo = (r[25] || "").toString().toLowerCase();
+                let talk = toSeconds(r[11]);
 
                 if(skill === "INBOUND") ivr++;
 
@@ -119,28 +121,44 @@ function processFiles(){
 
                     map[emp].total++;
 
+                    map[emp].talk += talk;
+
                     if(skill === "INBOUND"){
                         map[emp].ib++;
-                    }else{
-                        map[emp].ob++;
                     }
                 }
             });
 
-            let final = Object.values(map);
+            // 🔥 FINAL BUILD
+            let final = Object.values(map).map(r=>{
 
-            // 🔥 SAVE LOCAL
+                let ob = r.total - r.ib;
+                let aht = r.total ? r.talk / r.total : 0;
+
+                return {
+                    emp: r.emp,
+                    name: r.name,
+                    login: r.login,
+                    net: r.net,
+                    breakTime: r.breakTime,
+                    meeting: r.meeting,
+                    aht: aht,
+                    total: r.total,
+                    ib: r.ib,
+                    ob: ob
+                };
+            });
+
+            // 🔥 SAVE
             sessionStorage.setItem("data", JSON.stringify({
                 final: final,
                 ivr: ivr
             }));
 
-            // 🔥 FIREBASE SAVE
             if(firebaseDB){
                 firebaseDB.ref("dashboard").set({
                     final: final,
-                    ivr: ivr,
-                    updated: new Date().toISOString()
+                    ivr: ivr
                 });
             }
 
@@ -151,114 +169,4 @@ function processFiles(){
     }
 
     reader1.readAsBinaryString(aprFile);
-}
-
-
-// 🔥 LOAD DASHBOARD
-function loadDashboard(final, ivr){
-
-    const tb = document.querySelector("#table tbody");
-    if(!tb) return;
-
-    tb.innerHTML="";
-
-    // ❌ SORT REMOVED (NO ORDER CHANGE)
-
-    let max = Math.max(...final.map(x=>x.total));
-
-    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
-
-    final.forEach(r=>{
-
-        totalCalls+=r.total;
-        totalIB+=r.ib;
-        totalOB+=r.ob;
-        totalTalk+=(r.aht*r.total);
-
-        let callCls=getGradientClass(r.total,max);
-        let netCls=r.net>=28800?"netGreen":"";
-        let breakCls=r.breakTime>2100?"breakRed":"";
-        let meetingCls=r.meeting>2100?"meetingRed":"";
-
-        let tr=document.createElement("tr");
-
-        tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
-        <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
-        <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
-        <td>${r.ib}</td>
-        <td>${r.ob}</td>
-        `;
-
-        tb.appendChild(tr);
-    });
-
-    document.getElementById("ivr").innerText=ivr;
-    document.getElementById("total").innerText=totalCalls;
-    document.getElementById("ib").innerText=totalIB;
-    document.getElementById("ob").innerText=totalOB;
-
-    let overallAHT=totalCalls?totalTalk/totalCalls:0;
-    document.getElementById("aht").innerText=toTime(overallAHT);
-}
-
-
-// 🔥 AUTO LOAD + LIVE
-document.addEventListener("DOMContentLoaded", ()=>{
-
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    if(d.final){
-        loadDashboard(d.final, d.ivr);
-    }
-
-    if(window.location.pathname.includes("live") && firebaseDB){
-
-        firebaseDB.ref("dashboard").on("value",(snap)=>{
-            let data = snap.val();
-            if(data && data.final){
-                loadDashboard(data.final, data.ivr);
-            }
-        });
-    }
-});
-
-
-// 🔍 SEARCH
-function searchAgent(){
-    let v=document.getElementById("search").value.toLowerCase();
-    document.querySelectorAll("#table tbody tr").forEach(r=>{
-        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
-    });
-}
-
-
-// 📸 PNG
-function copyImage(){
-    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
-        c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
-            alert("Copied!");
-        });
-    });
-}
-
-
-// 📊 EXCEL
-function exportExcel(){
-    let table = document.getElementById("table");
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-}
-
-
-// 🔄 RESET
-function resetApp(){
-    sessionStorage.clear();
-    location="index.html";
 }

@@ -62,7 +62,13 @@ function processFiles(){
 
     reader1.readAsBinaryString(aprFile);
 }
-
+// 🔥 Firebase send
+if (window.firebaseDB) {
+    firebaseDB.ref("dashboard").set({
+        final: final,
+        ivr: ivr
+    });
+}
 // 🔥 GENERATE DASHBOARD
 function generateDashboard(apr, cdr){
 

@@ -1,27 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Live Dashboard</title>
+    <title>Live Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 
-<link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
-
 <body>
 
-<h2>Live Agent Performance Dashboard</h2>
-
-<div id="reportTime" style="
-color:#00e5ff;
-font-size:16px;
-margin-top:5px;
-font-weight:bold;
-text-shadow:0 0 8px #00e5ff;">
+<!-- 🔥 HEADER -->
+<div class="top-banner">
+    <div class="title-card">Live Agent Performance Dashboard</div>
+    <div class="time-card" id="reportTime"></div>
 </div>
 
+<!-- 🔥 SUMMARY -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
@@ -30,25 +25,86 @@ text-shadow:0 0 8px #00e5ff;">
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
+<!-- 🔥 TABLE -->
 <table id="table">
-<thead>
-<tr>
-<th>Employee ID</th>
-<th>Agent Full Name</th>
-<th>Total Login</th>
-<th>Net Login</th>
-<th>Total Break</th>
-<th>Total Meeting</th>
-<th>AHT</th>
-<th>Total Mature Call</th>
-<th>IB Mature</th>
-<th>OB Mature</th>
-</tr>
-</thead>
-<tbody></tbody>
+    <thead>
+        <tr>
+            <th>EMPLOYEE ID</th>
+            <th>AGENT FULL NAME</th>
+            <th>TOTAL LOGIN</th>
+            <th>NET LOGIN</th>
+            <th>TOTAL BREAK</th>
+            <th>TOTAL MEETING</th>
+            <th>AHT</th>
+            <th>TOTAL MATURE CALL</th>
+            <th>IB MATURE</th>
+            <th>OB MATURE</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
 </table>
 
-<script src="script.js"></script>
+<script>
+// 🔥 Firebase Config
+const firebaseConfig = {
+  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+  authDomain: "agent-performance-live.firebaseapp.com",
+  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+  projectId: "agent-performance-live"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
+
+// 🔥 FETCH LIVE DATA
+db.ref("dashboard").on("value", snap => {
+    let data = snap.val();
+    if(!data) return;
+
+    document.getElementById("ivr").innerText = data.ivr;
+    document.getElementById("total").innerText = data.total;
+    document.getElementById("ib").innerText = data.ib;
+    document.getElementById("ob").innerText = data.ob;
+    document.getElementById("aht").innerText = data.aht;
+    document.getElementById("reportTime").innerText = "Report Time: " + data.time;
+
+    let tbody = document.querySelector("#table tbody");
+    tbody.innerHTML = "";
+
+    data.table.forEach(r=>{
+        let tr = `<tr>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
+        <td>${r.login}</td>
+        <td>${r.net}</td>
+        <td>${r.break}</td>
+        <td>${r.meet}</td>
+        <td>${r.aht}</td>
+        <td class="${r.cls}">${r.total}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
+        </tr>`;
+        tbody.innerHTML += tr;
+    });
+});
+
+// 🔄 AUTO REFRESH
+setInterval(()=>{
+    location.reload();
+},120000);
+
+// 🔥 ROW CLICK
+document.addEventListener("click", function(e){
+    let row = e.target.closest("tr");
+    if(!row || row.parentNode.tagName !== "TBODY") return;
+
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.classList.remove("rowActive");
+    });
+
+    row.classList.add("rowActive");
+});
+</script>
 
 </body>
 </html>

@@ -1,209 +1,153 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
-
+/* =========================
+   🌌 GLOBAL STYLE
+========================= */
 body {
     margin: 0;
-    font-family: 'Oswald', sans-serif;
-    background: linear-gradient(135deg, #0b1f3a, #020617);
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #061a2e, #0d2b4d);
     color: white;
-    text-align: center;
-    font-weight: bold;
 }
 
-/* 🔥 HEADER TITLE (3D SOFT) */
+/* =========================
+   🔥 MAIN TITLE (3D CARD STYLE)
+========================= */
 h2 {
-    font-size: 32px;
-    color: gold;
-    margin-top: 20px;
+    text-align: center;
+    margin: 20px auto 10px;
+    padding: 20px;
+    width: 90%;
+    max-width: 900px;
+
+    font-size: 40px;
+    font-weight: bold;
+    color: #ffd700;
+
+    background: linear-gradient(145deg, #0b2a4a, #071a2f);
+    border-radius: 20px;
+
+    box-shadow: 
+        0 8px 20px rgba(0,0,0,0.6),
+        inset 0 2px 4px rgba(255,255,255,0.2),
+        inset 0 -2px 4px rgba(0,0,0,0.6);
+
     text-shadow: 
-        2px 2px 4px rgba(0,0,0,0.6),
-        0 0 10px gold;
+        0 0 10px #ffd700,
+        0 0 20px rgba(255,215,0,0.6);
 }
 
-/* 🔥 REPORT TIME (GLOW + SOFT 3D) */
-#reportTime {
-    color: #00e5ff;
-    font-size: 16px;
-    margin-top: 5px;
-    margin-bottom: 10px;
+/* =========================
+   ⏱ REPORT TIME (3D CARD)
+========================= */
+.report-time {
+    text-align: center;
+    margin: 10px auto 20px;
+    padding: 12px 20px;
+    width: fit-content;
 
-    text-shadow: 
-        1px 1px 3px rgba(0,0,0,0.6),
-        0 0 8px #00e5ff;
+    font-size: 18px;
+    font-weight: 600;
+    color: #00eaff;
+
+    background: linear-gradient(145deg, #0a223a, #061a2e);
+    border-radius: 12px;
+
+    box-shadow: 
+        0 5px 15px rgba(0,0,0,0.6),
+        inset 0 1px 3px rgba(255,255,255,0.2),
+        inset 0 -1px 3px rgba(0,0,0,0.6);
+
+    text-shadow: 0 0 8px #00eaff;
 }
 
-/* 🔥 SUMMARY CARDS */
+/* =========================
+   🧊 CARDS (ALREADY PERFECT)
+========================= */
 .cards {
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
     gap: 15px;
-    margin: 20px;
-    flex-wrap: wrap;
+    padding: 10px;
 }
 
 .card {
-    background: linear-gradient(145deg, #ffd700, #ffcc00);
-    color: black;
-    padding: 15px 20px;
-    border-radius: 12px;
-    min-width: 160px;
+    background: linear-gradient(145deg, #0c2d50, #071c33);
+    padding: 15px;
+    width: 160px;
+    text-align: center;
+    border-radius: 15px;
 
-    box-shadow:
-        5px 5px 15px rgba(0,0,0,0.7),
-        inset 2px 2px 6px rgba(255,255,255,0.6),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
+    box-shadow: 
+        0 6px 15px rgba(0,0,0,0.6),
+        inset 0 2px 4px rgba(255,255,255,0.15),
+        inset 0 -2px 4px rgba(0,0,0,0.6);
+
+    transition: 0.3s;
 }
 
-.card span {
-    font-size: 20px;
+.card:hover {
+    transform: translateY(-5px) scale(1.05);
 }
 
-/* 🔍 SEARCH */
-#search {
-    padding: 10px;
-    margin: 10px;
-    width: 260px;
-    border-radius: 8px;
-    border: none;
-}
-
-/* 🔘 BUTTON */
-button {
-    padding: 10px 15px;
-    margin: 10px;
-    background: linear-gradient(145deg, gold, #ffcc00);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-
-    box-shadow:
-        3px 3px 8px rgba(0,0,0,0.6),
-        inset 1px 1px 3px rgba(255,255,255,0.5);
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-/* 📊 TABLE */
+/* =========================
+   📊 TABLE 3D
+========================= */
 table {
     width: 95%;
     margin: auto;
-    margin-top: 20px;
-    border-collapse: collapse;
-    background: white;
-    color: black;
-    border-radius: 10px;
-    overflow: hidden;
-
-    box-shadow: 0 0 12px rgba(0,0,0,0.6);
+    border-collapse: separate;
+    border-spacing: 0 8px;
 }
 
-/* 🔵 HEADER (3D PREMIUM) */
 th {
-    background: linear-gradient(145deg, #0b3d91, #082c6c);
-    color: white;
-    padding: 12px;
-    font-weight: bold;
-
-    box-shadow:
-        inset 2px 2px 5px rgba(255,255,255,0.2),
-        inset -3px -3px 6px rgba(0,0,0,0.6);
-}
-
-/* 📌 CELLS (SOFT 3D – NOT OVER) */
-td {
+    background: linear-gradient(145deg, #123d66, #0b2b4d);
     padding: 10px;
-    border: 1px solid #ccc;
-    text-align: center;
-    font-weight: bold;
+    border-radius: 8px;
 
-    box-shadow:
-        inset 1px 1px 2px rgba(255,255,255,0.6),
-        inset -2px -2px 3px rgba(0,0,0,0.2);
+    box-shadow: 
+        0 4px 10px rgba(0,0,0,0.6),
+        inset 0 1px 2px rgba(255,255,255,0.2),
+        inset 0 -1px 2px rgba(0,0,0,0.6);
+
+    text-shadow: 0 0 5px #00eaff;
 }
 
-/* ✨ EMPLOYEE STYLE */
-td:nth-child(1),
-td:nth-child(2) {
-    font-style: italic;
+td {
+    background: linear-gradient(145deg, #0b2a4a, #071c33);
+    padding: 10px;
+    border-radius: 8px;
+
+    box-shadow: 
+        0 3px 8px rgba(0,0,0,0.5),
+        inset 0 1px 2px rgba(255,255,255,0.1),
+        inset 0 -1px 2px rgba(0,0,0,0.6);
 }
 
-/* ============================= */
-/* 🔥 CONDITIONAL 3D */
-/* ============================= */
+/* =========================
+   📱 MOBILE RESPONSIVE
+========================= */
+@media (max-width: 768px) {
 
-/* 🟢 NET LOGIN */
-.netGreen {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
+    h2 {
+        font-size: 22px;
+        padding: 15px;
+    }
 
-    box-shadow:
-        4px 4px 10px rgba(0,0,0,0.7),
-        inset 2px 2px 5px rgba(255,255,255,0.4),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
-}
+    .report-time {
+        font-size: 14px;
+        padding: 8px 12px;
+    }
 
-/* 🔴 UNIVERSAL RED */
-.red3D {
-    background: linear-gradient(145deg, #d50000, #ff1744);
-    color: white;
+    .card {
+        width: 45%;
+        font-size: 14px;
+    }
 
-    box-shadow:
-        4px 4px 10px rgba(0,0,0,0.8),
-        inset 2px 2px 5px rgba(255,255,255,0.3),
-        inset -3px -3px 6px rgba(0,0,0,0.6);
-}
+    table {
+        font-size: 12px;
+    }
 
-/* 🟡 MID */
-.yellow {
-    background: linear-gradient(145deg, #ffd600, #ffea00);
-
-    box-shadow:
-        3px 3px 8px rgba(0,0,0,0.6),
-        inset 2px 2px 4px rgba(255,255,255,0.5);
-}
-
-/* 🟢 HIGH */
-.green {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
-
-    box-shadow:
-        3px 3px 8px rgba(0,0,0,0.6),
-        inset 2px 2px 4px rgba(255,255,255,0.4);
-}
-
-/* 📂 UPLOAD PAGE */
-.container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.upload-box {
-    background: linear-gradient(145deg, #0b3d91, #001f4d);
-    padding: 40px;
-    border-radius: 15px;
-
-    box-shadow:
-        5px 5px 15px rgba(0,0,0,0.8),
-        inset 2px 2px 6px rgba(255,255,255,0.2),
-        inset -3px -3px 6px rgba(0,0,0,0.6);
-}
-
-/* LABEL */
-.label {
-    color: gold;
-}
-
-/* LOADING */
-.loading {
-    display: none;
-    color: gold;
-}
-
-/* HOVER */
-tr:hover {
-    background: #ffe066;
+    th, td {
+        padding: 6px;
+    }
 }

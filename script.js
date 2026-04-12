@@ -160,7 +160,7 @@ function processFiles(){
 }
 
 
-// 🔥 LOAD TABLE
+// 🔥 LOAD DASHBOARD (COLOR FIXED)
 function loadDashboard(final, ivr){
 
     let tb = document.querySelector("#table tbody");
@@ -179,17 +179,23 @@ function loadDashboard(final, ivr){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
+        // 🔥 COLOR LOGIC
+        let netCls = r.net >= 28800 ? "netGreen" : "";
+        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
+        let meetingCls = r.meeting > 2100 ? "meetingRed" : "";
+        let callCls = getGradientClass(r.total, max);
+
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td>${r.emp}</td>
-        <td>${r.name}</td>
+        <td><b><i>${r.emp}</i></b></td>
+        <td><b><i>${r.name}</i></b></td>
         <td>${toTime(r.login)}</td>
-        <td class="netGreen">${toTime(r.net)}</td>
-        <td>${toTime(r.breakTime)}</td>
-        <td>${toTime(r.meeting)}</td>
+        <td class="${netCls}">${toTime(r.net)}</td>
+        <td class="${breakCls}">${toTime(r.breakTime)}</td>
+        <td class="${meetingCls}">${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td class="${getGradientClass(r.total,max)}">${r.total}</td>
+        <td class="${callCls}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -207,26 +213,27 @@ function loadDashboard(final, ivr){
 }
 
 
-// 🔥 LOAD + LIVE
+// 🔥 LOAD + LIVE (FIXED)
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
+    // 👉 LOCAL DATA
     if(d.final){
         loadDashboard(d.final, d.ivr);
     }
 
-    // 🔥 LIVE DATA
-    if(window.location.pathname.includes("live")){
-        db.ref("dashboard").on("value",(snap)=>{
+    // 👉 LIVE DATA ALWAYS
+    db.ref("dashboard").on("value",(snap)=>{
 
-            let data = snap.val();
+        let data = snap.val();
 
-            if(data && data.final){
-                loadDashboard(data.final, data.ivr);
-            }
-        });
-    }
+        console.log("LIVE:", data);
+
+        if(data && data.final){
+            loadDashboard(data.final, data.ivr);
+        }
+    });
 });
 
 

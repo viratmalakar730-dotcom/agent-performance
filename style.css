@@ -6,211 +6,197 @@ body {
     background: linear-gradient(135deg, #0b1f3a, #020617);
     color: white;
     text-align: center;
-    font-weight: bold;
 }
 
-/* 🔥 TITLE (STRONG 3D) */
-h2 {
-    font-size: 32px;
-    color: gold;
-    margin-top: 20px;
+/* 🔥 BANNER */
+.top-banner{
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:15px;
+    margin-top:20px;
+}
+
+.title-card{
+    font-size:32px;
+    color:gold;
+    padding:15px 40px;
+    border-radius:12px;
+    background: linear-gradient(145deg,#0b3d91,#001f4d);
+
+    box-shadow:
+        8px 8px 20px rgba(0,0,0,0.9),
+        inset 2px 2px 6px rgba(255,255,255,0.2),
+        inset -4px -4px 8px rgba(0,0,0,0.7);
 
     text-shadow:
-        3px 3px 6px rgba(0,0,0,0.8),
-        -1px -1px 2px rgba(255,255,255,0.3),
+        3px 3px 6px rgba(0,0,0,0.9),
         0 0 12px gold;
 }
 
-/* 🔥 REPORT TIME (3D + GLOW) */
-#reportTime {
-    color: #00e5ff;
-    font-size: 16px;
-    margin-top: 5px;
-    margin-bottom: 10px;
+.time-card{
+    font-size:18px;
+    color:#00e5ff;
+    padding:10px 25px;
+    border-radius:10px;
+    background: linear-gradient(145deg,#001f4d,#020617);
+
+    box-shadow:
+        6px 6px 16px rgba(0,0,0,0.9),
+        inset 2px 2px 5px rgba(255,255,255,0.2),
+        inset -4px -4px 8px rgba(0,0,0,0.7);
 
     text-shadow:
-        2px 2px 5px rgba(0,0,0,0.8),
-        -1px -1px 2px rgba(255,255,255,0.2),
+        2px 2px 5px rgba(0,0,0,0.9),
         0 0 10px #00e5ff;
 }
 
 /* 🔥 CARDS */
-.cards {
-    display: flex;
-    justify-content: center;
-    gap: 15px;
-    margin: 20px;
-    flex-wrap: wrap;
+.cards{
+    display:flex;
+    flex-wrap:wrap;
+    justify-content:center;
+    gap:15px;
+    margin:20px;
 }
 
-.card {
-    background: linear-gradient(145deg, #ffd700, #ffcc00);
-    color: black;
-    padding: 15px 20px;
-    border-radius: 12px;
-    min-width: 160px;
+.card{
+    background: linear-gradient(145deg,#ffd700,#ffcc00);
+    color:black;
+    padding:15px;
+    border-radius:12px;
 
     box-shadow:
-        5px 5px 15px rgba(0,0,0,0.7),
+        6px 6px 16px rgba(0,0,0,0.8),
         inset 2px 2px 6px rgba(255,255,255,0.6),
-        inset -3px -3px 6px rgba(0,0,0,0.5);
+        inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
-.card span {
-    font-size: 20px;
+/* 🔍 */
+#search{
+    padding:10px;
+    width:260px;
+    border-radius:8px;
+    border:none;
 }
 
-/* 🔍 SEARCH */
-#search {
-    padding: 10px;
-    margin: 10px;
-    width: 260px;
-    border-radius: 8px;
-    border: none;
-}
-
-/* 🔘 BUTTON */
-button {
-    padding: 10px 15px;
-    margin: 10px;
-    background: linear-gradient(145deg, gold, #ffcc00);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
+/* 🔘 */
+button{
+    margin:10px;
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    background:gold;
+    cursor:pointer;
 
     box-shadow:
-        3px 3px 8px rgba(0,0,0,0.6),
+        3px 3px 10px rgba(0,0,0,0.7),
         inset 1px 1px 3px rgba(255,255,255,0.5);
 }
 
-button:hover {
-    transform: scale(1.05);
-}
-
 /* 📊 TABLE */
-table {
-    width: 95%;
-    margin: auto;
-    margin-top: 20px;
-    border-collapse: collapse;
-    background: white;
-    color: black;
-    border-radius: 10px;
-    overflow: hidden;
+table{
+    width:95%;
+    margin:auto;
+    margin-top:20px;
+    border-collapse:collapse;
+    background:white;
+    color:black;
+    border:2px solid black;
 
-    border: 2px solid #000;
     box-shadow: 0 0 15px rgba(0,0,0,0.7);
 }
 
-/* 🔵 HEADER (3D) */
-th {
-    background: linear-gradient(145deg, #0b3d91, #082c6c);
-    color: white;
-    padding: 12px;
-    font-weight: bold;
-
-    border: 2px solid #000;
+/* 🔵 HEADER */
+th{
+    background: linear-gradient(145deg,#0b3d91,#082c6c);
+    color:white;
+    padding:10px;
+    border:2px solid black;
 
     box-shadow:
         inset 2px 2px 5px rgba(255,255,255,0.2),
         inset -3px -3px 6px rgba(0,0,0,0.6);
 }
 
-/* 📌 CELLS (SOFT 3D) */
-td {
-    padding: 10px;
-    border: 1.5px solid #444;
-    text-align: center;
-    font-weight: bold;
+/* 🔥 CELLS (ENHANCED BUT CLEAN 3D) */
+td{
+    padding:10px;
+    border:1.5px solid #444;
 
     box-shadow:
-        inset 1px 1px 2px rgba(255,255,255,0.6),
-        inset -2px -2px 3px rgba(0,0,0,0.2);
+        inset 2px 2px 3px rgba(255,255,255,0.7),
+        inset -3px -3px 4px rgba(0,0,0,0.3);
 }
 
-/* ✨ EMPLOYEE STYLE */
+/* ✨ NAME STYLE */
 td:nth-child(1),
-td:nth-child(2) {
-    font-style: italic;
+td:nth-child(2){
+    font-style:italic;
 }
 
 /* ============================= */
-/* 🔥 CONDITIONAL 3D */
+/* 🔥 CONDITIONAL (UNCHANGED LOGIC) */
 /* ============================= */
 
-/* 🟢 NET LOGIN */
-.netGreen {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
+/* 🟢 HIGH */
+.green{
+    background: linear-gradient(145deg,#00c853,#00e676);
+    color:white;
 
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.7),
+        5px 5px 12px rgba(0,0,0,0.8),
         inset 2px 2px 5px rgba(255,255,255,0.4),
         inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
-/* 🔴 UNIVERSAL RED */
-.red3D {
-    background: linear-gradient(145deg, #d50000, #ff1744);
-    color: white;
+/* 🟡 MID */
+.yellow{
+    background: linear-gradient(145deg,#ffd600,#ffea00);
 
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.8),
+        4px 4px 10px rgba(0,0,0,0.6),
+        inset 2px 2px 5px rgba(255,255,255,0.5),
+        inset -3px -3px 6px rgba(0,0,0,0.3);
+}
+
+/* 🔴 LOW */
+.red3D{
+    background: linear-gradient(145deg,#d50000,#ff1744);
+    color:white;
+
+    box-shadow:
+        5px 5px 12px rgba(0,0,0,0.9),
         inset 2px 2px 5px rgba(255,255,255,0.3),
         inset -3px -3px 6px rgba(0,0,0,0.6);
 }
 
-/* 🟡 MID */
-.yellow {
-    background: linear-gradient(145deg, #ffd600, #ffea00);
+/* 📱 MOBILE */
+@media (max-width:768px){
 
-    box-shadow:
-        3px 3px 8px rgba(0,0,0,0.6),
-        inset 2px 2px 4px rgba(255,255,255,0.5);
+    .cards{
+        flex-direction:column;
+        align-items:center;
+    }
+
+    .card{
+        width:90%;
+    }
+
+    table{
+        font-size:12px;
+    }
+
+    .title-card{
+        font-size:22px;
+        padding:12px;
+    }
+
+    .time-card{
+        font-size:14px;
+    }
+
+    button{
+        width:90%;
+    }
 }
-
-/* 🟢 HIGH */
-.green {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
-
-    box-shadow:
-        3px 3px 8px rgba(0,0,0,0.6),
-        inset 2px 2px 4px rgba(255,255,255,0.4);
-}
-
-/* 📂 UPLOAD PAGE */
-.container {
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.upload-box {
-    background: linear-gradient(145deg, #0b3d91, #001f4d);
-    padding: 40px;
-    border-radius: 15px;
-
-    box-shadow:
-        5px 5px 15px rgba(0,0,0,0.8),
-        inset 2px 2px 6px rgba(255,255,255,0.2),
-        inset -3px -3px 6px rgba(0,0,0,0.6);
-}
-
-/* LABEL */
-.label {
-    color: gold;
-}
-
-/* LOADING */
-.loading {
-    display: none;
-    color: gold;
-}
-
-/* HOVER */
-tr:hover {
-    background: #ffe066;
-    transition: 0.2s;
-   }

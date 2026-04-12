@@ -1,12 +1,13 @@
-// 🔥 FIREBASE SAFE INIT (NO DUPLICATE ERROR)
-if (typeof firebase !== "undefined" && !firebase.apps.length) {
-    firebase.initializeApp({
-        apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
-        authDomain: "agent-performance-live.firebaseapp.com",
-        databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com",
-        projectId: "agent-performance-live"
-    });
-}
+// 🔥 FIREBASE INIT
+const firebaseConfig = {
+  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+  authDomain: "agent-performance-live.firebaseapp.com",
+  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+  projectId: "agent-performance-live",
+};
+
+firebase.initializeApp(firebaseConfig);
+const firebaseDB = firebase.database();
 
 // 🔥 TIME FUNCTIONS
 function toSeconds(t){
@@ -23,164 +24,100 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-function getGradientClass(val,max){
-    let p = val/max;
-    if(p >= 0.75) return "green";
-    if(p >= 0.45) return "yellow";
-    return "red";
-}
-
 // 🔥 PROCESS FILES
 function processFiles(){
 
-    let aprFile = document.getElementById("aprFile").files[0];
-    let cdrFile = document.getElementById("cdrFile").files[0];
+    let apr = document.getElementById("aprFile").files[0];
+    let cdr = document.getElementById("cdrFile").files[0];
 
-    if(!aprFile || !cdrFile){
+    if(!apr || !cdr){
         alert("Upload both files");
         return;
     }
 
-    document.getElementById("loading").style.display = "block";
+    document.getElementById("loading").style.display="block";
 
     let reader1 = new FileReader();
     let reader2 = new FileReader();
 
-    reader1.onload = function(e){
-        let apr = XLSX.read(e.target.result, {type:'binary'});
-        let aprData = XLSX.utils.sheet_to_json(apr.Sheets[apr.SheetNames[0]], {header:1});
-
+    reader1.onload = function(e1){
         reader2.onload = function(e2){
-            let cdr = XLSX.read(e2.target.result, {type:'binary'});
-            let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            generateDashboard(aprData, cdrData);
+            let wb1 = XLSX.read(e1.target.result, {type:'binary'});
+            let wb2 = XLSX.read(e2.target.result, {type:'binary'});
+
+            let aprData = XLSX.utils.sheet_to_json(wb1.Sheets[wb1.SheetNames[0]]);
+            let cdrData = XLSX.utils.sheet_to_json(wb2.Sheets[wb2.SheetNames[0]]);
+
+            let final = [];
+
+            aprData.forEach(a=>{
+
+                let emp = a["Employee ID"];
+                let name = a["Agent Full Name"];
+
+                let login = toSeconds(a["Total Login Time"]);
+                let breakTime = toSeconds(a["Total Break Duration"]);
+                let meeting = toSeconds(a["MEETING"]);
+                let net = login - breakTime - meeting;
+
+                let agentCDR = cdrData.filter(c=>c["Username"]==emp);
+
+                let ib = agentCDR.filter(x=>x["Call Type"]=="Inbound").length;
+                let ob = agentCDR.filter(x=>x["Call Type"]=="Outbound").length;
+
+                let total = ib + ob;
+
+                let talk = agentCDR.reduce((s,x)=>s+toSeconds(x["Talk Duration"]),0);
+                let aht = total ? talk/total : 0;
+
+                final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
+            });
+
+            let ivr = cdrData.filter(x=>x["Call Type"]=="Inbound").length;
+
+            sessionStorage.setItem("data", JSON.stringify({final,ivr}));
+
+            // 🔥 FIREBASE PUSH
+            firebaseDB.ref("dashboard").set({
+                final: final,
+                ivr: ivr
+            });
+
+            window.location="dashboard.html";
         }
 
-        reader2.readAsBinaryString(cdrFile);
+        reader2.readAsBinaryString(cdr);
     }
 
-    reader1.readAsBinaryString(aprFile);
-}
-// 🔥 Firebase send
-if (window.firebaseDB) {
-    firebaseDB.ref("dashboard").set({
-        final: final,
-        ivr: ivr
-    });
-}
-// 🔥 GENERATE DASHBOARD
-function generateDashboard(apr, cdr){
-
-    apr.splice(0,2);
-    cdr.splice(0,1);
-
-    let map = {};
-
-    // 🔥 APR DATA
-    apr.forEach(r=>{
-        let emp = r[1];
-        if(!emp) return;
-
-        map[emp] = {
-            emp: emp,
-            name: r[2] || "",
-            login: toSeconds(r[3]),
-            breakTime: toSeconds(r[19]) + toSeconds(r[23]) + toSeconds(r[21]),
-            meeting: toSeconds(r[20]) + toSeconds(r[22]),
-            aht: toSeconds(r[5]),
-            total: 0,
-            ib: 0,
-            ob: 0
-        };
-
-        map[emp].net = map[emp].login - map[emp].breakTime;
-    });
-
-    let ivr = 0;
-
-    // 🔥 CDR DATA
-    cdr.forEach(r=>{
-        let emp = r[1];
-        let skill = r[7];
-        let dispo = (r[25] || "").toString().toLowerCase();
-
-        if(skill === "INBOUND") ivr++;
-
-        if(!map[emp]) return;
-
-        if(dispo === "callmatured" || dispo === "transfer"){
-
-            map[emp].total++;
-
-            if(skill === "INBOUND"){
-                map[emp].ib++;
-            }else{
-                map[emp].ob++;
-            }
-        }
-    });
-
-    let final = Object.values(map);
-
-    // 🔥 SAVE SESSION
-    sessionStorage.setItem("data", JSON.stringify({
-        final: final,
-        ivr: ivr
-    }));
-
-    // 🔥 FIREBASE SAVE (FIXED)
-    if(typeof firebase !== "undefined"){
-        firebase.database().ref("liveData").set({
-            final: final,   // ✅ IMPORTANT FIX
-            ivr: ivr,
-            updated: new Date().toISOString()
-        });
-    }
-
-    location = "dashboard.html";
+    reader1.readAsBinaryString(apr);
 }
 
-// 🔥 LOAD DASHBOARD
-document.addEventListener("DOMContentLoaded", ()=>{
-
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-    if(!d.final) return;
-
-    let {final, ivr} = d;
-
-    final.sort((a,b)=>b.total - a.total);
-
-    let max = Math.max(...final.map(x=>x.total));
+// 🔥 DASHBOARD LOAD
+function loadDashboard(final, ivr){
 
     const tb = document.querySelector("#table tbody");
+    tb.innerHTML="";
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
     final.forEach(r=>{
-
         totalCalls+=r.total;
         totalIB+=r.ib;
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
-        let callCls=getGradientClass(r.total,max);
-
-        let netCls=r.net>=28800?"netGreen":"";
-        let breakCls=r.breakTime>2100?"breakRed":"";
-        let meetingCls=r.meeting>2100?"meetingRed":"";
-
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
+        <td>${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
+        <td>${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -195,7 +132,21 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     let overallAHT=totalCalls?totalTalk/totalCalls:0;
     document.getElementById("aht").innerText=toTime(overallAHT);
+}
+
+// 🔥 AUTO LOAD (DASHBOARD)
+document.addEventListener("DOMContentLoaded", ()=>{
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+    if(d.final) loadDashboard(d.final,d.ivr);
 });
+
+// 🔥 LIVE LOAD
+if(window.location.pathname.includes("live")){
+    firebaseDB.ref("dashboard").on("value",(snap)=>{
+        let d=snap.val();
+        if(d) loadDashboard(d.final,d.ivr);
+    });
+}
 
 // 🔍 SEARCH
 function searchAgent(){
@@ -207,7 +158,7 @@ function searchAgent(){
 
 // 📸 PNG
 function copyImage(){
-    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
+    html2canvas(document.getElementById("table")).then(c=>{
         c.toBlob(b=>{
             navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
             alert("Copied!");
@@ -215,14 +166,7 @@ function copyImage(){
     });
 }
 
-// 📊 EXCEL
-function exportExcel(){
-    let table = document.getElementById("table");
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-}
-
-// 🔄 RESET
+// 🔁 RESET
 function resetApp(){
     sessionStorage.clear();
     location="index.html";

@@ -1,5 +1,5 @@
 // ===============================
-// 🔥 FIREBASE CONFIG (NEW ADD)
+// 🔥 FIREBASE CONFIG (ADD)
 // ===============================
 const firebaseConfig = {
     apiKey: "YOUR_KEY",
@@ -10,7 +10,7 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
 
-// 🔥 SAVE CLOUD (NEW ADD)
+// 🔥 SAVE CLOUD
 async function saveToCloud(payload){
     try{
         await db.collection("dashboard").doc("latest").set(payload);
@@ -45,126 +45,174 @@ function getGradientClass(val,max){
 }
 
 // ===============================
-// 🔥 REPORT TIME
-// ===============================
-function extractReportTime(aprRaw){
-    let row = aprRaw[1]?.[0] || "";
-    let match = row.match(/to\s([\d\-:\s]+)/i);
-    if(!match) return "";
-
-    let d = new Date(match[1].trim());
-
-    let day = String(d.getDate()).padStart(2,'0');
-    let month = d.toLocaleString('en-US',{month:'short'});
-    let year = String(d.getFullYear()).slice(-2);
-
-    let time = d.toLocaleTimeString('en-US',{hour12:true});
-
-    return `${day}-${month}-${year} ${time}`;
-}
-
-// ===============================
 // 📂 READ EXCEL
 // ===============================
-function readExcel(file, skipRows){
-    return new Promise(resolve=>{
-        let reader = new FileReader();
-        reader.onload = e=>{
-            let wb = XLSX.read(new Uint8Array(e.target.result), {type:'array'});
-            let data = XLSX.utils.sheet_to_json(
-                wb.Sheets[wb.SheetNames[0]],
-                {header:1}
-            );
-            resolve(data.slice(skipRows));
+function readExcel(file,skip){
+    return new Promise(res=>{
+        let r=new FileReader();
+        r.onload=e=>{
+            let wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+            let d=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+            res(d.slice(skip));
         };
-        reader.readAsArrayBuffer(file);
+        r.readAsArrayBuffer(file);
     });
 }
 
 // ===============================
-// 🔥 PROCESS FILES
+// 🔥 PROCESS FILES (UPDATED)
 // ===============================
 async function processFiles(){
 
-    let aprFile = document.getElementById("aprFile").files[0];
-    let cdrFile = document.getElementById("cdrFile").files[0];
+    let aprFile=document.getElementById("aprFile").files[0];
+    let cdrFile=document.getElementById("cdrFile").files[0];
 
     if(!aprFile || !cdrFile){
-        alert("Please upload both files ❌");
+        alert("Upload both files ❌");
         return;
     }
 
-    document.getElementById("loading").style.display = "block";
+    document.getElementById("loading").style.display="block";
 
-    let aprRaw = await readExcel(aprFile,0);
-    let reportTime = extractReportTime(aprRaw);
+    let apr=await readExcel(aprFile,3);
+    let cdr=await readExcel(cdrFile,2);
 
-    let apr = aprRaw.slice(3);
-    let cdr = await readExcel(cdrFile,2);
-
-    let final = [];
-    let ivr = 0;
+    let final=[];
+    let ivr=0;
 
     // IVR HIT
     cdr.forEach(c=>{
         if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
     });
 
-    // MAIN CALCULATION
     apr.forEach(r=>{
 
         if(!r[1]) return;
 
-        let emp = (r[1]||"").toString().trim();
-        let name = r[2];
+        let emp=(r[1]||"").toString().trim();
+        let name=r[2];
 
-        let login = toSeconds(r[3]);
+        let login=toSeconds(r[3]);
 
-        let breakTime =
-            toSeconds(r[19]) +
-            toSeconds(r[22]) +
-            toSeconds(r[24]);
+        let breakTime=
+        toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
 
-        let meeting =
-            toSeconds(r[20]) +
-            toSeconds(r[23]);
+        let meeting=
+        toSeconds(r[20])+toSeconds(r[23]);
 
-        let net = Math.max(0, login - breakTime);
+        let net=Math.max(0,login-breakTime);
 
-        let calls = cdr.filter(c=>{
-            let empCDR = (c[1]||"").toString().trim();
-            let disp = (c[25]||"").toLowerCase();
-
-            return empCDR === emp &&
-                (disp.includes("callmatured") || disp.includes("transfer"));
+        let calls=cdr.filter(c=>{
+            return (c[1]||"").toString().trim()===emp &&
+            ((c[25]||"").toLowerCase().includes("callmatured") ||
+             (c[25]||"").toLowerCase().includes("transfer"));
         });
 
-        let total = calls.length;
+        let total=calls.length;
 
-        let ib = calls.filter(c =>
+        let ib=calls.filter(c=>
             (c[7]||"").toUpperCase().includes("INBOUND")
         ).length;
 
-        let ob = total - ib;
+        let ob=total-ib;
 
-        let aht = total ? Math.round(toSeconds(r[5]) / total) : 0;
+        let aht=total?Math.round(toSeconds(r[5])/total):0;
 
-        final.push({
-            emp, name, login, net,
-            breakTime, meeting,
-            aht, total, ib, ob
-        });
+        final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
     });
 
     // ===============================
-    // 🔥 SAVE DATA
+    // 🔥 SAVE DATA (FIXED)
     // ===============================
-    let payload = { final, ivr, reportTime };
+    let payload = { final, ivr };
 
-    sessionStorage.setItem("data", JSON.stringify(payload));
+    sessionStorage.setItem("data",JSON.stringify(payload));
 
-    // 🔥 LIVE SYNC ADD
-    saveToCloud(payload);
+    // 🔥 WAIT FOR CLOUD SAVE (MAIN FIX)
+    await saveToCloud(payload);
 
-    location = "dashboard.html";
+    // REDIRECT AFTER SAVE
+    location="dashboard.html";
+}
+
+// ===============================
+// 🔥 DASHBOARD LOAD
+// ===============================
+document.addEventListener("DOMContentLoaded",()=>{
+
+    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+    if(!d.final) return;
+
+    let {final,ivr}=d;
+
+    final.sort((a,b)=>b.total-a.total);
+
+    let max=Math.max(...final.map(x=>x.total));
+
+    let tb=document.querySelector("#table tbody");
+
+    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
+
+    final.forEach(r=>{
+
+        totalCalls+=r.total;
+        totalIB+=r.ib;
+        totalOB+=r.ob;
+        totalTalk+=(r.aht*r.total);
+
+        let tr=document.createElement("tr");
+
+        tr.innerHTML=`
+        <td><b><i>${r.emp}</i></b></td>
+        <td><b><i>${r.name}</i></b></td>
+        <td>${toTime(r.login)}</td>
+        <td class="${r.net>=28800?'netGreen':''}">${toTime(r.net)}</td>
+        <td class="${r.breakTime>2100?'breakRed':''}">${toTime(r.breakTime)}</td>
+        <td class="${r.meeting>2100?'meetingRed':''}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.aht)}</td>
+        <td class="${getGradientClass(r.total,max)}">${r.total}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
+        `;
+
+        tb.appendChild(tr);
+    });
+
+    document.getElementById("ivr").innerText=ivr;
+    document.getElementById("total").innerText=totalCalls;
+    document.getElementById("ib").innerText=totalIB;
+    document.getElementById("ob").innerText=totalOB;
+
+    let overall=totalCalls?totalTalk/totalCalls:0;
+    document.getElementById("aht").innerText=toTime(overall);
+});
+
+// ===============================
+// 🔍 SEARCH
+// ===============================
+function searchAgent(){
+    let v=document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
+    });
+}
+
+// ===============================
+// 🖼 PNG COPY
+// ===============================
+function copyImage(){
+    html2canvas(document.getElementById("captureArea"),{scale:2}).then(c=>{
+        c.toBlob(b=>{
+            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+            alert("Copied!");
+        });
+    });
+}
+
+// ===============================
+// 🔄 RESET
+// ===============================
+function resetApp(){
+    sessionStorage.clear();
+    location="index.html";
 }

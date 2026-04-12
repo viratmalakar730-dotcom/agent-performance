@@ -1,23 +1,28 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live Agent Performance Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Live Dashboard</title>
 </head>
 <body>
 
-<h2 style="text-align:center;">Live Agent Performance Dashboard</h2>
+<h2 style="text-align:center;">Live Dashboard</h2>
 
-<!-- 🔥 DASHBOARD OUTPUT -->
-<div id="dashboard"></div>
+<table border="1" width="100%" id="table">
+<thead>
+<tr>
+<th>Emp</th>
+<th>Name</th>
+<th>Total Calls</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
-<!-- 🔥 FIREBASE + LIVE SYNC -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
 import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
 
-// ⚠️ SAME CONFIG use karo jo primary me use kiya
 const firebaseConfig = {
     apiKey: "YOUR_KEY",
     authDomain: "YOUR_DOMAIN",
@@ -27,47 +32,21 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// ===============================
-// 🔥 AUTO LIVE UPDATE
-// ===============================
-onSnapshot(doc(db, "dashboard", "latest"), (docSnap) => {
+onSnapshot(doc(db,"dashboard","latest"), (snap)=>{
 
-    if (docSnap.exists()) {
-        const data = docSnap.data().data;
+    if(!snap.exists()) return;
 
-        renderDashboard(data);
-    } else {
-        document.getElementById("dashboard").innerHTML = "No Data Available";
-    }
-});
+    let d = snap.data();
+    let tb = document.querySelector("#table tbody");
+    tb.innerHTML = "";
 
-// ===============================
-// 🔥 SAME RENDER FUNCTION (MATCH PRIMARY)
-// ===============================
-function renderDashboard(data) {
-
-    let html = `<table border="1" style="width:100%; text-align:center;">
-        <tr>
-            <th>Agent</th>
-            <th>Calls</th>
-            <th>Total Talk</th>
-            <th>AHT</th>
-        </tr>`;
-
-    data.forEach(d => {
-        html += `
-        <tr>
-            <td>${d.agent}</td>
-            <td>${d.calls}</td>
-            <td>${d.talk}</td>
-            <td>${d.aht.toFixed(2)}</td>
-        </tr>`;
+    d.final.forEach(r=>{
+        let tr = document.createElement("tr");
+        tr.innerHTML = `<td>${r.emp}</td><td>${r.name}</td><td>${r.total}</td>`;
+        tb.appendChild(tr);
     });
 
-    html += `</table>`;
-
-    document.getElementById("dashboard").innerHTML = html;
-}
+});
 
 </script>
 

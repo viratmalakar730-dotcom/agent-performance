@@ -39,7 +39,7 @@ function getGradientClass(val,max){
 }
 
 
-// 🔥 HEADER FINDER (FIXED)
+// 🔍 HEADER FIND
 function findCol(header, name){
     return header.findIndex(h => 
         h && h.toString().toLowerCase().replace(/\s+/g,'')
@@ -48,7 +48,7 @@ function findCol(header, name){
 }
 
 
-// 🔥 PROCESS FILES (FINAL)
+// 🔥 PROCESS FILES
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -74,9 +74,21 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            // 🔥 HEADER DETECT
-            let aprHeader = aprData[1];
+            // 🔥 ✅ REPORT TIME (Row 2)
+            let reportRow = aprData[1][0] || "";
+            let reportTime = "";
 
+            if(reportRow.includes("to")){
+                reportTime = reportRow.split("to")[1].trim();
+            }
+
+            // 🔥 ✅ HEADER = ROW 3
+            let aprHeader = aprData[2];
+
+            // 🔥 REMOVE TOP 3 ROWS
+            aprData.splice(0,3);
+
+            // 🔥 COLUMN DETECT
             let empCol = findCol(aprHeader, "agentname");
             let nameCol = findCol(aprHeader, "agentfullname");
             let loginCol = findCol(aprHeader, "totallogintime");
@@ -87,9 +99,6 @@ function processFiles(){
 
             let meetCol = findCol(aprHeader, "meeting");
             let sysCol = findCol(aprHeader, "systemdown");
-
-            // 🔥 REMOVE HEADER
-            aprData.splice(0,2);
 
             let map = {};
             let ivr = 0;
@@ -157,7 +166,6 @@ function processFiles(){
                 }
             });
 
-            // 🔥 FINAL BUILD
             let final = Object.values(map).map(r=>({
 
                 emp: r.emp,
@@ -172,16 +180,17 @@ function processFiles(){
                 ob: r.total - r.ib
             }));
 
-            // 🔥 SAVE
             sessionStorage.setItem("data", JSON.stringify({
-                final: final,
-                ivr: ivr
+                final,
+                ivr,
+                reportTime
             }));
 
             if(firebaseDB){
                 firebaseDB.ref("dashboard").set({
                     final,
-                    ivr
+                    ivr,
+                    reportTime
                 });
             }
 
@@ -192,112 +201,4 @@ function processFiles(){
     }
 
     reader1.readAsBinaryString(aprFile);
-}
-
-
-// 🔥 LOAD DASHBOARD
-function loadDashboard(final, ivr){
-
-    const tb = document.querySelector("#table tbody");
-    if(!tb) return;
-
-    tb.innerHTML="";
-
-    let max = Math.max(...final.map(x=>x.total));
-
-    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
-
-    final.forEach(r=>{
-
-        totalCalls+=r.total;
-        totalIB+=r.ib;
-        totalOB+=r.ob;
-        totalTalk+=(r.aht*r.total);
-
-        let callCls=getGradientClass(r.total,max);
-        let netCls=r.net>=28800?"netGreen":"";
-        let breakCls=r.breakTime>2100?"breakRed":"";
-        let meetingCls=r.meeting>2100?"meetingRed":"";
-
-        let tr=document.createElement("tr");
-
-        tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
-        <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
-        <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
-        <td>${r.ib}</td>
-        <td>${r.ob}</td>
-        `;
-
-        tb.appendChild(tr);
-    });
-
-    document.getElementById("ivr").innerText=ivr;
-    document.getElementById("total").innerText=totalCalls;
-    document.getElementById("ib").innerText=totalIB;
-    document.getElementById("ob").innerText=totalOB;
-
-    let overallAHT=totalCalls?totalTalk/totalCalls:0;
-    document.getElementById("aht").innerText=toTime(overallAHT);
-}
-
-
-// 🔥 AUTO LOAD + LIVE
-document.addEventListener("DOMContentLoaded", ()=>{
-
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    if(d.final){
-        loadDashboard(d.final, d.ivr);
-    }
-
-    if(window.location.pathname.includes("live") && firebaseDB){
-
-        firebaseDB.ref("dashboard").on("value",(snap)=>{
-            let data = snap.val();
-            if(data && data.final){
-                loadDashboard(data.final, data.ivr);
-            }
-        });
-    }
-});
-
-
-// 🔍 SEARCH
-function searchAgent(){
-    let v=document.getElementById("search").value.toLowerCase();
-    document.querySelectorAll("#table tbody tr").forEach(r=>{
-        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
-    });
-}
-
-
-// 📸 PNG
-function copyImage(){
-    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
-        c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
-            alert("Copied!");
-        });
-    });
-}
-
-
-// 📊 EXCEL
-function exportExcel(){
-    let table = document.getElementById("table");
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-}
-
-
-// 🔄 RESET
-function resetApp(){
-    sessionStorage.clear();
-    location="index.html";
 }

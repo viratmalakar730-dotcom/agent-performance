@@ -10,7 +10,7 @@ if (typeof firebase !== "undefined" && !firebase.apps.length) {
     firebase.initializeApp(firebaseConfig);
 }
 
-const firebaseDB = firebase.database();
+const db = firebase.database();
 
 
 // 🔥 TIME FUNCTIONS
@@ -62,9 +62,11 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
+            // 🔥 REPORT TIME
             let reportRow = aprData[1][0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
+            // 🔥 REMOVE TOP ROWS
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
@@ -80,13 +82,13 @@ function processFiles(){
                 let login = toSeconds(r[3]);
 
                 let breakTime =
-                    toSeconds(r[19]) +
-                    toSeconds(r[22]) +
-                    toSeconds(r[24]);
+                    toSeconds(r[19]) + // LUNCH
+                    toSeconds(r[22]) + // SHORT
+                    toSeconds(r[24]);  // TEA
 
                 let meeting =
-                    toSeconds(r[20]) +
-                    toSeconds(r[23]);
+                    toSeconds(r[20]) + // MEETING
+                    toSeconds(r[23]);  // SYSTEMDOWN
 
                 map[emp] = {
                     emp: String(emp),
@@ -113,7 +115,6 @@ function processFiles(){
                 if(!map[emp]) return;
 
                 if(dispo === "callmatured" || dispo === "transfer"){
-
                     map[emp].total++;
 
                     if(skill === "INBOUND"){
@@ -123,7 +124,6 @@ function processFiles(){
             });
 
             let final = Object.values(map).map(r=>({
-
                 emp: r.emp,
                 name: r.name,
                 login: r.login,
@@ -143,8 +143,8 @@ function processFiles(){
                 reportTime
             }));
 
-            // 🔥 FIREBASE PUSH
-            firebaseDB.ref("dashboard").set({
+            // 🔥 PUSH TO FIREBASE
+            db.ref("dashboard").set({
                 final,
                 ivr,
                 reportTime
@@ -160,10 +160,10 @@ function processFiles(){
 }
 
 
-// 🔥 LOAD DASHBOARD
+// 🔥 LOAD TABLE
 function loadDashboard(final, ivr){
 
-    const tb = document.querySelector("#table tbody");
+    let tb = document.querySelector("#table tbody");
     if(!tb) return;
 
     tb.innerHTML="";
@@ -179,22 +179,17 @@ function loadDashboard(final, ivr){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
-        let callCls=getGradientClass(r.total,max);
-        let netCls=r.net>=28800?"netGreen":"";
-        let breakCls=r.breakTime>2100?"breakRed":"";
-        let meetingCls=r.meeting>2100?"meetingRed":"";
-
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
+        <td class="netGreen">${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
+        <td>${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
+        <td class="${getGradientClass(r.total,max)}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -207,12 +202,12 @@ function loadDashboard(final, ivr){
     document.getElementById("ib").innerText=totalIB;
     document.getElementById("ob").innerText=totalOB;
 
-    let overallAHT=totalCalls?totalTalk/totalCalls:0;
-    document.getElementById("aht").innerText=toTime(overallAHT);
+    let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
+    document.getElementById("aht").innerText = toTime(overallAHT);
 }
 
 
-// 🔥 AUTO LOAD + LIVE FIX
+// 🔥 LOAD + LIVE
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -221,10 +216,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
         loadDashboard(d.final, d.ivr);
     }
 
-    // 🔥 LIVE FIX (IMPORTANT)
-    if(window.location.pathname.includes("live") || window.location.pathname.includes("live.html")){
-
-        firebaseDB.ref("dashboard").on("value",(snap)=>{
+    // 🔥 LIVE DATA
+    if(window.location.pathname.includes("live")){
+        db.ref("dashboard").on("value",(snap)=>{
 
             let data = snap.val();
 
@@ -241,17 +235,6 @@ function searchAgent(){
     let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
         r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
-    });
-}
-
-
-// 📸 PNG
-function copyImage(){
-    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
-        c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
-            alert("Copied!");
-        });
     });
 }
 

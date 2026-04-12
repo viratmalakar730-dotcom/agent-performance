@@ -2,26 +2,38 @@
 <html>
 <head>
     <title>Live Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<h2 style="text-align:center;">Live Dashboard</h2>
+<h2 style="text-align:center;">Live Agent Dashboard</h2>
 
-<table border="1" width="100%" id="table">
+<div id="reportTime"></div>
+
+<table id="table">
 <thead>
 <tr>
 <th>Emp</th>
 <th>Name</th>
-<th>Total Calls</th>
+<th>Login</th>
+<th>Net</th>
+<th>Break</th>
+<th>Meeting</th>
+<th>AHT</th>
+<th>Total</th>
+<th>IB</th>
+<th>OB</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<script type="module">
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-app.js";
-import { getFirestore, doc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore.js";
+<script>
 
 const firebaseConfig = {
     apiKey: "YOUR_KEY",
@@ -29,20 +41,45 @@ const firebaseConfig = {
     projectId: "YOUR_PROJECT_ID",
 };
 
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-onSnapshot(doc(db,"dashboard","latest"), (snap)=>{
+function toTime(sec){
+    sec = Math.max(0, Math.round(sec));
+    let h = Math.floor(sec/3600);
+    let m = Math.floor((sec%3600)/60);
+    let s = sec%60;
+    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
+}
 
-    if(!snap.exists()) return;
+db.collection("dashboard").doc("latest")
+.onSnapshot(doc=>{
 
-    let d = snap.data();
+    if(!doc.exists) return;
+
+    let d = doc.data();
+
+    document.getElementById("reportTime").innerText = d.reportTime || "";
+
     let tb = document.querySelector("#table tbody");
     tb.innerHTML = "";
 
     d.final.forEach(r=>{
         let tr = document.createElement("tr");
-        tr.innerHTML = `<td>${r.emp}</td><td>${r.name}</td><td>${r.total}</td>`;
+
+        tr.innerHTML = `
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
+        <td>${toTime(r.login)}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
+        <td>${toTime(r.meeting)}</td>
+        <td>${toTime(r.aht)}</td>
+        <td>${r.total}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
+        `;
+
         tb.appendChild(tr);
     });
 

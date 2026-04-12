@@ -14,10 +14,14 @@ h2 {
     font-size: 32px;
     color: gold;
     margin-top: 20px;
-    text-shadow: 0 0 10px rgba(255,215,0,0.6);
 }
 
-/* 🔥 SUMMARY CARDS */
+/* 🔥 REPORT TIME */
+#reportTime {
+    margin-bottom: 10px;
+}
+
+/* 🔥 CARDS */
 .cards {
     display: flex;
     justify-content: center;
@@ -30,49 +34,40 @@ h2 {
     background: linear-gradient(145deg, #ffd700, #ffcc00);
     color: black;
     padding: 15px 20px;
-    border-radius: 14px;
-    font-weight: bold;
+    border-radius: 12px;
     min-width: 160px;
 
     box-shadow:
-        inset 3px 3px 8px rgba(255,255,255,0.6),
-        inset -4px -4px 8px rgba(0,0,0,0.4),
-        3px 3px 10px rgba(0,0,0,0.6);
-}
-
-.card span {
-    display: block;
-    font-size: 22px;
-    margin-top: 5px;
+        4px 4px 10px rgba(0,0,0,0.6),
+        inset 2px 2px 6px rgba(255,255,255,0.6),
+        inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
 /* 🔍 SEARCH */
 #search {
     padding: 10px;
     margin: 10px;
-    width: 260px;
-    border-radius: 10px;
+    width: 250px;
+    border-radius: 8px;
     border: none;
-    outline: none;
 }
 
 /* 🔘 BUTTON */
 button {
-    padding: 10px 18px;
+    padding: 10px 15px;
     margin: 10px;
     background: linear-gradient(145deg, gold, #ffcc00);
     border: none;
-    border-radius: 10px;
-    font-weight: bold;
+    border-radius: 8px;
     cursor: pointer;
 
     box-shadow:
         3px 3px 8px rgba(0,0,0,0.6),
-        inset 1px 1px 4px rgba(255,255,255,0.5);
+        inset 1px 1px 3px rgba(255,255,255,0.5);
 }
 
 button:hover {
-    transform: scale(1.07);
+    transform: scale(1.05);
 }
 
 /* 📊 TABLE */
@@ -83,18 +78,15 @@ table {
     border-collapse: collapse;
     background: white;
     color: black;
-    border-radius: 12px;
+    border-radius: 10px;
     overflow: hidden;
-
-    box-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
 
 /* 🔵 HEADER */
 th {
-    background: linear-gradient(145deg, #0b3d91, #001f4d);
+    background: #0b3d91;
     color: white;
-    padding: 14px;
-    text-transform: uppercase;
+    padding: 12px;
     font-weight: bold;
 }
 
@@ -103,7 +95,6 @@ td {
     padding: 10px;
     border: 1px solid black;
     text-align: center;
-    font-weight: bold;
 }
 
 /* ✨ EMPLOYEE STYLE */
@@ -113,43 +104,48 @@ td:nth-child(2) {
     font-weight: bold;
 }
 
-/* 🟢 NET LOGIN */
+/* ============================= */
+/* 🔥 3D CONDITIONAL FORMATTING */
+/* ============================= */
+
+/* 🟢 NET LOGIN (GOOD) */
 .netGreen {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
     box-shadow:
+        4px 4px 10px rgba(0,0,0,0.6),
         inset 2px 2px 6px rgba(255,255,255,0.4),
-        inset -3px -3px 6px rgba(0,0,0,0.4);
+        inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
-/* 🔴 BREAK */
-.breakRed {
-    background: linear-gradient(145deg, #ff1744, #ff5252);
-    color: white;
-}
-
-/* 🔴 MEETING */
-.meetingRed {
+/* 🔴 UNIVERSAL RED (BREAK / MEETING / LOW CALL) */
+.red3D {
     background: linear-gradient(145deg, #d50000, #ff1744);
     color: white;
-}
-
-/* 🟢 HIGH CALL */
-.green {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
+    box-shadow:
+        4px 4px 10px rgba(0,0,0,0.7),
+        inset 2px 2px 6px rgba(255,255,255,0.3),
+        inset -3px -3px 6px rgba(0,0,0,0.6);
 }
 
 /* 🟡 MID CALL */
 .yellow {
     background: linear-gradient(145deg, #ffd600, #ffea00);
     color: black;
+    box-shadow:
+        4px 4px 10px rgba(0,0,0,0.5),
+        inset 2px 2px 6px rgba(255,255,255,0.5),
+        inset -3px -3px 6px rgba(0,0,0,0.3);
 }
 
-/* 🔴 LOW CALL */
-.red {
-    background: linear-gradient(145deg, #ff1744, #ff5252);
+/* 🟢 HIGH CALL */
+.green {
+    background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
+    box-shadow:
+        4px 4px 10px rgba(0,0,0,0.6),
+        inset 2px 2px 6px rgba(255,255,255,0.4),
+        inset -3px -3px 6px rgba(0,0,0,0.4);
 }
 
 /* 📂 UPLOAD PAGE */
@@ -162,43 +158,27 @@ td:nth-child(2) {
 
 .upload-box {
     background: linear-gradient(145deg, #0b3d91, #001f4d);
-    padding: 45px;
-    border-radius: 18px;
+    padding: 40px;
+    border-radius: 15px;
 
     box-shadow:
-        inset 3px 3px 10px rgba(255,255,255,0.2),
-        inset -4px -4px 10px rgba(0,0,0,0.7),
-        0 0 20px rgba(0,0,0,0.8);
+        4px 4px 10px rgba(0,0,0,0.7),
+        inset 2px 2px 6px rgba(255,255,255,0.2),
+        inset -3px -3px 6px rgba(0,0,0,0.6);
 }
 
 /* LABEL */
 .label {
     color: gold;
-    font-weight: bold;
 }
 
 /* LOADING */
 .loading {
     display: none;
     color: gold;
-    margin-top: 10px;
 }
 
-/* 🎯 HOVER ROW */
+/* HOVER */
 tr:hover {
     background: #ffe066;
-    transition: 0.2s;
-}
-
-/* 📦 CAPTURE AREA */
-#captureArea {
-    padding: 15px;
-    border-radius: 10px;
-}
-
-/* ❤️ FOOTER */
-.footer {
-    margin-top: 20px;
-    font-weight: bold;
-    color: gold;
 }

@@ -1,4 +1,6 @@
-// 🔥 FIREBASE INIT
+// ===============================
+// 🔥 FIREBASE CONFIG
+// ===============================
 const firebaseConfig = {
   apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
   authDomain: "agent-performance-live.firebaseapp.com",
@@ -13,7 +15,9 @@ if (typeof firebase !== "undefined" && !firebase.apps.length) {
 const db = firebase.database();
 
 
+// ===============================
 // 🔥 TIME FUNCTIONS
+// ===============================
 function toSeconds(t){
     if(!t) return 0;
     let a = t.toString().split(":").map(Number);
@@ -36,7 +40,9 @@ function getGradientClass(val,max){
 }
 
 
-// 🔥 PROCESS FILES
+// ===============================
+// 🔥 PROCESS FILES (MAIN ENGINE)
+// ===============================
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -62,18 +68,24 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
+            // ===============================
             // 🔥 REPORT TIME
+            // ===============================
             let reportRow = aprData[1][0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 REMOVE TOP ROWS
+            // ===============================
+            // 🔥 REMOVE HEADER ROWS
+            // ===============================
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP
+            // ===============================
+            // 🔥 APR DATA PROCESS
+            // ===============================
             aprData.forEach(r=>{
 
                 let emp = r[1];
@@ -103,7 +115,9 @@ function processFiles(){
                 };
             });
 
-            // 🔥 CDR LOOP
+            // ===============================
+            // 🔥 CDR DATA PROCESS
+            // ===============================
             cdrData.forEach(r=>{
 
                 let emp = r[1];
@@ -123,6 +137,9 @@ function processFiles(){
                 }
             });
 
+            // ===============================
+            // 🔥 FINAL ARRAY
+            // ===============================
             let final = Object.values(map).map(r=>({
                 emp: r.emp,
                 name: r.name,
@@ -136,31 +153,52 @@ function processFiles(){
                 ob: r.total - r.ib
             }));
 
+            console.log("FINAL:", final);
+
+            // ❌ STOP IF EMPTY
+            if(!final || final.length === 0){
+                alert("No data generated ❌");
+                return;
+            }
+
+            // ===============================
             // 🔥 SAVE LOCAL
+            // ===============================
             sessionStorage.setItem("data", JSON.stringify({
                 final,
                 ivr,
                 reportTime
             }));
 
-            // 🔥 PUSH TO FIREBASE
+            // ===============================
+            // 🔥 FIREBASE PUSH (FIXED)
+            // ===============================
             db.ref("dashboard").set({
-                final,
-                ivr,
-                reportTime
+                final: final,
+                ivr: ivr,
+                reportTime: reportTime
+            })
+            .then(()=>{
+                console.log("🔥 Firebase SUCCESS");
+                window.location = "dashboard.html";
+            })
+            .catch(err=>{
+                console.error("Firebase Error:", err);
+                alert("Firebase push failed ❌");
             });
 
-            window.location = "dashboard.html";
-        }
+        };
 
         reader2.readAsBinaryString(cdrFile);
-    }
+    };
 
     reader1.readAsBinaryString(aprFile);
 }
 
 
-// 🔥 LOAD DASHBOARD (COLOR FIXED)
+// ===============================
+// 🔥 LOAD DASHBOARD (UI)
+// ===============================
 function loadDashboard(final, ivr){
 
     let tb = document.querySelector("#table tbody");
@@ -179,7 +217,6 @@ function loadDashboard(final, ivr){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
-        // 🔥 COLOR LOGIC
         let netCls = r.net >= 28800 ? "netGreen" : "";
         let breakCls = r.breakTime > 2100 ? "breakRed" : "";
         let meetingCls = r.meeting > 2100 ? "meetingRed" : "";
@@ -213,17 +250,18 @@ function loadDashboard(final, ivr){
 }
 
 
-// 🔥 LOAD + LIVE (FIXED)
+// ===============================
+// 🔥 AUTO LOAD + LIVE
+// ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
-    // 👉 LOCAL DATA
     if(d.final){
         loadDashboard(d.final, d.ivr);
     }
 
-    // 👉 LIVE DATA ALWAYS
+    // 🔥 LIVE SYNC
     db.ref("dashboard").on("value",(snap)=>{
 
         let data = snap.val();
@@ -237,7 +275,9 @@ document.addEventListener("DOMContentLoaded", ()=>{
 });
 
 
+// ===============================
 // 🔍 SEARCH
+// ===============================
 function searchAgent(){
     let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
@@ -246,7 +286,9 @@ function searchAgent(){
 }
 
 
+// ===============================
 // 🔄 RESET
+// ===============================
 function resetApp(){
     sessionStorage.clear();
     location="index.html";

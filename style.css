@@ -14,14 +14,19 @@ h2 {
     font-size: 32px;
     color: gold;
     margin-top: 20px;
+    text-shadow: 0 0 10px gold;
 }
 
 /* 🔥 REPORT TIME */
 #reportTime {
+    color: #00e5ff;
+    font-size: 16px;
+    margin-top: 5px;
     margin-bottom: 10px;
+    text-shadow: 0 0 10px #00e5ff;
 }
 
-/* 🔥 CARDS */
+/* 🔥 SUMMARY CARDS */
 .cards {
     display: flex;
     justify-content: center;
@@ -38,18 +43,25 @@ h2 {
     min-width: 160px;
 
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.6),
+        5px 5px 15px rgba(0,0,0,0.7),
         inset 2px 2px 6px rgba(255,255,255,0.6),
         inset -3px -3px 6px rgba(0,0,0,0.5);
+}
+
+.card span {
+    display: block;
+    font-size: 20px;
+    margin-top: 5px;
 }
 
 /* 🔍 SEARCH */
 #search {
     padding: 10px;
     margin: 10px;
-    width: 250px;
+    width: 260px;
     border-radius: 8px;
     border: none;
+    outline: none;
 }
 
 /* 🔘 BUTTON */
@@ -60,9 +72,10 @@ button {
     border: none;
     border-radius: 8px;
     cursor: pointer;
+    font-weight: bold;
 
     box-shadow:
-        3px 3px 8px rgba(0,0,0,0.6),
+        4px 4px 10px rgba(0,0,0,0.7),
         inset 1px 1px 3px rgba(255,255,255,0.5);
 }
 
@@ -80,6 +93,8 @@ table {
     color: black;
     border-radius: 10px;
     overflow: hidden;
+
+    box-shadow: 0 0 15px rgba(0,0,0,0.6);
 }
 
 /* 🔵 HEADER */
@@ -87,6 +102,7 @@ th {
     background: #0b3d91;
     color: white;
     padding: 12px;
+    text-transform: uppercase;
     font-weight: bold;
 }
 
@@ -95,6 +111,7 @@ td {
     padding: 10px;
     border: 1px solid black;
     text-align: center;
+    font-weight: bold;
 }
 
 /* ✨ EMPLOYEE STYLE */
@@ -113,7 +130,7 @@ td:nth-child(2) {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.6),
+        5px 5px 12px rgba(0,0,0,0.7),
         inset 2px 2px 6px rgba(255,255,255,0.4),
         inset -3px -3px 6px rgba(0,0,0,0.5);
 }
@@ -123,7 +140,7 @@ td:nth-child(2) {
     background: linear-gradient(145deg, #d50000, #ff1744);
     color: white;
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.7),
+        5px 5px 12px rgba(0,0,0,0.8),
         inset 2px 2px 6px rgba(255,255,255,0.3),
         inset -3px -3px 6px rgba(0,0,0,0.6);
 }
@@ -133,7 +150,7 @@ td:nth-child(2) {
     background: linear-gradient(145deg, #ffd600, #ffea00);
     color: black;
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.5),
+        5px 5px 10px rgba(0,0,0,0.6),
         inset 2px 2px 6px rgba(255,255,255,0.5),
         inset -3px -3px 6px rgba(0,0,0,0.3);
 }
@@ -143,7 +160,7 @@ td:nth-child(2) {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.6),
+        5px 5px 12px rgba(0,0,0,0.7),
         inset 2px 2px 6px rgba(255,255,255,0.4),
         inset -3px -3px 6px rgba(0,0,0,0.4);
 }
@@ -162,7 +179,7 @@ td:nth-child(2) {
     border-radius: 15px;
 
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.7),
+        5px 5px 15px rgba(0,0,0,0.8),
         inset 2px 2px 6px rgba(255,255,255,0.2),
         inset -3px -3px 6px rgba(0,0,0,0.6);
 }
@@ -170,15 +187,18 @@ td:nth-child(2) {
 /* LABEL */
 .label {
     color: gold;
+    font-weight: bold;
 }
 
 /* LOADING */
 .loading {
     display: none;
     color: gold;
+    margin-top: 10px;
 }
 
-/* HOVER */
+/* HOVER EFFECT */
 tr:hover {
     background: #ffe066;
+    transition: 0.2s;
 }

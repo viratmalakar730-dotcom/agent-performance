@@ -9,51 +9,29 @@ text-align: center;
 font-weight: bold;
 }
 
-/* 🔥 TOP BANNER */
-.top-banner{
-display:flex;
-flex-direction:column;
-align-items:center;
-gap:12px;
-margin-top:20px;
-}
-
-/* 🔥 TITLE CARD (3D UPGRADE) */
-.title-card {
+/* 🔥 TITLE (STRONG 3D) */
+h2 {
 font-size: 32px;
 color: gold;
-padding: 15px 40px;
-border-radius: 14px;
-
-background: linear-gradient(145deg, #0b3d91, #001f4d);  
-
-box-shadow:  
-    8px 8px 20px rgba(0,0,0,0.9),  
-    inset 2px 2px 6px rgba(255,255,255,0.2),  
-    inset -4px -4px 8px rgba(0,0,0,0.7);  
+margin-top: 20px;
 
 text-shadow:  
     3px 3px 6px rgba(0,0,0,0.8),  
+    -1px -1px 2px rgba(255,255,255,0.3),  
     0 0 12px gold;
 
 }
 
-/* 🔥 REPORT TIME CARD */
-.time-card {
+/* 🔥 REPORT TIME (3D + GLOW) */
+#reportTime {
 color: #00e5ff;
 font-size: 16px;
-padding: 8px 20px;
-border-radius: 10px;
-
-background: linear-gradient(145deg, #001f4d, #020617);  
-
-box-shadow:  
-    6px 6px 16px rgba(0,0,0,0.9),  
-    inset 2px 2px 5px rgba(255,255,255,0.2),  
-    inset -3px -3px 6px rgba(0,0,0,0.7);  
+margin-top: 5px;
+margin-bottom: 10px;
 
 text-shadow:  
     2px 2px 5px rgba(0,0,0,0.8),  
+    -1px -1px 2px rgba(255,255,255,0.2),  
     0 0 10px #00e5ff;
 
 }
@@ -163,21 +141,11 @@ td:nth-child(2) {
 font-style: italic;
 }
 
-/* 🔥 ROW CLICK HIGHLIGHT */
-.rowActive {
-background: linear-gradient(145deg, #ffe066, #ffd700) !important;
-color: black;
-
-box-shadow:  
-    inset 2px 2px 5px rgba(255,255,255,0.6),  
-    inset -3px -3px 6px rgba(0,0,0,0.3);
-
-}
-
 /* ============================= /
 / 🔥 CONDITIONAL 3D /
 / ============================= */
 
+/* 🟢 NET LOGIN */
 .netGreen {
 background: linear-gradient(145deg, #00c853, #00e676);
 color: white;
@@ -189,6 +157,7 @@ box-shadow:
 
 }
 
+/* 🔴 UNIVERSAL RED */
 .red3D {
 background: linear-gradient(145deg, #d50000, #ff1744);
 color: white;
@@ -200,6 +169,7 @@ box-shadow:
 
 }
 
+/* 🟡 MID */
 .yellow {
 background: linear-gradient(145deg, #ffd600, #ffea00);
 
@@ -209,6 +179,7 @@ box-shadow:
 
 }
 
+/* 🟢 HIGH */
 .green {
 background: linear-gradient(145deg, #00c853, #00e676);
 color: white;

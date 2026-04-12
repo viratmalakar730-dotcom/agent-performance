@@ -62,11 +62,9 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            // 🔥 REPORT TIME
             let reportRow = aprData[1][0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 REMOVE HEADER
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
@@ -124,7 +122,6 @@ function processFiles(){
                 }
             });
 
-            // 🔥 FINAL BUILD
             let final = Object.values(map).map(r=>({
 
                 emp: r.emp,
@@ -139,7 +136,7 @@ function processFiles(){
                 ob: r.total - r.ib
             }));
 
-            // 🔥 LOCAL SAVE
+            // 🔥 SAVE LOCAL
             sessionStorage.setItem("data", JSON.stringify({
                 final,
                 ivr,
@@ -150,8 +147,7 @@ function processFiles(){
             firebaseDB.ref("dashboard").set({
                 final,
                 ivr,
-                reportTime,
-                updatedAt: new Date().toISOString()
+                reportTime
             });
 
             window.location = "dashboard.html";
@@ -216,7 +212,7 @@ function loadDashboard(final, ivr){
 }
 
 
-// 🔥 AUTO LOAD + LIVE
+// 🔥 AUTO LOAD + LIVE FIX
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
@@ -225,9 +221,13 @@ document.addEventListener("DOMContentLoaded", ()=>{
         loadDashboard(d.final, d.ivr);
     }
 
-    if(window.location.pathname.includes("live")){
+    // 🔥 LIVE FIX (IMPORTANT)
+    if(window.location.pathname.includes("live") || window.location.pathname.includes("live.html")){
+
         firebaseDB.ref("dashboard").on("value",(snap)=>{
+
             let data = snap.val();
+
             if(data && data.final){
                 loadDashboard(data.final, data.ivr);
             }

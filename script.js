@@ -1,4 +1,4 @@
-// 🔥 FIREBASE INIT (SAFE)
+// 🔥 FIREBASE INIT
 const firebaseConfig = {
   apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
   authDomain: "agent-performance-live.firebaseapp.com",
@@ -23,13 +23,6 @@ function toTime(sec){
     let m = Math.floor((sec%3600)/60);
     let s = sec%60;
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
-}
-
-function getGradientClass(val,max){
-    let p = val/max;
-    if(p >= 0.75) return "green";
-    if(p >= 0.45) return "yellow";
-    return "red";
 }
 
 
@@ -60,13 +53,11 @@ function processFiles(){
 
             let final = [];
 
-            // 🔥 MAIN LOOP (FIXED)
             aprData.forEach(a=>{
 
                 let emp = a["Employee ID"];
                 let name = a["Agent Full Name"];
 
-                // ❌ skip invalid rows
                 if(!emp || emp === "Employee ID") return;
 
                 let login = toSeconds(a["Total Login Time"] || "00:00:00");
@@ -86,41 +77,24 @@ function processFiles(){
                 let aht = total ? talk/total : 0;
 
                 final.push({
-                    emp: String(emp),  // 🔥 FIX
+                    emp: String(emp),
                     name: String(name),
-                    login: login,
-                    net: net,
-                    breakTime: breakTime,
-                    meeting: meeting,
-                    aht: aht,
-                    total: total,
-                    ib: ib,
-                    ob: ob
+                    login, net, breakTime, meeting, aht, total, ib, ob
                 });
             });
 
-            // 🔥 FINAL CLEAN
             final = final.filter(x => x.emp && x.name);
 
             let ivr = cdrData.filter(x=>x["Call Type"]=="Inbound").length;
 
-            // 🔥 LOCAL SAVE (OLD WORKING)
-            sessionStorage.setItem("data", JSON.stringify({
+            sessionStorage.setItem("data", JSON.stringify({final,ivr}));
+
+            firebaseDB.ref("dashboard").set({
                 final: final,
                 ivr: ivr
-            }));
+            });
 
-            // 🔥 FIREBASE SAVE (SAFE)
-            try{
-                firebaseDB.ref("dashboard").set({
-                    final: final,
-                    ivr: ivr
-                });
-            }catch(e){
-                console.log("Firebase error ignored:", e);
-            }
-
-            window.location = "dashboard.html";
+            window.location="dashboard.html";
         }
 
         reader2.readAsBinaryString(cdr);
@@ -140,10 +114,6 @@ function loadDashboard(final, ivr){
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
-    final.sort((a,b)=>b.total - a.total);
-
-    let max = Math.max(...final.map(x=>x.total));
-
     final.forEach(r=>{
 
         totalCalls+=r.total;
@@ -151,23 +121,17 @@ function loadDashboard(final, ivr){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
-        let callCls=getGradientClass(r.total,max);
-
-        let netCls=r.net>=28800?"netGreen":"";
-        let breakCls=r.breakTime>2100?"breakRed":"";
-        let meetingCls=r.meeting>2100?"meetingRed":"";
-
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
+        <td>${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
+        <td>${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -185,16 +149,16 @@ function loadDashboard(final, ivr){
 }
 
 
-// 🔥 AUTO LOAD (DASHBOARD)
+// 🔥 AUTO LOAD
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
     if(d.final){
-        loadDashboard(d.final, d.ivr);
+        loadDashboard(d.final,d.ivr);
     }
 
-    // 🔥 LIVE PAGE AUTO LOAD
+    // 🔥 LIVE
     if(window.location.pathname.includes("live")){
         firebaseDB.ref("dashboard").on("value",(snap)=>{
             let d=snap.val();
@@ -202,38 +166,3 @@ document.addEventListener("DOMContentLoaded", ()=>{
         });
     }
 });
-
-
-// 🔍 SEARCH
-function searchAgent(){
-    let v=document.getElementById("search").value.toLowerCase();
-    document.querySelectorAll("#table tbody tr").forEach(r=>{
-        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
-    });
-}
-
-
-// 📸 PNG
-function copyImage(){
-    html2canvas(document.getElementById("table")).then(c=>{
-        c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
-            alert("Copied!");
-        });
-    });
-}
-
-
-// 📊 EXCEL
-function exportExcel(){
-    let table = document.getElementById("table");
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-}
-
-
-// 🔄 RESET
-function resetApp(){
-    sessionStorage.clear();
-    location="index.html";
-}

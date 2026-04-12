@@ -1,3 +1,18 @@
+// 🔥 FIREBASE INIT
+const firebaseConfig = {
+  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+  authDomain: "agent-performance-live.firebaseapp.com",
+  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+  projectId: "agent-performance-live"
+};
+
+if (typeof firebase !== "undefined" && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const firebaseDB = firebase.database();
+
+
 // 🔥 TIME FUNCTIONS
 function toSeconds(t){
     if(!t) return 0;
@@ -21,7 +36,7 @@ function getGradientClass(val,max){
 }
 
 
-// 🔥 PROCESS FILES FINAL
+// 🔥 PROCESS FILES
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -51,7 +66,7 @@ function processFiles(){
             let reportRow = aprData[1][0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 REMOVE HEADER ROWS
+            // 🔥 REMOVE HEADER
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
@@ -67,13 +82,13 @@ function processFiles(){
                 let login = toSeconds(r[3]);
 
                 let breakTime =
-                    toSeconds(r[19]) +   // LUNCH
-                    toSeconds(r[22]) +   // SHORT
-                    toSeconds(r[24]);    // TEA
+                    toSeconds(r[19]) +
+                    toSeconds(r[22]) +
+                    toSeconds(r[24]);
 
                 let meeting =
-                    toSeconds(r[20]) +   // MEETING
-                    toSeconds(r[23]);    // SYSTEMDOWN ✅ FIXED
+                    toSeconds(r[20]) +
+                    toSeconds(r[23]);
 
                 map[emp] = {
                     emp: String(emp),
@@ -82,7 +97,7 @@ function processFiles(){
                     breakTime,
                     meeting,
                     net: login - breakTime,
-                    ahtRaw: toSeconds(r[5]),   // 🔥 APR TALK TIME
+                    ahtRaw: toSeconds(r[5]),
                     total: 0,
                     ib: 0
                 };
@@ -109,32 +124,35 @@ function processFiles(){
                 }
             });
 
-            // 🔥 FINAL BUILD (YOUR AHT LOGIC)
-            let final = Object.values(map).map(r=>{
+            // 🔥 FINAL BUILD
+            let final = Object.values(map).map(r=>({
 
-                let ob = r.total - r.ib;
+                emp: r.emp,
+                name: r.name,
+                login: r.login,
+                net: r.net,
+                breakTime: r.breakTime,
+                meeting: r.meeting,
+                aht: r.total ? r.ahtRaw / r.total : 0,
+                total: r.total,
+                ib: r.ib,
+                ob: r.total - r.ib
+            }));
 
-                let aht = r.total ? r.ahtRaw / r.total : 0;
-
-                return {
-                    emp: r.emp,
-                    name: r.name,
-                    login: r.login,
-                    net: r.net,
-                    breakTime: r.breakTime,
-                    meeting: r.meeting,
-                    aht: aht,
-                    total: r.total,
-                    ib: r.ib,
-                    ob: ob
-                };
-            });
-
+            // 🔥 LOCAL SAVE
             sessionStorage.setItem("data", JSON.stringify({
                 final,
                 ivr,
                 reportTime
             }));
+
+            // 🔥 FIREBASE PUSH
+            firebaseDB.ref("dashboard").set({
+                final,
+                ivr,
+                reportTime,
+                updatedAt: new Date().toISOString()
+            });
 
             window.location = "dashboard.html";
         }
@@ -198,13 +216,22 @@ function loadDashboard(final, ivr){
 }
 
 
-// 🔥 AUTO LOAD
+// 🔥 AUTO LOAD + LIVE
 document.addEventListener("DOMContentLoaded", ()=>{
 
     let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
     if(d.final){
         loadDashboard(d.final, d.ivr);
+    }
+
+    if(window.location.pathname.includes("live")){
+        firebaseDB.ref("dashboard").on("value",(snap)=>{
+            let data = snap.val();
+            if(data && data.final){
+                loadDashboard(data.final, data.ivr);
+            }
+        });
     }
 });
 
@@ -226,14 +253,6 @@ function copyImage(){
             alert("Copied!");
         });
     });
-}
-
-
-// 📊 EXCEL
-function exportExcel(){
-    let table = document.getElementById("table");
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Dashboard"});
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
 }
 
 

@@ -10,7 +10,7 @@ firebase.initializeApp(firebaseConfig);
 const firebaseDB = firebase.database();
 
 
-// 🔥 TIME FUNCTIONS
+// 🔥 TIME
 function toSeconds(t){
     if(!t) return 0;
     let a = t.toString().split(":").map(Number);
@@ -25,15 +25,8 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-function getGradientClass(val,max){
-    let p = val/max;
-    if(p >= 0.75) return "green";
-    if(p >= 0.45) return "yellow";
-    return "red";
-}
 
-
-// 🔥 PROCESS FILES (FINAL FIXED)
+// 🔥 PROCESS FILES
 function processFiles(){
 
     let aprFile = document.getElementById("aprFile").files[0];
@@ -52,21 +45,20 @@ function processFiles(){
     reader1.onload = function(e){
 
         let apr = XLSX.read(e.target.result, {type:'binary'});
-        let aprData = XLSX.utils.sheet_to_json(apr.Sheets[apr.SheetNames[0]], {header:1});
+        let aprData = XLSX.utils.sheet_to_json(apr.Sheets[0], {header:1});
 
         reader2.onload = function(e2){
 
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
-            let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
+            let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[0], {header:1});
 
-            // 🔥 REMOVE HEADERS
             aprData.splice(0,2);
             cdrData.splice(0,1);
 
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP
+            // 🔥 APR LOOP (FINAL CORRECT)
             aprData.forEach(r=>{
 
                 let emp = r[1];
@@ -74,44 +66,47 @@ function processFiles(){
 
                 let login = toSeconds(r[3]);
 
-                // ✅ BREAK = T + W + Y
-                let breakTime = toSeconds(r[19]) + toSeconds(r[23]) + toSeconds(r[21]);
+                // ✅ BREAK (FIXED INDEX)
+                let lunch = toSeconds(r[19]);
+                let tea = toSeconds(r[23]);
+                let shortB = toSeconds(r[25]);
 
-                // ✅ MEETING = U + X
-                let meeting = toSeconds(r[20]) + toSeconds(r[22]);
+                let breakTime = lunch + tea + shortB;
+
+                // ✅ MEETING (FIXED INDEX)
+                let meeting = toSeconds(r[20]);
+                let systemDown = toSeconds(r[24]);
+
+                let totalMeeting = meeting + systemDown;
 
                 map[emp] = {
                     emp: String(emp),
                     name: r[2] || "",
                     login: login,
                     breakTime: breakTime,
-                    meeting: meeting,
-                    net: login - breakTime, // ✅ FIXED
+                    meeting: totalMeeting,
+                    net: login - breakTime,
                     total: 0,
                     ib: 0,
-                    ob: 0,
-                    talk: 0 // 🔥 for AHT
+                    talk: 0
                 };
             });
 
-            // 🔥 CDR LOOP (FINAL FIX)
+            // 🔥 CDR LOOP
             cdrData.forEach(r=>{
 
                 let emp = r[1];
                 let skill = r[7];
-                let dispo = (r[25] || "").toString().toLowerCase();
-                let talk = toSeconds(r[11]); // 🔥 TALK TIME
+                let dispo = (r[25] || "").toLowerCase();
+                let talk = toSeconds(r[11]);
 
-                // ✅ IVR HIT
                 if(skill === "INBOUND") ivr++;
 
                 if(!map[emp]) return;
 
-                // ✅ VALID CALL
                 if(dispo === "callmatured" || dispo === "transfer"){
 
                     map[emp].total++;
-
                     map[emp].talk += talk;
 
                     if(skill === "INBOUND"){
@@ -120,11 +115,9 @@ function processFiles(){
                 }
             });
 
-            // 🔥 FINAL BUILD
             let final = Object.values(map).map(r=>{
 
                 let ob = r.total - r.ib;
-
                 let aht = r.total ? r.talk / r.total : 0;
 
                 return {
@@ -141,11 +134,7 @@ function processFiles(){
                 };
             });
 
-            // 🔥 SAVE
-            sessionStorage.setItem("data", JSON.stringify({
-                final: final,
-                ivr: ivr
-            }));
+            sessionStorage.setItem("data", JSON.stringify({final,ivr}));
 
             firebaseDB.ref("dashboard").set({
                 final: final,
@@ -160,75 +149,3 @@ function processFiles(){
 
     reader1.readAsBinaryString(aprFile);
 }
-
-
-// 🔥 LOAD DASHBOARD
-function loadDashboard(final, ivr){
-
-    const tb = document.querySelector("#table tbody");
-    if(!tb) return;
-
-    tb.innerHTML="";
-
-    final.sort((a,b)=>b.total - a.total);
-
-    let max = Math.max(...final.map(x=>x.total));
-
-    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
-
-    final.forEach(r=>{
-
-        totalCalls+=r.total;
-        totalIB+=r.ib;
-        totalOB+=r.ob;
-        totalTalk+=(r.aht*r.total);
-
-        let callCls=getGradientClass(r.total,max);
-        let netCls=r.net>=28800?"netGreen":"";
-        let breakCls=r.breakTime>2100?"breakRed":"";
-        let meetingCls=r.meeting>2100?"meetingRed":"";
-
-        let tr=document.createElement("tr");
-
-        tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
-        <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
-        <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
-        <td>${r.ib}</td>
-        <td>${r.ob}</td>
-        `;
-
-        tb.appendChild(tr);
-    });
-
-    document.getElementById("ivr").innerText=ivr;
-    document.getElementById("total").innerText=totalCalls;
-    document.getElementById("ib").innerText=totalIB;
-    document.getElementById("ob").innerText=totalOB;
-
-    let overallAHT=totalCalls?totalTalk/totalCalls:0;
-    document.getElementById("aht").innerText=toTime(overallAHT);
-}
-
-
-// 🔥 AUTO LOAD
-document.addEventListener("DOMContentLoaded", ()=>{
-
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    if(d.final){
-        loadDashboard(d.final, d.ivr);
-    }
-
-    if(window.location.pathname.includes("live")){
-        firebaseDB.ref("dashboard").on("value",(snap)=>{
-            let d=snap.val();
-            if(d) loadDashboard(d.final,d.ivr);
-        });
-    }
-});

@@ -2,40 +2,78 @@
 <html>
 <head>
     <title>Agent Performance Dashboard</title>
+
     <link rel="stylesheet" href="style.css">
+
+    <!-- 🔥 FIREBASE -->
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+
 </head>
+
 <body>
 
-<!-- 🔥 3D TITLE (NO CHANGE NEEDED) -->
-<h2>Live Agent Performance Dashboard</h2>
+<!-- 🔥 TITLE -->
+<h2>Agent Performance Dashboard</h2>
 
-<!-- 🔥 3D REPORT TIME (UPDATED) -->
-<div class="report-time">
-    Report Time: <span id="reportTime"></span>
-</div>
+<!-- 🔥 REPORT TIME -->
+<div id="reportTime"></div>
 
-<!-- 🔥 SUMMARY CARDS (UNCHANGED) -->
+<!-- 🔥 SUMMARY CARDS -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
-    <div class="card">Connected<br><span id="conn"></span></div>
-    <div class="card">Not Connected<br><span id="notconn"></span></div>
+    <div class="card">IB Mature<br><span id="ib"></span></div>
+    <div class="card">OB Mature<br><span id="ob"></span></div>
+    <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
-<!-- 🔥 TABLE (UNCHANGED) -->
-<table id="dataTable">
-    <thead>
-        <tr>
-            <th>Agent Name</th>
-            <th>Total Login</th>
-            <th>Talk Time</th>
-            <th>Break</th>
-            <th>Net Login</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
+<!-- 🔍 SEARCH -->
+<div>
+    <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
+</div>
+
+<!-- 🔘 BUTTONS -->
+<div style="margin:20px;">
+    <button onclick="copyImage()">📸 Copy PNG</button>
+    <button onclick="exportExcel()">📊 Export Excel</button>
+    <button onclick="resetApp()">🔄 Reset</button>
+</div>
+
+<!-- 📊 TABLE -->
+<table id="table">
+<thead>
+<tr>
+<th>Employee ID</th>
+<th>Agent Full Name</th>
+<th>Total Login</th>
+<th>Net Login</th>
+<th>Total Break</th>
+<th>Total Meeting</th>
+<th>AHT</th>
+<th>Total Mature Call</th>
+<th>IB Mature</th>
+<th>OB Mature</th>
+</tr>
+</thead>
+
+<tbody></tbody>
 </table>
 
+<!-- ❤️ FOOTER -->
+<div style="
+text-align:center;
+margin-top:20px;
+font-weight:bold;
+text-shadow: 0 0 6px gold;">
+    ❤️ Powered by Chandan Malakar ❤️
+</div>
+
+<!-- 🔥 LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<!-- 🔥 MAIN SCRIPT -->
 <script src="script.js"></script>
 
 </body>

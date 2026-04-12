@@ -32,11 +32,12 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
+// 🔥 FIXED GRADIENT (RED3D INCLUDED)
 function getGradientClass(val,max){
     let p = val/max;
     if(p >= 0.75) return "green";
     if(p >= 0.45) return "yellow";
-    return "red";
+    return "red3D"; // 🔥 FINAL FIX
 }
 
 
@@ -141,11 +142,6 @@ function processFiles(){
                 ob: r.total - r.ib
             }));
 
-            if(!final || final.length === 0){
-                alert("No data generated ❌");
-                return;
-            }
-
             sessionStorage.setItem("data", JSON.stringify({
                 final,
                 ivr,
@@ -189,9 +185,10 @@ function loadDashboard(final, ivr, reportTime){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
+        // 🔥 3D CONDITIONAL
         let netCls = r.net >= 28800 ? "netGreen" : "";
-        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
-        let meetingCls = r.meeting > 2100 ? "meetingRed" : "";
+        let breakCls = r.breakTime > 2100 ? "red3D" : "";
+        let meetingCls = r.meeting > 2100 ? "red3D" : "";
         let callCls = getGradientClass(r.total, max);
 
         let tr=document.createElement("tr");
@@ -220,7 +217,6 @@ function loadDashboard(final, ivr, reportTime){
     let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
     document.getElementById("aht").innerText = toTime(overallAHT);
 
-    // 🔥 REPORT TIME SHOW
     if(document.getElementById("reportTime")){
         document.getElementById("reportTime").innerText =
             "Report Time: " + (reportTime || "");

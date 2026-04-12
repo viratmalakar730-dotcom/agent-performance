@@ -9,21 +9,26 @@ body {
     font-weight: bold;
 }
 
-/* 🔥 HEADER */
+/* 🔥 HEADER TITLE (3D SOFT) */
 h2 {
     font-size: 32px;
     color: gold;
     margin-top: 20px;
-    text-shadow: 0 0 10px gold;
+    text-shadow: 
+        2px 2px 4px rgba(0,0,0,0.6),
+        0 0 10px gold;
 }
 
-/* 🔥 REPORT TIME */
+/* 🔥 REPORT TIME (GLOW + SOFT 3D) */
 #reportTime {
     color: #00e5ff;
     font-size: 16px;
     margin-top: 5px;
     margin-bottom: 10px;
-    text-shadow: 0 0 10px #00e5ff;
+
+    text-shadow: 
+        1px 1px 3px rgba(0,0,0,0.6),
+        0 0 8px #00e5ff;
 }
 
 /* 🔥 SUMMARY CARDS */
@@ -49,9 +54,7 @@ h2 {
 }
 
 .card span {
-    display: block;
     font-size: 20px;
-    margin-top: 5px;
 }
 
 /* 🔍 SEARCH */
@@ -61,7 +64,6 @@ h2 {
     width: 260px;
     border-radius: 8px;
     border: none;
-    outline: none;
 }
 
 /* 🔘 BUTTON */
@@ -72,10 +74,9 @@ button {
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    font-weight: bold;
 
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.7),
+        3px 3px 8px rgba(0,0,0,0.6),
         inset 1px 1px 3px rgba(255,255,255,0.5);
 }
 
@@ -94,75 +95,82 @@ table {
     border-radius: 10px;
     overflow: hidden;
 
-    box-shadow: 0 0 15px rgba(0,0,0,0.6);
+    box-shadow: 0 0 12px rgba(0,0,0,0.6);
 }
 
-/* 🔵 HEADER */
+/* 🔵 HEADER (3D PREMIUM) */
 th {
-    background: #0b3d91;
+    background: linear-gradient(145deg, #0b3d91, #082c6c);
     color: white;
     padding: 12px;
-    text-transform: uppercase;
     font-weight: bold;
+
+    box-shadow:
+        inset 2px 2px 5px rgba(255,255,255,0.2),
+        inset -3px -3px 6px rgba(0,0,0,0.6);
 }
 
-/* 📌 CELLS */
+/* 📌 CELLS (SOFT 3D – NOT OVER) */
 td {
     padding: 10px;
-    border: 1px solid black;
+    border: 1px solid #ccc;
     text-align: center;
     font-weight: bold;
+
+    box-shadow:
+        inset 1px 1px 2px rgba(255,255,255,0.6),
+        inset -2px -2px 3px rgba(0,0,0,0.2);
 }
 
 /* ✨ EMPLOYEE STYLE */
 td:nth-child(1),
 td:nth-child(2) {
     font-style: italic;
-    font-weight: bold;
 }
 
 /* ============================= */
-/* 🔥 3D CONDITIONAL FORMATTING */
+/* 🔥 CONDITIONAL 3D */
 /* ============================= */
 
-/* 🟢 NET LOGIN (GOOD) */
+/* 🟢 NET LOGIN */
 .netGreen {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
+
     box-shadow:
-        5px 5px 12px rgba(0,0,0,0.7),
-        inset 2px 2px 6px rgba(255,255,255,0.4),
+        4px 4px 10px rgba(0,0,0,0.7),
+        inset 2px 2px 5px rgba(255,255,255,0.4),
         inset -3px -3px 6px rgba(0,0,0,0.5);
 }
 
-/* 🔴 UNIVERSAL RED (BREAK / MEETING / LOW CALL) */
+/* 🔴 UNIVERSAL RED */
 .red3D {
     background: linear-gradient(145deg, #d50000, #ff1744);
     color: white;
+
     box-shadow:
-        5px 5px 12px rgba(0,0,0,0.8),
-        inset 2px 2px 6px rgba(255,255,255,0.3),
+        4px 4px 10px rgba(0,0,0,0.8),
+        inset 2px 2px 5px rgba(255,255,255,0.3),
         inset -3px -3px 6px rgba(0,0,0,0.6);
 }
 
-/* 🟡 MID CALL */
+/* 🟡 MID */
 .yellow {
     background: linear-gradient(145deg, #ffd600, #ffea00);
-    color: black;
+
     box-shadow:
-        5px 5px 10px rgba(0,0,0,0.6),
-        inset 2px 2px 6px rgba(255,255,255,0.5),
-        inset -3px -3px 6px rgba(0,0,0,0.3);
+        3px 3px 8px rgba(0,0,0,0.6),
+        inset 2px 2px 4px rgba(255,255,255,0.5);
 }
 
-/* 🟢 HIGH CALL */
+/* 🟢 HIGH */
 .green {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
+
     box-shadow:
-        5px 5px 12px rgba(0,0,0,0.7),
-        inset 2px 2px 6px rgba(255,255,255,0.4),
-        inset -3px -3px 6px rgba(0,0,0,0.4);
+        3px 3px 8px rgba(0,0,0,0.6),
+        inset 2px 2px 4px rgba(255,255,255,0.4);
 }
 
 /* 📂 UPLOAD PAGE */
@@ -187,18 +195,15 @@ td:nth-child(2) {
 /* LABEL */
 .label {
     color: gold;
-    font-weight: bold;
 }
 
 /* LOADING */
 .loading {
     display: none;
     color: gold;
-    margin-top: 10px;
 }
 
-/* HOVER EFFECT */
+/* HOVER */
 tr:hover {
     background: #ffe066;
-    transition: 0.2s;
 }

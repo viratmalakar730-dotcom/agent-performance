@@ -264,3 +264,25 @@ function resetApp(){
     sessionStorage.clear();
     location="index.html";
 }
+// ===============================
+// 🔥 ROW CLICK HIGHLIGHT
+// ===============================
+document.addEventListener("click", function(e){
+    let row = e.target.closest("tr");
+
+    if(!row || row.parentNode.tagName !== "TBODY") return;
+
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.classList.remove("rowActive");
+    });
+
+    row.classList.add("rowActive");
+});
+
+
+// ===============================
+// 🔄 AUTO REFRESH (2 MIN)
+// ===============================
+setInterval(()=>{
+    location.reload();
+},120000);

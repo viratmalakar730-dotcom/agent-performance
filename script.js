@@ -1,28 +1,4 @@
-// ===============================
-// 🔥 FIREBASE CONFIG (ADD)
-// ===============================
-const firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// 🔥 SAVE CLOUD
-async function saveToCloud(payload){
-    try{
-        await db.collection("dashboard").doc("latest").set(payload);
-        console.log("✅ Live Updated");
-    }catch(e){
-        console.error("Firebase Error:", e);
-    }
-}
-
-// ===============================
-// 🔥 TIME FUNCTIONS
-// ===============================
+// ================= TIME FUNCTIONS =================
 function toSeconds(t){
     if(!t) return 0;
     let a = t.toString().split(":").map(Number);
@@ -44,9 +20,7 @@ function getGradientClass(val,max){
     return "red";
 }
 
-// ===============================
-// 📂 READ EXCEL
-// ===============================
+// ================= READ EXCEL =================
 function readExcel(file,skip){
     return new Promise(res=>{
         let r=new FileReader();
@@ -59,9 +33,7 @@ function readExcel(file,skip){
     });
 }
 
-// ===============================
-// 🔥 PROCESS FILES (UPDATED)
-// ===============================
+// ================= PROCESS FILES =================
 async function processFiles(){
 
     let aprFile=document.getElementById("aprFile").files[0];
@@ -82,9 +54,12 @@ async function processFiles(){
 
     // IVR HIT
     cdr.forEach(c=>{
-        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
+        if((c[7]||"").toString().toUpperCase().includes("INBOUND")){
+            ivr++;
+        }
     });
 
+    // MAIN CALCULATION
     apr.forEach(r=>{
 
         if(!r[1]) return;
@@ -95,49 +70,55 @@ async function processFiles(){
         let login=toSeconds(r[3]);
 
         let breakTime=
-        toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
+        toSeconds(r[19])+
+        toSeconds(r[22])+
+        toSeconds(r[24]);
 
         let meeting=
-        toSeconds(r[20])+toSeconds(r[23]);
+        toSeconds(r[20])+
+        toSeconds(r[23]);
 
         let net=Math.max(0,login-breakTime);
 
         let calls=cdr.filter(c=>{
-            return (c[1]||"").toString().trim()===emp &&
-            ((c[25]||"").toLowerCase().includes("callmatured") ||
-             (c[25]||"").toLowerCase().includes("transfer"));
+            let empCDR=(c[1]||"").toString().trim();
+            let disp=(c[25]||"").toLowerCase();
+
+            return empCDR===emp &&
+            (disp.includes("callmatured") || disp.includes("transfer"));
         });
 
         let total=calls.length;
 
         let ib=calls.filter(c=>
-            (c[7]||"").toUpperCase().includes("INBOUND")
+            (c[7]||"").toString().toUpperCase().includes("INBOUND")
         ).length;
 
         let ob=total-ib;
 
-        let aht=total?Math.round(toSeconds(r[5])/total):0;
+        let aht=total ? Math.round(toSeconds(r[5])/total) : 0;
 
-        final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
+        final.push({
+            emp,name,login,net,breakTime,meeting,aht,total,ib,ob
+        });
     });
 
-    // ===============================
-    // 🔥 SAVE DATA (FIXED)
-    // ===============================
-    let payload = { final, ivr };
+    // 🔥 LOCAL SAVE (PRIMARY DASHBOARD)
+    sessionStorage.setItem("data",JSON.stringify({final,ivr}));
 
-    sessionStorage.setItem("data",JSON.stringify(payload));
+    // 🔥 FIREBASE SAVE (LIVE SYNC)
+    if(typeof db !== "undefined"){
+        db.ref("dashboard").set({
+            final: final,
+            ivr: ivr,
+            time: new Date().toLocaleString()
+        });
+    }
 
-    // 🔥 WAIT FOR CLOUD SAVE (MAIN FIX)
-    await saveToCloud(payload);
-
-    // REDIRECT AFTER SAVE
     location="dashboard.html";
 }
 
-// ===============================
-// 🔥 DASHBOARD LOAD
-// ===============================
+// ================= LOAD DASHBOARD =================
 document.addEventListener("DOMContentLoaded",()=>{
 
     let d=JSON.parse(sessionStorage.getItem("data")||"{}");
@@ -183,13 +164,11 @@ document.addEventListener("DOMContentLoaded",()=>{
     document.getElementById("ib").innerText=totalIB;
     document.getElementById("ob").innerText=totalOB;
 
-    let overall=totalCalls?totalTalk/totalCalls:0;
+    let overall=totalCalls ? totalTalk/totalCalls : 0;
     document.getElementById("aht").innerText=toTime(overall);
 });
 
-// ===============================
-// 🔍 SEARCH
-// ===============================
+// ================= SEARCH =================
 function searchAgent(){
     let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
@@ -197,9 +176,7 @@ function searchAgent(){
     });
 }
 
-// ===============================
-// 🖼 PNG COPY
-// ===============================
+// ================= PNG COPY =================
 function copyImage(){
     html2canvas(document.getElementById("captureArea"),{scale:2}).then(c=>{
         c.toBlob(b=>{
@@ -209,9 +186,35 @@ function copyImage(){
     });
 }
 
-// ===============================
-// 🔄 RESET
-// ===============================
+// ================= EXCEL EXPORT =================
+function exportExcel(){
+
+    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+    if(!d.final) return;
+
+    let ws_data=[[
+        "Employee ID","Agent Full Name","Total Login","Net Login",
+        "Total Break","Total Meeting","AHT",
+        "Total Mature Call","IB Mature","OB Mature"
+    ]];
+
+    d.final.forEach(r=>{
+        ws_data.push([
+            r.emp,r.name,
+            toTime(r.login),toTime(r.net),
+            toTime(r.breakTime),toTime(r.meeting),
+            toTime(r.aht),r.total,r.ib,r.ob
+        ]);
+    });
+
+    let ws=XLSX.utils.aoa_to_sheet(ws_data);
+    let wb=XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
+
+    XLSX.writeFile(wb,"Agent_Report.xlsx");
+}
+
+// ================= RESET =================
 function resetApp(){
     sessionStorage.clear();
     location="index.html";

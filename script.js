@@ -14,14 +14,14 @@ const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
 // ===============================
-// 🔥 SAVE DATA TO CLOUD
+// 🔥 SAVE TO CLOUD
 // ===============================
 async function saveToCloud(payload){
     try{
         await setDoc(doc(db,"dashboard","latest"), payload);
-        console.log("✅ Live Data Updated");
+        console.log("✅ Live Updated");
     }catch(e){
-        console.error("❌ Firebase Error", e);
+        console.error("❌ Firebase Error:", e);
     }
 }
 
@@ -161,13 +161,15 @@ async function processFiles(){
         });
     });
 
+    // ===============================
     // 🔥 SAVE DATA
+    // ===============================
     let payload = { final, ivr, reportTime };
 
-    // LOCAL (OLD FLOW)
+    // LOCAL (existing flow)
     sessionStorage.setItem("data", JSON.stringify(payload));
 
-    // CLOUD (NEW LIVE FEATURE)
+    // CLOUD (LIVE FEATURE)
     saveToCloud(payload);
 
     // REDIRECT
@@ -175,7 +177,7 @@ async function processFiles(){
 }
 
 // ===============================
-// 🔥 MAKE FUNCTION GLOBAL (FIX ERROR)
+// 🔥 FIX ERROR (GLOBAL ACCESS)
 // ===============================
 window.processFiles = processFiles;
 

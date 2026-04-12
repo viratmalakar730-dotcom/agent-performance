@@ -1,38 +1,30 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Agent Performance Dashboard</title>
-    <link rel="stylesheet" href="style.css">
+<title>Upload</title>
+<link rel="stylesheet" href="style.css">
 </head>
-
 <body>
 
-<h2 style="text-align:center;">Agent Performance Dashboard</h2>
+<div class="container">
+<div class="upload-box">
 
-<div style="text-align:center; margin-top:30px;">
+<h2>Agent Performance Dashboard</h2>
 
-    <input type="file" id="aprFile" accept=".xlsx,.xls">
-    <br><br>
+<label class="label">APR Report</label>
+<input type="file" id="aprFile"><br>
 
-    <input type="file" id="cdrFile" accept=".xlsx,.xls">
-    <br><br>
+<label class="label">CDR Report</label>
+<input type="file" id="cdrFile"><br>
 
-    <button onclick="processFiles()">Generate Dashboard</button>
+<button onclick="processFiles()">Generate Report</button>
+
+<div id="loading" class="loading">Processing... ⏳</div>
 
 </div>
-
-<div id="loading" style="display:none; text-align:center; margin-top:20px;">
-    Processing... ⏳
 </div>
 
-<!-- XLSX -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<!-- 🔥 FIREBASE ADD -->
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
-
-<!-- MAIN SCRIPT -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 
 </body>

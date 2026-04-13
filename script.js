@@ -32,15 +32,16 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
+
 // ===============================
-// 🔥 CALL COLOR LOGIC (FIXED)
+// 🔥 CALL COLOR LOGIC
 // ===============================
 function getGradientClass(val, max){
     let p = val / max;
 
     if(p >= 0.75) return "green";
     if(p >= 0.45) return "yellow";
-    return "red3D"; // 🔥 FIXED (earlier "red")
+    return "red3D";
 }
 
 
@@ -76,7 +77,7 @@ function processFiles(){
             let reportRow = aprData[1]?.[0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 CLEAN
+            // 🔥 CLEAN DATA
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
@@ -149,7 +150,7 @@ function processFiles(){
                 return;
             }
 
-            // 🔥 SAVE
+            // 🔥 SAVE DATA
             sessionStorage.setItem("data", JSON.stringify({
                 final,
                 ivr,
@@ -194,9 +195,8 @@ function loadDashboard(final, ivr, reportTime){
         totalTalk+=(r.aht*r.total);
 
         let netCls = r.net >= 28800 ? "netGreen" : "";
-
         let breakCls = r.breakTime > 2100 ? "breakRed" : "";
-        let meetingCls = r.meeting > 2100 ? "meetRed" : "";
+        let meetingCls = r.meeting > 2100 ? "red3D" : "";
 
         let callCls = getGradientClass(r.total, max);
 
@@ -226,9 +226,10 @@ function loadDashboard(final, ivr, reportTime){
     let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
     document.getElementById("aht").innerText = toTime(overallAHT);
 
+    // 🔥 UPDATED TEXT HERE
     if(document.getElementById("reportTime")){
         document.getElementById("reportTime").innerText =
-            "Report Time: " + (reportTime || "");
+            "Last Updated On : " + (reportTime || "");
     }
 }
 

@@ -1,5 +1,5 @@
 // ===============================
-// 🔥 FIREBASE CONFIG
+// 🔥 FIREBASE CONFIG (UNCHANGED)
 // ===============================
 const firebaseConfig = {
   apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
@@ -16,7 +16,7 @@ const db = firebase.database();
 
 
 // ===============================
-// 🔥 TIME FUNCTIONS
+// 🔥 TIME FUNCTIONS (UNCHANGED)
 // ===============================
 function toSeconds(t){
     if(!t) return 0;
@@ -34,32 +34,47 @@ function toTime(sec){
 
 
 // ===============================
-// 🔥 AUTO REPORT (NGROK VERSION)
+// 🔥 AUTO REPORT (UPGRADED)
 // ===============================
 function runAutoReport(){
 
     let loader = document.getElementById("loading");
     if(loader) loader.style.display="block";
 
-    fetch("https://reprimand-enclose-clumsily.ngrok-free.dev/run-flow")
-    .then(res => res.text())
+    // 🔥 IMPORTANT → ngrok URL यहाँ डालना है
+    const URL = "https://reprimand-enclose-clumsily.ngrok-free.dev/run-flow";
+
+    fetch(URL, {
+        method: "GET",
+        mode: "cors"
+    })
+    .then(res => {
+        if(!res.ok) throw new Error("Server not responding");
+        return res.text();
+    })
     .then(data => {
 
         if(loader) loader.style.display="none";
 
         alert("✅ Auto Report Generated");
 
-        window.location = "dashboard.html";
+        // थोड़ा delay ताकि firebase load हो जाए
+        setTimeout(()=>{
+            window.location = "dashboard.html";
+        },1000);
+
     })
     .catch(err=>{
+
         if(loader) loader.style.display="none";
-        alert("❌ Error: " + err);
+
+        alert("❌ Server connect nahi hua\n\nCheck:\n1. server.js run\n2. ngrok run\n3. URL correct");
     });
 }
 
 
 // ===============================
-// 🔥 PNG COPY FIX
+// 🔥 PNG COPY FIX (UPGRADED)
 // ===============================
 function copyImage(){
 
@@ -67,10 +82,16 @@ function copyImage(){
 
         canvas.toBlob(blob => {
 
-            const item = new ClipboardItem({ "image/png": blob });
-            navigator.clipboard.write([item]);
+            if (!navigator.clipboard) {
+                alert("Clipboard not supported");
+                return;
+            }
 
-            alert("📸 PNG Copied");
+            const item = new ClipboardItem({ "image/png": blob });
+
+            navigator.clipboard.write([item])
+            .then(()=> alert("📸 PNG Copied"))
+            .catch(()=> alert("❌ Copy failed (browser permission issue)"));
 
         });
 
@@ -80,21 +101,28 @@ function copyImage(){
 
 
 // ===============================
-// 🔥 EXCEL EXPORT FIX
+// 🔥 EXCEL EXPORT FIX (UPGRADED)
 // ===============================
 function exportExcel(){
 
     let table = document.getElementById("table");
 
+    if(!table){
+        alert("No data to export");
+        return;
+    }
+
     let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
 
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
+    let fileName = "Agent_Report_" + new Date().toISOString().slice(0,10) + ".xlsx";
+
+    XLSX.writeFile(wb, fileName);
 
 }
 
 
 // ===============================
-// 🔥 PROCESS FILES (MANUAL)
+// 🔥 PROCESS FILES (UNCHANGED)
 // ===============================
 function processFiles(){
 
@@ -206,7 +234,7 @@ function processFiles(){
 
 
 // ===============================
-// 🔥 LOAD DASHBOARD
+// 🔥 बाकी सब (UNCHANGED)
 // ===============================
 function loadDashboard(final, ivr, reportTime){
 
@@ -254,10 +282,6 @@ function loadDashboard(final, ivr, reportTime){
         "Report Time: " + (reportTime || "");
 }
 
-
-// ===============================
-// 🔥 AUTO LOAD
-// ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
     db.ref("dashboard").on("value",(snap)=>{
@@ -269,10 +293,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
     });
 });
 
-
-// ===============================
-// 🔍 SEARCH
-// ===============================
 function searchAgent(){
     let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
@@ -280,10 +300,6 @@ function searchAgent(){
     });
 }
 
-
-// ===============================
-// 🔄 RESET
-// ===============================
 function resetApp(){
     location="index.html";
 }

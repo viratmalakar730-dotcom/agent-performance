@@ -37,11 +37,65 @@ function toTime(sec){
 // 🔥 CALL COLOR LOGIC
 // ===============================
 function getGradientClass(val, max){
-    let p = val / max;
+    let p = val / (max || 1);
 
     if(p >= 0.75) return "green";
     if(p >= 0.45) return "yellow";
     return "red3D";
+}
+
+
+// ===============================
+// 🔥 AUTO REPORT BUTTON
+// ===============================
+function runAutoReport(){
+
+    alert("⏳ Auto Report Generate ho raha hai...");
+
+    fetch("http://localhost:3000/run-flow")
+    .then(res => res.text())
+    .then(data => {
+        alert("✅ Report Generated");
+    })
+    .catch(err=>{
+        alert("❌ Error: " + err);
+    });
+}
+
+
+// ===============================
+// 🔥 PNG COPY FIX
+// ===============================
+function copyImage(){
+
+    html2canvas(document.querySelector("#table")).then(canvas => {
+
+        canvas.toBlob(blob => {
+
+            const item = new ClipboardItem({ "image/png": blob });
+
+            navigator.clipboard.write([item]);
+
+            alert("📸 PNG Copied Successfully");
+
+        });
+
+    });
+
+}
+
+
+// ===============================
+// 🔥 EXCEL EXPORT FIX
+// ===============================
+function exportExcel(){
+
+    let table = document.getElementById("table");
+
+    let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
+
+    XLSX.writeFile(wb, "Agent_Report.xlsx");
+
 }
 
 
@@ -58,8 +112,6 @@ function processFiles(){
         return;
     }
 
-    document.getElementById("loading").style.display="block";
-
     let reader1 = new FileReader();
     let reader2 = new FileReader();
 
@@ -73,18 +125,15 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            // 🔥 REPORT TIME
             let reportRow = aprData[1]?.[0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 CLEAN DATA
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP
             aprData.forEach(r=>{
                 let emp = r[1];
                 if(!emp) return;
@@ -113,7 +162,6 @@ function processFiles(){
                 };
             });
 
-            // 🔥 CDR LOOP
             cdrData.forEach(r=>{
                 let emp = r[1];
                 let skill = r[7];
@@ -132,30 +180,7 @@ function processFiles(){
                 }
             });
 
-            let final = Object.values(map).map(r=>({
-                emp: r.emp,
-                name: r.name,
-                login: r.login,
-                net: r.net,
-                breakTime: r.breakTime,
-                meeting: r.meeting,
-                aht: r.total ? r.ahtRaw / r.total : 0,
-                total: r.total,
-                ib: r.ib,
-                ob: r.total - r.ib
-            }));
-
-            if(!final.length){
-                alert("No data generated ❌");
-                return;
-            }
-
-            // 🔥 SAVE DATA
-            sessionStorage.setItem("data", JSON.stringify({
-                final,
-                ivr,
-                reportTime
-            }));
+            let final = Object.values(map);
 
             db.ref("dashboard").set({
                 final,
@@ -183,67 +208,51 @@ function loadDashboard(final, ivr, reportTime){
 
     tb.innerHTML="";
 
-    let max = Math.max(...final.map(x=>x.total));
+    let max = Math.max(...final.map(x=>x.total || 0));
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
     final.forEach(r=>{
 
-        totalCalls+=r.total;
-        totalIB+=r.ib;
-        totalOB+=r.ob;
-        totalTalk+=(r.aht*r.total);
-
-        let netCls = r.net >= 28800 ? "netGreen" : "";
-        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
-        let meetingCls = r.meeting > 2100 ? "red3D" : "";
-
-        let callCls = getGradientClass(r.total, max);
+        totalCalls+=r.total || 0;
+        totalIB+=r.ib || 0;
+        totalOB+=(r.total || 0)-(r.ib || 0);
+        totalTalk+=(r.ahtRaw || 0);
 
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
+        <td>${r.emp || ""}</td>
+        <td>${r.name || ""}</td>
         <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
-        <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
-        <td>${r.ib}</td>
-        <td>${r.ob}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
+        <td>${toTime(r.meeting)}</td>
+        <td>${toTime((r.ahtRaw || 0)/(r.total || 1))}</td>
+        <td>${r.total || 0}</td>
+        <td>${r.ib || 0}</td>
+        <td>${(r.total || 0)-(r.ib || 0)}</td>
         `;
 
         tb.appendChild(tr);
     });
 
-    document.getElementById("ivr").innerText=ivr;
+    document.getElementById("ivr").innerText=ivr || 0;
     document.getElementById("total").innerText=totalCalls;
     document.getElementById("ib").innerText=totalIB;
     document.getElementById("ob").innerText=totalOB;
 
-    let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
-    document.getElementById("aht").innerText = toTime(overallAHT);
+    document.getElementById("aht").innerText = toTime(totalCalls ? totalTalk/totalCalls : 0);
 
-    // 🔥 UPDATED TEXT HERE
-    if(document.getElementById("reportTime")){
-        document.getElementById("reportTime").innerText =
-            "Last Updated On : " + (reportTime || "");
-    }
+    document.getElementById("reportTime").innerText =
+        "Last Updated On : " + (reportTime || "");
 }
 
 
 // ===============================
-// 🔥 AUTO LOAD + LIVE
+// 🔥 AUTO LOAD
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
-
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    if(d.final){
-        loadDashboard(d.final, d.ivr, d.reportTime);
-    }
 
     db.ref("dashboard").on("value",(snap)=>{
         let data = snap.val();

@@ -1,19 +1,24 @@
 // ===============================
-// 🔥 FIREBASE CONFIG
+// 🔥 FIREBASE CONFIG (ADD)
 // ===============================
 const firebaseConfig = {
-  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
-  authDomain: "agent-performance-live.firebaseapp.com",
-  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-  projectId: "agent-performance-live"
+    apiKey: "YOUR_KEY",
+    authDomain: "YOUR_DOMAIN",
+    projectId: "YOUR_PROJECT_ID",
 };
 
-if (typeof firebase !== "undefined" && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+// 🔥 SAVE CLOUD
+async function saveToCloud(payload){
+    try{
+        await db.collection("dashboard").doc("latest").set(payload);
+        console.log("✅ Live Updated");
+    }catch(e){
+        console.error("Firebase Error:", e);
+    }
 }
-
-const db = firebase.database();
-
 
 // ===============================
 // 🔥 TIME FUNCTIONS
@@ -32,237 +37,155 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-
-// ===============================
-// 🔥 CALL COLOR LOGIC
-// ===============================
-function getGradientClass(val, max){
-    let p = val / (max || 1);
-
+function getGradientClass(val,max){
+    let p = val/max;
     if(p >= 0.75) return "green";
     if(p >= 0.45) return "yellow";
-    return "red3D";
+    return "red";
 }
 
-
 // ===============================
-// 🔥 AUTO REPORT BUTTON
+// 📂 READ EXCEL
 // ===============================
-function runAutoReport(){
-
-    alert("⏳ Auto Report Generate ho raha hai...");
-
-    fetch("http://localhost:3000/run-flow")
-    .then(res => res.text())
-    .then(data => {
-        alert("✅ Report Generated");
-    })
-    .catch(err=>{
-        alert("❌ Error: " + err);
+function readExcel(file,skip){
+    return new Promise(res=>{
+        let r=new FileReader();
+        r.onload=e=>{
+            let wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
+            let d=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+            res(d.slice(skip));
+        };
+        r.readAsArrayBuffer(file);
     });
 }
 
-
 // ===============================
-// 🔥 PNG COPY FIX
+// 🔥 PROCESS FILES (UPDATED)
 // ===============================
-function copyImage(){
+async function processFiles(){
 
-    html2canvas(document.querySelector("#table")).then(canvas => {
-
-        canvas.toBlob(blob => {
-
-            const item = new ClipboardItem({ "image/png": blob });
-
-            navigator.clipboard.write([item]);
-
-            alert("📸 PNG Copied Successfully");
-
-        });
-
-    });
-
-}
-
-
-// ===============================
-// 🔥 EXCEL EXPORT FIX
-// ===============================
-function exportExcel(){
-
-    let table = document.getElementById("table");
-
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
-
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-
-}
-
-
-// ===============================
-// 🔥 PROCESS FILES
-// ===============================
-function processFiles(){
-
-    let aprFile = document.getElementById("aprFile").files[0];
-    let cdrFile = document.getElementById("cdrFile").files[0];
+    let aprFile=document.getElementById("aprFile").files[0];
+    let cdrFile=document.getElementById("cdrFile").files[0];
 
     if(!aprFile || !cdrFile){
-        alert("Upload both files");
+        alert("Upload both files ❌");
         return;
     }
 
-    let reader1 = new FileReader();
-    let reader2 = new FileReader();
+    document.getElementById("loading").style.display="block";
 
-    reader1.onload = function(e){
+    let apr=await readExcel(aprFile,3);
+    let cdr=await readExcel(cdrFile,2);
 
-        let apr = XLSX.read(e.target.result, {type:'binary'});
-        let aprData = XLSX.utils.sheet_to_json(apr.Sheets[apr.SheetNames[0]], {header:1});
+    let final=[];
+    let ivr=0;
 
-        reader2.onload = function(e2){
+    // IVR HIT
+    cdr.forEach(c=>{
+        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
+    });
 
-            let cdr = XLSX.read(e2.target.result, {type:'binary'});
-            let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
+    apr.forEach(r=>{
 
-            let reportRow = aprData[1]?.[0] || "";
-            let reportTime = reportRow.split("to")[1]?.trim() || "";
+        if(!r[1]) return;
 
-            aprData.splice(0,3);
-            cdrData.splice(0,2);
+        let emp=(r[1]||"").toString().trim();
+        let name=r[2];
 
-            let map = {};
-            let ivr = 0;
+        let login=toSeconds(r[3]);
 
-            aprData.forEach(r=>{
-                let emp = r[1];
-                if(!emp) return;
+        let breakTime=
+        toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
 
-                let login = toSeconds(r[3]);
+        let meeting=
+        toSeconds(r[20])+toSeconds(r[23]);
 
-                let breakTime =
-                    toSeconds(r[19]) +
-                    toSeconds(r[22]) +
-                    toSeconds(r[24]);
+        let net=Math.max(0,login-breakTime);
 
-                let meeting =
-                    toSeconds(r[20]) +
-                    toSeconds(r[23]);
+        let calls=cdr.filter(c=>{
+            return (c[1]||"").toString().trim()===emp &&
+            ((c[25]||"").toLowerCase().includes("callmatured") ||
+             (c[25]||"").toLowerCase().includes("transfer"));
+        });
 
-                map[emp] = {
-                    emp: String(emp),
-                    name: r[2] || "",
-                    login,
-                    breakTime,
-                    meeting,
-                    net: login - breakTime,
-                    ahtRaw: toSeconds(r[5]),
-                    total: 0,
-                    ib: 0
-                };
-            });
+        let total=calls.length;
 
-            cdrData.forEach(r=>{
-                let emp = r[1];
-                let skill = r[7];
-                let dispo = (r[25] || "").toLowerCase();
+        let ib=calls.filter(c=>
+            (c[7]||"").toUpperCase().includes("INBOUND")
+        ).length;
 
-                if(skill === "INBOUND") ivr++;
+        let ob=total-ib;
 
-                if(!map[emp]) return;
+        let aht=total?Math.round(toSeconds(r[5])/total):0;
 
-                if(dispo === "callmatured" || dispo === "transfer"){
-                    map[emp].total++;
+        final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
+    });
 
-                    if(skill === "INBOUND"){
-                        map[emp].ib++;
-                    }
-                }
-            });
+    // ===============================
+    // 🔥 SAVE DATA (FIXED)
+    // ===============================
+    let payload = { final, ivr };
 
-            let final = Object.values(map);
+    sessionStorage.setItem("data",JSON.stringify(payload));
 
-            db.ref("dashboard").set({
-                final,
-                ivr,
-                reportTime
-            });
+    // 🔥 WAIT FOR CLOUD SAVE (MAIN FIX)
+    await saveToCloud(payload);
 
-            window.location = "dashboard.html";
-        };
-
-        reader2.readAsBinaryString(cdrFile);
-    };
-
-    reader1.readAsBinaryString(aprFile);
+    // REDIRECT AFTER SAVE
+    location="dashboard.html";
 }
 
-
 // ===============================
-// 🔥 LOAD DASHBOARD
+// 🔥 DASHBOARD LOAD
 // ===============================
-function loadDashboard(final, ivr, reportTime){
+document.addEventListener("DOMContentLoaded",()=>{
 
-    let tb = document.querySelector("#table tbody");
-    if(!tb) return;
+    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+    if(!d.final) return;
 
-    tb.innerHTML="";
+    let {final,ivr}=d;
 
-    let max = Math.max(...final.map(x=>x.total || 0));
+    final.sort((a,b)=>b.total-a.total);
+
+    let max=Math.max(...final.map(x=>x.total));
+
+    let tb=document.querySelector("#table tbody");
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
     final.forEach(r=>{
 
-        totalCalls+=r.total || 0;
-        totalIB+=r.ib || 0;
-        totalOB+=(r.total || 0)-(r.ib || 0);
-        totalTalk+=(r.ahtRaw || 0);
+        totalCalls+=r.total;
+        totalIB+=r.ib;
+        totalOB+=r.ob;
+        totalTalk+=(r.aht*r.total);
 
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td>${r.emp || ""}</td>
-        <td>${r.name || ""}</td>
+        <td><b><i>${r.emp}</i></b></td>
+        <td><b><i>${r.name}</i></b></td>
         <td>${toTime(r.login)}</td>
-        <td>${toTime(r.net)}</td>
-        <td>${toTime(r.breakTime)}</td>
-        <td>${toTime(r.meeting)}</td>
-        <td>${toTime((r.ahtRaw || 0)/(r.total || 1))}</td>
-        <td>${r.total || 0}</td>
-        <td>${r.ib || 0}</td>
-        <td>${(r.total || 0)-(r.ib || 0)}</td>
+        <td class="${r.net>=28800?'netGreen':''}">${toTime(r.net)}</td>
+        <td class="${r.breakTime>2100?'breakRed':''}">${toTime(r.breakTime)}</td>
+        <td class="${r.meeting>2100?'meetingRed':''}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.aht)}</td>
+        <td class="${getGradientClass(r.total,max)}">${r.total}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
         `;
 
         tb.appendChild(tr);
     });
 
-    document.getElementById("ivr").innerText=ivr || 0;
+    document.getElementById("ivr").innerText=ivr;
     document.getElementById("total").innerText=totalCalls;
     document.getElementById("ib").innerText=totalIB;
     document.getElementById("ob").innerText=totalOB;
 
-    document.getElementById("aht").innerText = toTime(totalCalls ? totalTalk/totalCalls : 0);
-
-    document.getElementById("reportTime").innerText =
-        "Last Updated On : " + (reportTime || "");
-}
-
-
-// ===============================
-// 🔥 AUTO LOAD
-// ===============================
-document.addEventListener("DOMContentLoaded", ()=>{
-
-    db.ref("dashboard").on("value",(snap)=>{
-        let data = snap.val();
-
-        if(data && data.final){
-            loadDashboard(data.final, data.ivr, data.reportTime);
-        }
-    });
+    let overall=totalCalls?totalTalk/totalCalls:0;
+    document.getElementById("aht").innerText=toTime(overall);
 });
-
 
 // ===============================
 // 🔍 SEARCH
@@ -274,6 +197,17 @@ function searchAgent(){
     });
 }
 
+// ===============================
+// 🖼 PNG COPY
+// ===============================
+function copyImage(){
+    html2canvas(document.getElementById("captureArea"),{scale:2}).then(c=>{
+        c.toBlob(b=>{
+            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+            alert("Copied!");
+        });
+    });
+}
 
 // ===============================
 // 🔄 RESET

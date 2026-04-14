@@ -32,92 +32,16 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-
-// ===============================
-// 🔥 AUTO REPORT (FINAL FIXED)
-// ===============================
-function runAutoReport(){
-
-    let loader = document.getElementById("loading");
-    if(loader) loader.style.display="block";
-
-    const URL = "https://reprimand-enclose-clumsily.ngrok-free.dev/run-flow";
-
-    fetch(URL, {
-        method: "GET",
-        headers: {
-            "ngrok-skip-browser-warning": "true"
-        }
-    })
-    .then(res => {
-        if(!res.ok) throw new Error("Server issue");
-        return res.text();
-    })
-    .then(data => {
-
-        if(loader) loader.style.display="none";
-
-        alert("✅ Auto Report Generated");
-
-        setTimeout(()=>{
-            window.location = "dashboard.html";
-        },1000);
-
-    })
-    .catch(err=>{
-
-        if(loader) loader.style.display="none";
-
-        alert("❌ Server connect nahi hua\n\nCheck:\n1. server.js run\n2. ngrok run\n3. URL correct");
-    });
-
+function getGradientClass(val,max){
+    let p = val/max;
+    if(p >= 0.75) return "green";
+    if(p >= 0.45) return "yellow";
+    return "red3D";
 }
 
 
 // ===============================
-// 🔥 PNG COPY
-// ===============================
-function copyImage(){
-
-    html2canvas(document.body).then(canvas => {
-
-        canvas.toBlob(blob => {
-
-            try{
-                const item = new ClipboardItem({ "image/png": blob });
-                navigator.clipboard.write([item]);
-                alert("📸 PNG Copied");
-            }catch{
-                alert("❌ Copy failed (browser permission issue)");
-            }
-
-        });
-
-    });
-
-}
-
-
-// ===============================
-// 🔥 EXCEL EXPORT
-// ===============================
-function exportExcel(){
-
-    let table = document.getElementById("table");
-
-    if(!table){
-        alert("No data");
-        return;
-    }
-
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
-    XLSX.writeFile(wb, "Agent_Report.xlsx");
-
-}
-
-
-// ===============================
-// 🔥 PROCESS FILES (MANUAL)
+// 🔥 PROCESS FILES
 // ===============================
 function processFiles(){
 
@@ -144,7 +68,7 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            let reportRow = aprData[1]?.[0] || "";
+            let reportRow = aprData[1][0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
             aprData.splice(0,3);
@@ -153,7 +77,9 @@ function processFiles(){
             let map = {};
             let ivr = 0;
 
+            // APR LOOP
             aprData.forEach(r=>{
+
                 let emp = r[1];
                 if(!emp) return;
 
@@ -181,7 +107,9 @@ function processFiles(){
                 };
             });
 
+            // CDR LOOP
             cdrData.forEach(r=>{
+
                 let emp = r[1];
                 let skill = r[7];
                 let dispo = (r[25] || "").toLowerCase();
@@ -212,6 +140,12 @@ function processFiles(){
                 ob: r.total - r.ib
             }));
 
+            sessionStorage.setItem("data", JSON.stringify({
+                final,
+                ivr,
+                reportTime
+            }));
+
             db.ref("dashboard").set({
                 final,
                 ivr,
@@ -238,6 +172,8 @@ function loadDashboard(final, ivr, reportTime){
 
     tb.innerHTML="";
 
+    let max = Math.max(...final.map(x=>x.total));
+
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
     final.forEach(r=>{
@@ -247,17 +183,20 @@ function loadDashboard(final, ivr, reportTime){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
+        let netCls = r.net >= 28800 ? "netGreen" : "";
+        let callCls = getGradientClass(r.total, max);
+
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
         <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td>${toTime(r.net)}</td>
+        <td class="${netCls}">${toTime(r.net)}</td>
         <td>${toTime(r.breakTime)}</td>
         <td>${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td>${r.total}</td>
+        <td class="${callCls}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -274,22 +213,32 @@ function loadDashboard(final, ivr, reportTime){
     document.getElementById("aht").innerText = toTime(overallAHT);
 
     document.getElementById("reportTime").innerText =
-        "Report Time: " + (reportTime || "");
+        "Last Update Till: " + (reportTime || "");
 }
 
 
 // ===============================
-// 🔥 AUTO LOAD
+// 🔥 LIVE + AUTO REFRESH
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+    if(d.final){
+        loadDashboard(d.final, d.ivr, d.reportTime);
+    }
+
     db.ref("dashboard").on("value",(snap)=>{
         let data = snap.val();
-
         if(data && data.final){
             loadDashboard(data.final, data.ivr, data.reportTime);
         }
     });
+
+    // 🔥 AUTO REFRESH (2 MIN)
+    setInterval(()=>{
+        location.reload();
+    },120000);
 });
 
 
@@ -308,5 +257,21 @@ function searchAgent(){
 // 🔄 RESET
 // ===============================
 function resetApp(){
+    sessionStorage.clear();
     location="index.html";
 }
+
+
+// ===============================
+// 🔥 ROW CLICK HIGHLIGHT
+// ===============================
+document.addEventListener("click", function(e){
+    let row = e.target.closest("tr");
+    if(!row || row.parentNode.tagName !== "TBODY") return;
+
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.classList.remove("rowActive");
+    });
+
+    row.classList.add("rowActive");
+});

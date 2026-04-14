@@ -1,24 +1,19 @@
 // ===============================
-// 🔥 FIREBASE CONFIG (ADD)
+// 🔥 FIREBASE CONFIG
 // ===============================
 const firebaseConfig = {
-    apiKey: "YOUR_KEY",
-    authDomain: "YOUR_DOMAIN",
-    projectId: "YOUR_PROJECT_ID",
+  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+  authDomain: "agent-performance-live.firebaseapp.com",
+  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+  projectId: "agent-performance-live"
 };
 
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-// 🔥 SAVE CLOUD
-async function saveToCloud(payload){
-    try{
-        await db.collection("dashboard").doc("latest").set(payload);
-        console.log("✅ Live Updated");
-    }catch(e){
-        console.error("Firebase Error:", e);
-    }
+if (typeof firebase !== "undefined" && !firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
 }
+
+const db = firebase.database();
+
 
 // ===============================
 // 🔥 TIME FUNCTIONS
@@ -37,119 +32,157 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-function getGradientClass(val,max){
-    let p = val/max;
+// ===============================
+// 🔥 CALL COLOR LOGIC (FIXED)
+// ===============================
+function getGradientClass(val, max){
+    let p = val / max;
+
     if(p >= 0.75) return "green";
     if(p >= 0.45) return "yellow";
-    return "red";
+    return "red3D"; // 🔥 FIXED (earlier "red")
 }
 
-// ===============================
-// 📂 READ EXCEL
-// ===============================
-function readExcel(file,skip){
-    return new Promise(res=>{
-        let r=new FileReader();
-        r.onload=e=>{
-            let wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-            let d=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
-            res(d.slice(skip));
-        };
-        r.readAsArrayBuffer(file);
-    });
-}
 
 // ===============================
-// 🔥 PROCESS FILES (UPDATED)
+// 🔥 PROCESS FILES
 // ===============================
-async function processFiles(){
+function processFiles(){
 
-    let aprFile=document.getElementById("aprFile").files[0];
-    let cdrFile=document.getElementById("cdrFile").files[0];
+    let aprFile = document.getElementById("aprFile").files[0];
+    let cdrFile = document.getElementById("cdrFile").files[0];
 
     if(!aprFile || !cdrFile){
-        alert("Upload both files ❌");
+        alert("Upload both files");
         return;
     }
 
     document.getElementById("loading").style.display="block";
 
-    let apr=await readExcel(aprFile,3);
-    let cdr=await readExcel(cdrFile,2);
+    let reader1 = new FileReader();
+    let reader2 = new FileReader();
 
-    let final=[];
-    let ivr=0;
+    reader1.onload = function(e){
 
-    // IVR HIT
-    cdr.forEach(c=>{
-        if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
-    });
+        let apr = XLSX.read(e.target.result, {type:'binary'});
+        let aprData = XLSX.utils.sheet_to_json(apr.Sheets[apr.SheetNames[0]], {header:1});
 
-    apr.forEach(r=>{
+        reader2.onload = function(e2){
 
-        if(!r[1]) return;
+            let cdr = XLSX.read(e2.target.result, {type:'binary'});
+            let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-        let emp=(r[1]||"").toString().trim();
-        let name=r[2];
+            // 🔥 REPORT TIME
+            let reportRow = aprData[1]?.[0] || "";
+            let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-        let login=toSeconds(r[3]);
+            // 🔥 CLEAN
+            aprData.splice(0,3);
+            cdrData.splice(0,2);
 
-        let breakTime=
-        toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
+            let map = {};
+            let ivr = 0;
 
-        let meeting=
-        toSeconds(r[20])+toSeconds(r[23]);
+            // 🔥 APR LOOP
+            aprData.forEach(r=>{
+                let emp = r[1];
+                if(!emp) return;
 
-        let net=Math.max(0,login-breakTime);
+                let login = toSeconds(r[3]);
 
-        let calls=cdr.filter(c=>{
-            return (c[1]||"").toString().trim()===emp &&
-            ((c[25]||"").toLowerCase().includes("callmatured") ||
-             (c[25]||"").toLowerCase().includes("transfer"));
-        });
+                let breakTime =
+                    toSeconds(r[19]) +
+                    toSeconds(r[22]) +
+                    toSeconds(r[24]);
 
-        let total=calls.length;
+                let meeting =
+                    toSeconds(r[20]) +
+                    toSeconds(r[23]);
 
-        let ib=calls.filter(c=>
-            (c[7]||"").toUpperCase().includes("INBOUND")
-        ).length;
+                map[emp] = {
+                    emp: String(emp),
+                    name: r[2] || "",
+                    login,
+                    breakTime,
+                    meeting,
+                    net: login - breakTime,
+                    ahtRaw: toSeconds(r[5]),
+                    total: 0,
+                    ib: 0
+                };
+            });
 
-        let ob=total-ib;
+            // 🔥 CDR LOOP
+            cdrData.forEach(r=>{
+                let emp = r[1];
+                let skill = r[7];
+                let dispo = (r[25] || "").toLowerCase();
 
-        let aht=total?Math.round(toSeconds(r[5])/total):0;
+                if(skill === "INBOUND") ivr++;
 
-        final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
-    });
+                if(!map[emp]) return;
 
-    // ===============================
-    // 🔥 SAVE DATA (FIXED)
-    // ===============================
-    let payload = { final, ivr };
+                if(dispo === "callmatured" || dispo === "transfer"){
+                    map[emp].total++;
 
-    sessionStorage.setItem("data",JSON.stringify(payload));
+                    if(skill === "INBOUND"){
+                        map[emp].ib++;
+                    }
+                }
+            });
 
-    // 🔥 WAIT FOR CLOUD SAVE (MAIN FIX)
-    await saveToCloud(payload);
+            let final = Object.values(map).map(r=>({
+                emp: r.emp,
+                name: r.name,
+                login: r.login,
+                net: r.net,
+                breakTime: r.breakTime,
+                meeting: r.meeting,
+                aht: r.total ? r.ahtRaw / r.total : 0,
+                total: r.total,
+                ib: r.ib,
+                ob: r.total - r.ib
+            }));
 
-    // REDIRECT AFTER SAVE
-    location="dashboard.html";
+            if(!final.length){
+                alert("No data generated ❌");
+                return;
+            }
+
+            // 🔥 SAVE
+            sessionStorage.setItem("data", JSON.stringify({
+                final,
+                ivr,
+                reportTime
+            }));
+
+            db.ref("dashboard").set({
+                final,
+                ivr,
+                reportTime
+            });
+
+            window.location = "dashboard.html";
+        };
+
+        reader2.readAsBinaryString(cdrFile);
+    };
+
+    reader1.readAsBinaryString(aprFile);
 }
 
+
 // ===============================
-// 🔥 DASHBOARD LOAD
+// 🔥 LOAD DASHBOARD
 // ===============================
-document.addEventListener("DOMContentLoaded",()=>{
+function loadDashboard(final, ivr, reportTime){
 
-    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
-    if(!d.final) return;
+    let tb = document.querySelector("#table tbody");
+    if(!tb) return;
 
-    let {final,ivr}=d;
+    tb.innerHTML="";
 
-    final.sort((a,b)=>b.total-a.total);
-
-    let max=Math.max(...final.map(x=>x.total));
-
-    let tb=document.querySelector("#table tbody");
+    let max = Math.max(...final.map(x=>x.total));
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
@@ -160,17 +193,24 @@ document.addEventListener("DOMContentLoaded",()=>{
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
+        let netCls = r.net >= 28800 ? "netGreen" : "";
+
+        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
+        let meetingCls = r.meeting > 2100 ? "meetRed" : "";
+
+        let callCls = getGradientClass(r.total, max);
+
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
         <td><b><i>${r.emp}</i></b></td>
         <td><b><i>${r.name}</i></b></td>
         <td>${toTime(r.login)}</td>
-        <td class="${r.net>=28800?'netGreen':''}">${toTime(r.net)}</td>
-        <td class="${r.breakTime>2100?'breakRed':''}">${toTime(r.breakTime)}</td>
-        <td class="${r.meeting>2100?'meetingRed':''}">${toTime(r.meeting)}</td>
+        <td class="${netCls}">${toTime(r.net)}</td>
+        <td class="${breakCls}">${toTime(r.breakTime)}</td>
+        <td class="${meetingCls}">${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td class="${getGradientClass(r.total,max)}">${r.total}</td>
+        <td class="${callCls}">${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -183,9 +223,36 @@ document.addEventListener("DOMContentLoaded",()=>{
     document.getElementById("ib").innerText=totalIB;
     document.getElementById("ob").innerText=totalOB;
 
-    let overall=totalCalls?totalTalk/totalCalls:0;
-    document.getElementById("aht").innerText=toTime(overall);
+    let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
+    document.getElementById("aht").innerText = toTime(overallAHT);
+
+    if(document.getElementById("reportTime")){
+        document.getElementById("reportTime").innerText =
+            "Report Time: " + (reportTime || "");
+    }
+}
+
+
+// ===============================
+// 🔥 AUTO LOAD + LIVE
+// ===============================
+document.addEventListener("DOMContentLoaded", ()=>{
+
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+    if(d.final){
+        loadDashboard(d.final, d.ivr, d.reportTime);
+    }
+
+    db.ref("dashboard").on("value",(snap)=>{
+        let data = snap.val();
+
+        if(data && data.final){
+            loadDashboard(data.final, data.ivr, data.reportTime);
+        }
+    });
 });
+
 
 // ===============================
 // 🔍 SEARCH
@@ -197,17 +264,6 @@ function searchAgent(){
     });
 }
 
-// ===============================
-// 🖼 PNG COPY
-// ===============================
-function copyImage(){
-    html2canvas(document.getElementById("captureArea"),{scale:2}).then(c=>{
-        c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
-            alert("Copied!");
-        });
-    });
-}
 
 // ===============================
 // 🔄 RESET

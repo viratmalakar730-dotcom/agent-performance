@@ -18,21 +18,22 @@
         <label class="label">CDR Report</label>
         <input type="file" id="cdrFile"><br>
 
-        <button onclick="processFiles()">Generate Report</button>
+        <!-- Manual -->
+        <button onclick="processFiles()">📊 Generate Report</button>
+
+        <!-- Auto -->
+        <button onclick="runAutoReport()">🚀 Generate Auto Report</button>
 
         <div id="loading" class="loading">Processing... ⏳</div>
 
     </div>
 </div>
 
-<!-- 🔥 Excel -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- 🔥 Firebase (FIXED) -->
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
 
-<!-- 🔥 Main Script -->
 <script src="script.js"></script>
 
 </body>

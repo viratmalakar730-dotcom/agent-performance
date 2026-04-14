@@ -1,5 +1,5 @@
 // ===============================
-// 🔥 FIREBASE CONFIG (UNCHANGED)
+// 🔥 FIREBASE CONFIG
 // ===============================
 const firebaseConfig = {
   apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
@@ -16,7 +16,7 @@ const db = firebase.database();
 
 
 // ===============================
-// 🔥 TIME FUNCTIONS (UNCHANGED)
+// 🔥 TIME FUNCTIONS
 // ===============================
 function toSeconds(t){
     if(!t) return 0;
@@ -34,7 +34,7 @@ function toTime(sec){
 
 
 // ===============================
-// 🔥 AUTO REPORT (FIXED)
+// 🔥 AUTO REPORT (FINAL FIXED)
 // ===============================
 function runAutoReport(){
 
@@ -75,7 +75,7 @@ function runAutoReport(){
 
 
 // ===============================
-// 🔥 PNG COPY (FIXED)
+// 🔥 PNG COPY
 // ===============================
 function copyImage(){
 
@@ -99,7 +99,7 @@ function copyImage(){
 
 
 // ===============================
-// 🔥 EXCEL EXPORT (FIXED)
+// 🔥 EXCEL EXPORT
 // ===============================
 function exportExcel(){
 
@@ -117,7 +117,7 @@ function exportExcel(){
 
 
 // ===============================
-// 🔥 PROCESS FILES (UNCHANGED)
+// 🔥 PROCESS FILES (MANUAL)
 // ===============================
 function processFiles(){
 
@@ -229,7 +229,7 @@ function processFiles(){
 
 
 // ===============================
-// 🔥 बाकी सब (UNCHANGED)
+// 🔥 LOAD DASHBOARD
 // ===============================
 function loadDashboard(final, ivr, reportTime){
 
@@ -277,6 +277,10 @@ function loadDashboard(final, ivr, reportTime){
         "Report Time: " + (reportTime || "");
 }
 
+
+// ===============================
+// 🔥 AUTO LOAD
+// ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
     db.ref("dashboard").on("value",(snap)=>{
@@ -288,6 +292,10 @@ document.addEventListener("DOMContentLoaded", ()=>{
     });
 });
 
+
+// ===============================
+// 🔍 SEARCH
+// ===============================
 function searchAgent(){
     let v=document.getElementById("search").value.toLowerCase();
     document.querySelectorAll("#table tbody tr").forEach(r=>{
@@ -295,6 +303,10 @@ function searchAgent(){
     });
 }
 
+
+// ===============================
+// 🔄 RESET
+// ===============================
 function resetApp(){
     location="index.html";
 }

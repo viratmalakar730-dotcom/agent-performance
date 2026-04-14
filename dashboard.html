@@ -1,32 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Live Agent Dashboard</title>
+<title>Live Agent Dashboard</title>
 
-    <link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="style.css">
 
-    <!-- 🔥 FIREBASE -->
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
 
 </head>
 
 <body>
 
-<!-- 🔥 TOP BANNER -->
 <div class="top-banner">
-
-    <div class="title-card">
-        Live Agent Performance Dashboard
-    </div>
-
-    <div class="time-card" id="reportTime">
-        Report Time:
-    </div>
-
+    <div class="title-card">Live Agent Performance Dashboard</div>
+    <div class="time-card" id="reportTime">Report Time:</div>
 </div>
 
-<!-- 🔥 SUMMARY -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
@@ -35,20 +25,14 @@
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
-<!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<!-- 🔘 BUTTONS -->
 <div>
     <button onclick="copyImage()">📸 Copy PNG</button>
     <button onclick="exportExcel()">📊 Export Excel</button>
     <button onclick="resetApp()">🔄 Reset</button>
-
-    <!-- 🔥 NEW BUTTON -->
-    <button onclick="runAutoReport()">🚀 Generate Auto Report</button>
 </div>
 
-<!-- 📊 TABLE -->
 <table id="table">
 <thead>
 <tr>
@@ -64,39 +48,13 @@
 <th>OB Mature</th>
 </tr>
 </thead>
-
 <tbody></tbody>
 </table>
 
-<!-- 🔥 LIB -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
-<!-- 🔥 SCRIPT -->
 <script src="script.js"></script>
-
-<!-- 🔥 AUTO REPORT SCRIPT -->
-<script>
-function runAutoReport() {
-
-    alert("⏳ Auto Report generate ho raha hai...");
-
-    fetch("http://localhost:3000/run-flow")
-    .then(res => res.text())
-    .then(data => {
-
-        alert("✅ Report Generated Successfully");
-
-        // 🔄 dashboard refresh
-        location.reload();
-
-    })
-    .catch(err => {
-        alert("❌ Error: " + err);
-    });
-
-}
-</script>
 
 </body>
 </html>

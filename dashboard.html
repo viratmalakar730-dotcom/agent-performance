@@ -1,22 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Live Agent Dashboard</title>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 
-<link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-
+    <!-- Firebase -->
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
 </head>
-
 <body>
 
+<!-- 🔥 TOP BANNER -->
 <div class="top-banner">
     <div class="title-card">Live Agent Performance Dashboard</div>
-    <div class="time-card" id="reportTime">Report Time:</div>
+    <div id="reportTime" class="time-card"></div>
 </div>
 
+<!-- 🔥 SUMMARY -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
@@ -25,34 +25,32 @@
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
+<!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<div>
-    <button onclick="copyImage()">📸 Copy PNG</button>
-    <button onclick="exportExcel()">📊 Export Excel</button>
-    <button onclick="resetApp()">🔄 Reset</button>
-</div>
+<br>
 
+<!-- 🔘 BUTTON -->
+<button onclick="resetApp()">Reset</button>
+
+<!-- 📊 TABLE -->
 <table id="table">
-<thead>
-<tr>
-<th>Employee ID</th>
-<th>Agent Full Name</th>
-<th>Total Login</th>
-<th>Net Login</th>
-<th>Total Break</th>
-<th>Total Meeting</th>
-<th>AHT</th>
-<th>Total Mature Call</th>
-<th>IB Mature</th>
-<th>OB Mature</th>
-</tr>
-</thead>
-<tbody></tbody>
+    <thead>
+        <tr>
+            <th>EMPLOYEE ID</th>
+            <th>AGENT FULL NAME</th>
+            <th>TOTAL LOGIN</th>
+            <th>NET LOGIN</th>
+            <th>TOTAL BREAK</th>
+            <th>TOTAL MEETING</th>
+            <th>AHT</th>
+            <th>TOTAL MATURE CALL</th>
+            <th>IB MATURE</th>
+            <th>OB MATURE</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
 </table>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://unpkg.com/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
 
 <script src="script.js"></script>
 

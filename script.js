@@ -34,22 +34,23 @@ function toTime(sec){
 
 
 // ===============================
-// 🔥 AUTO REPORT (UPGRADED)
+// 🔥 AUTO REPORT (FIXED)
 // ===============================
 function runAutoReport(){
 
     let loader = document.getElementById("loading");
     if(loader) loader.style.display="block";
 
-    // 🔥 IMPORTANT → ngrok URL यहाँ डालना है
     const URL = "https://reprimand-enclose-clumsily.ngrok-free.dev/run-flow";
 
     fetch(URL, {
         method: "GET",
-        mode: "cors"
+        headers: {
+            "ngrok-skip-browser-warning": "true"
+        }
     })
     .then(res => {
-        if(!res.ok) throw new Error("Server not responding");
+        if(!res.ok) throw new Error("Server issue");
         return res.text();
     })
     .then(data => {
@@ -58,7 +59,6 @@ function runAutoReport(){
 
         alert("✅ Auto Report Generated");
 
-        // थोड़ा delay ताकि firebase load हो जाए
         setTimeout(()=>{
             window.location = "dashboard.html";
         },1000);
@@ -70,11 +70,12 @@ function runAutoReport(){
 
         alert("❌ Server connect nahi hua\n\nCheck:\n1. server.js run\n2. ngrok run\n3. URL correct");
     });
+
 }
 
 
 // ===============================
-// 🔥 PNG COPY FIX (UPGRADED)
+// 🔥 PNG COPY (FIXED)
 // ===============================
 function copyImage(){
 
@@ -82,16 +83,13 @@ function copyImage(){
 
         canvas.toBlob(blob => {
 
-            if (!navigator.clipboard) {
-                alert("Clipboard not supported");
-                return;
+            try{
+                const item = new ClipboardItem({ "image/png": blob });
+                navigator.clipboard.write([item]);
+                alert("📸 PNG Copied");
+            }catch{
+                alert("❌ Copy failed (browser permission issue)");
             }
-
-            const item = new ClipboardItem({ "image/png": blob });
-
-            navigator.clipboard.write([item])
-            .then(()=> alert("📸 PNG Copied"))
-            .catch(()=> alert("❌ Copy failed (browser permission issue)"));
 
         });
 
@@ -101,22 +99,19 @@ function copyImage(){
 
 
 // ===============================
-// 🔥 EXCEL EXPORT FIX (UPGRADED)
+// 🔥 EXCEL EXPORT (FIXED)
 // ===============================
 function exportExcel(){
 
     let table = document.getElementById("table");
 
     if(!table){
-        alert("No data to export");
+        alert("No data");
         return;
     }
 
     let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
-
-    let fileName = "Agent_Report_" + new Date().toISOString().slice(0,10) + ".xlsx";
-
-    XLSX.writeFile(wb, fileName);
+    XLSX.writeFile(wb, "Agent_Report.xlsx");
 
 }
 

@@ -34,14 +34,14 @@ function toTime(sec){
 
 
 // ===============================
-// 🔥 AUTO REPORT BUTTON (ADDED)
+// 🔥 AUTO REPORT (NGROK VERSION)
 // ===============================
 function runAutoReport(){
 
     let loader = document.getElementById("loading");
     if(loader) loader.style.display="block";
 
-    fetch("http://localhost:3000/run-flow")
+    fetch("https://reprimand-enclose-clumsily.ngrok-free.dev/run-flow")
     .then(res => res.text())
     .then(data => {
 
@@ -59,7 +59,7 @@ function runAutoReport(){
 
 
 // ===============================
-// 🔥 PNG COPY FIX (FINAL)
+// 🔥 PNG COPY FIX
 // ===============================
 function copyImage(){
 
@@ -70,7 +70,7 @@ function copyImage(){
             const item = new ClipboardItem({ "image/png": blob });
             navigator.clipboard.write([item]);
 
-            alert("📸 PNG Copied Successfully");
+            alert("📸 PNG Copied");
 
         });
 
@@ -80,7 +80,7 @@ function copyImage(){
 
 
 // ===============================
-// 🔥 EXCEL EXPORT FIX (FINAL)
+// 🔥 EXCEL EXPORT FIX
 // ===============================
 function exportExcel(){
 
@@ -94,7 +94,7 @@ function exportExcel(){
 
 
 // ===============================
-// 🔥 PROCESS FILES (UNCHANGED)
+// 🔥 PROCESS FILES (MANUAL)
 // ===============================
 function processFiles(){
 
@@ -189,17 +189,6 @@ function processFiles(){
                 ob: r.total - r.ib
             }));
 
-            if(!final.length){
-                alert("No data generated ❌");
-                return;
-            }
-
-            sessionStorage.setItem("data", JSON.stringify({
-                final,
-                ivr,
-                reportTime
-            }));
-
             db.ref("dashboard").set({
                 final,
                 ivr,
@@ -225,8 +214,6 @@ function loadDashboard(final, ivr, reportTime){
     if(!tb) return;
 
     tb.innerHTML="";
-
-    let max = Math.max(...final.map(x=>x.total));
 
     let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
 
@@ -269,15 +256,9 @@ function loadDashboard(final, ivr, reportTime){
 
 
 // ===============================
-// 🔥 AUTO LOAD + LIVE
+// 🔥 AUTO LOAD
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
-
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    if(d.final){
-        loadDashboard(d.final, d.ivr, d.reportTime);
-    }
 
     db.ref("dashboard").on("value",(snap)=>{
         let data = snap.val();
@@ -304,6 +285,5 @@ function searchAgent(){
 // 🔄 RESET
 // ===============================
 function resetApp(){
-    sessionStorage.clear();
     location="index.html";
 }

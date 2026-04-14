@@ -32,6 +32,7 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
+// 🔥 CALL COLOR
 function getGradientClass(val,max){
     let p = val/max;
     if(p >= 0.75) return "green";
@@ -68,9 +69,11 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
+            // 🔥 REPORT TIME
             let reportRow = aprData[1][0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
+            // CLEAN
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
@@ -183,7 +186,10 @@ function loadDashboard(final, ivr, reportTime){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
-        let netCls = r.net >= 28800 ? "netGreen" : "";
+        // 🔥 CONDITIONAL FORMATTING
+        let netCls = r.net >= 28800 ? "netGreen" : "red3D";
+        let breakCls = r.breakTime > 2100 ? "red3D" : "green";
+        let meetingCls = r.meeting > 2100 ? "red3D" : "green";
         let callCls = getGradientClass(r.total, max);
 
         let tr=document.createElement("tr");
@@ -193,8 +199,8 @@ function loadDashboard(final, ivr, reportTime){
         <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
         <td class="${netCls}">${toTime(r.net)}</td>
-        <td>${toTime(r.breakTime)}</td>
-        <td>${toTime(r.meeting)}</td>
+        <td class="${breakCls}">${toTime(r.breakTime)}</td>
+        <td class="${meetingCls}">${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
         <td class="${callCls}">${r.total}</td>
         <td>${r.ib}</td>
@@ -235,7 +241,6 @@ document.addEventListener("DOMContentLoaded", ()=>{
         }
     });
 
-    // 🔥 AUTO REFRESH (2 MIN)
     setInterval(()=>{
         location.reload();
     },120000);

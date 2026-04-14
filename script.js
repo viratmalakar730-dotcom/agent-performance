@@ -32,20 +32,69 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-// ===============================
-// 🔥 CALL COLOR LOGIC (FIXED)
-// ===============================
-function getGradientClass(val, max){
-    let p = val / max;
 
-    if(p >= 0.75) return "green";
-    if(p >= 0.45) return "yellow";
-    return "red3D"; // 🔥 FIXED (earlier "red")
+// ===============================
+// 🔥 AUTO REPORT BUTTON (ADDED)
+// ===============================
+function runAutoReport(){
+
+    let loader = document.getElementById("loading");
+    if(loader) loader.style.display="block";
+
+    fetch("http://localhost:3000/run-flow")
+    .then(res => res.text())
+    .then(data => {
+
+        if(loader) loader.style.display="none";
+
+        alert("✅ Auto Report Generated");
+
+        window.location = "dashboard.html";
+    })
+    .catch(err=>{
+        if(loader) loader.style.display="none";
+        alert("❌ Error: " + err);
+    });
 }
 
 
 // ===============================
-// 🔥 PROCESS FILES
+// 🔥 PNG COPY FIX (FINAL)
+// ===============================
+function copyImage(){
+
+    html2canvas(document.body).then(canvas => {
+
+        canvas.toBlob(blob => {
+
+            const item = new ClipboardItem({ "image/png": blob });
+            navigator.clipboard.write([item]);
+
+            alert("📸 PNG Copied Successfully");
+
+        });
+
+    });
+
+}
+
+
+// ===============================
+// 🔥 EXCEL EXPORT FIX (FINAL)
+// ===============================
+function exportExcel(){
+
+    let table = document.getElementById("table");
+
+    let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
+
+    XLSX.writeFile(wb, "Agent_Report.xlsx");
+
+}
+
+
+// ===============================
+// 🔥 PROCESS FILES (UNCHANGED)
 // ===============================
 function processFiles(){
 
@@ -72,18 +121,15 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            // 🔥 REPORT TIME
             let reportRow = aprData[1]?.[0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 CLEAN
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP
             aprData.forEach(r=>{
                 let emp = r[1];
                 if(!emp) return;
@@ -112,7 +158,6 @@ function processFiles(){
                 };
             });
 
-            // 🔥 CDR LOOP
             cdrData.forEach(r=>{
                 let emp = r[1];
                 let skill = r[7];
@@ -149,7 +194,6 @@ function processFiles(){
                 return;
             }
 
-            // 🔥 SAVE
             sessionStorage.setItem("data", JSON.stringify({
                 final,
                 ivr,
@@ -193,24 +237,17 @@ function loadDashboard(final, ivr, reportTime){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
-        let netCls = r.net >= 28800 ? "netGreen" : "";
-
-        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
-        let meetingCls = r.meeting > 2100 ? "meetRed" : "";
-
-        let callCls = getGradientClass(r.total, max);
-
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
+        <td>${toTime(r.net)}</td>
+        <td>${toTime(r.breakTime)}</td>
+        <td>${toTime(r.meeting)}</td>
         <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
+        <td>${r.total}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -226,10 +263,8 @@ function loadDashboard(final, ivr, reportTime){
     let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
     document.getElementById("aht").innerText = toTime(overallAHT);
 
-    if(document.getElementById("reportTime")){
-        document.getElementById("reportTime").innerText =
-            "Report Time: " + (reportTime || "");
-    }
+    document.getElementById("reportTime").innerText =
+        "Report Time: " + (reportTime || "");
 }
 
 

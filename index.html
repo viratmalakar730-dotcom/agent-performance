@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Upload</title>
-<link rel="stylesheet" href="style.css">
+    <title>Upload</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
@@ -13,11 +13,12 @@
         <h2>Agent Performance Dashboard</h2>
 
         <label class="label">APR Report</label>
-        <input type="file" id="aprFile"><br>
+        <input type="file" id="aprFile"><br><br>
 
         <label class="label">CDR Report</label>
-        <input type="file" id="cdrFile"><br>
+        <input type="file" id="cdrFile"><br><br>
 
+        <!-- 🔥 FIXED BUTTON -->
         <button onclick="processFiles()">Generate Report</button>
 
         <div id="loading" class="loading">Processing... ⏳</div>
@@ -26,10 +27,10 @@
 
 </div>
 
-<!-- ✅ XLSX पहले -->
+<!-- 🔥 IMPORTANT LIBRARY -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- ✅ फिर तुम्हारा script -->
+<!-- 🔥 YOUR SCRIPT (VERY IMPORTANT) -->
 <script src="script.js"></script>
 
 </body>

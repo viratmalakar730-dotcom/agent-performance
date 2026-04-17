@@ -1,20 +1,28 @@
 // ===============================
-// 🔥 FIREBASE CONFIG
+// 🔥 SAFE FIREBASE INIT
 // ===============================
-const firebaseConfig = {
-  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
-  authDomain: "agent-performance-live.firebaseapp.com",
-  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-  projectId: "agent-performance-live"
-};
+let db = null;
 
-if (typeof firebase !== "undefined" && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+try{
+    const firebaseConfig = {
+        apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+        authDomain: "agent-performance-live.firebaseapp.com",
+        databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+        projectId: "agent-performance-live"
+    };
+
+    if (typeof firebase !== "undefined") {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
+    }
+}catch(e){
+    console.log("Firebase Disabled:", e);
 }
-const db = firebase.database();
 
 // ===============================
-// 🔥 TIME
+// 🔥 TIME FUNCTIONS
 // ===============================
 function toSeconds(t){
     if(!t) return 0;
@@ -31,110 +39,15 @@ function toTime(sec){
 }
 
 // ===============================
-// 🔥 DYNAMIC CALL COLOR
+// 🔥 CALL COLOR (DYNAMIC)
 // ===============================
 function getCallClass(val, max){
     if(max === 0) return "";
+    let r = val/max;
 
-    let ratio = val / max;
-
-    if(ratio >= 0.75) return "green3D";
-    if(ratio >= 0.40) return "yellow3D";
+    if(r >= 0.75) return "green3D";
+    if(r >= 0.4) return "yellow3D";
     return "red3D";
-}
-
-// ===============================
-// 🔥 PROCESS FILES
-// ===============================
-function processFiles(){
-
-    let aprFile = document.getElementById("aprFile").files[0];
-    let cdrFile = document.getElementById("cdrFile").files[0];
-
-    if(!aprFile || !cdrFile){
-        alert("Upload both files");
-        return;
-    }
-
-    document.getElementById("loading").style.display="block";
-
-    let reader1 = new FileReader();
-    let reader2 = new FileReader();
-
-    reader1.onload = function(e){
-
-        let apr = XLSX.read(e.target.result, {type:'binary'});
-        let aprData = XLSX.utils.sheet_to_json(apr.Sheets[apr.SheetNames[0]], {header:1});
-
-        reader2.onload = function(e2){
-
-            let cdr = XLSX.read(e2.target.result, {type:'binary'});
-            let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
-
-            let reportRow = aprData[1]?.[0] || "";
-            let reportTime = reportRow.split("to")[1]?.trim() || "";
-
-            aprData.splice(0,3);
-            cdrData.splice(0,2);
-
-            let map = {};
-            let ivr = 0;
-
-            // 🔥 APR LOOP
-            aprData.forEach(r=>{
-                let emp = r[1];
-                if(!emp) return;
-
-                let login = toSeconds(r[3]);
-
-                let breakTime = toSeconds(r[19]) + toSeconds(r[22]) + toSeconds(r[24]);
-                let meeting = toSeconds(r[20]) + toSeconds(r[23]);
-
-                map[emp] = {
-                    emp,
-                    name: r[2] || "",
-                    login,
-                    breakTime,
-                    meeting,
-                    net: login - breakTime,
-                    ahtRaw: toSeconds(r[5]),
-                    total: 0,
-                    ib: 0
-                };
-            });
-
-            // 🔥 CDR LOOP
-            cdrData.forEach(r=>{
-                let emp = r[1];
-                let skill = r[7];
-                let dispo = (r[25]||"").toLowerCase();
-
-                if(skill==="INBOUND") ivr++;
-
-                if(!map[emp]) return;
-
-                if(dispo==="callmatured"||dispo==="transfer"){
-                    map[emp].total++;
-                    if(skill==="INBOUND") map[emp].ib++;
-                }
-            });
-
-            let final = Object.values(map).map(r=>({
-                ...r,
-                aht: r.total ? r.ahtRaw/r.total : 0,
-                ob: r.total - r.ib
-            }));
-
-            sessionStorage.setItem("data", JSON.stringify({final,ivr,reportTime}));
-            db.ref("dashboard").set({final,ivr,reportTime});
-
-            window.location="dashboard.html";
-        };
-
-        reader2.readAsBinaryString(cdrFile);
-    };
-
-    reader1.readAsBinaryString(aprFile);
 }
 
 // ===============================
@@ -142,20 +55,25 @@ function processFiles(){
 // ===============================
 function loadDashboard(final, ivr, reportTime){
 
-    let tb=document.querySelector("#table tbody");
+    let tb = document.querySelector("#table tbody");
     if(!tb) return;
 
-    tb.innerHTML="";
+    tb.innerHTML = "";
 
     let max = Math.max(...final.map(x=>x.total));
 
+    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
+
     final.forEach(r=>{
+
+        totalCalls+=r.total;
+        totalIB+=r.ib;
+        totalOB+=r.ob;
+        totalTalk+=(r.aht*r.total);
 
         let netCls = r.net >= 28800 ? "netGreen3D" : "";
         let breakCls = r.breakTime > 2100 ? "red3D" : "";
         let meetingCls = r.meeting > 2100 ? "red3D" : "";
-
-        // 🔥 DYNAMIC CALL COLOR
         let callCls = getCallClass(r.total, max);
 
         let tr=document.createElement("tr");
@@ -176,13 +94,10 @@ function loadDashboard(final, ivr, reportTime){
         tb.appendChild(tr);
     });
 
-    document.getElementById("ivr").innerText=ivr;
-    document.getElementById("total").innerText=final.reduce((a,b)=>a+b.total,0);
-    document.getElementById("ib").innerText=final.reduce((a,b)=>a+b.ib,0);
-    document.getElementById("ob").innerText=final.reduce((a,b)=>a+b.ob,0);
-
-    let totalTalk = final.reduce((a,b)=>a+(b.aht*b.total),0);
-    let totalCalls = final.reduce((a,b)=>a+b.total,0);
+    document.getElementById("ivr").innerText=ivr || 0;
+    document.getElementById("total").innerText=totalCalls;
+    document.getElementById("ib").innerText=totalIB;
+    document.getElementById("ob").innerText=totalOB;
 
     document.getElementById("aht").innerText =
         totalCalls ? toTime(totalTalk/totalCalls) : "00:00:00";
@@ -192,20 +107,109 @@ function loadDashboard(final, ivr, reportTime){
 }
 
 // ===============================
-// 🔥 LIVE
+// 🔥 LOAD DATA (SAFE)
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
-    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+    try{
+        let d = JSON.parse(sessionStorage.getItem("data") || "{}");
 
-    if(d.final){
-        loadDashboard(d.final, d.ivr, d.reportTime);
+        if(d.final){
+            loadDashboard(d.final, d.ivr, d.reportTime);
+        }
+
+        if(db){
+            db.ref("dashboard").on("value",(snap)=>{
+                let data = snap.val();
+                if(data && data.final){
+                    loadDashboard(data.final, data.ivr, data.reportTime);
+                }
+            });
+        }
+
+    }catch(e){
+        console.log("Load Error:", e);
+    }
+});
+
+// ===============================
+// 🔥 PNG COPY (FIXED)
+// ===============================
+function copyImage(){
+    if(typeof html2canvas === "undefined"){
+        alert("PNG library missing ❌");
+        return;
     }
 
-    db.ref("dashboard").on("value",(snap)=>{
-        let data = snap.val();
-        if(data && data.final){
-            loadDashboard(data.final, data.ivr, data.reportTime);
-        }
+    html2canvas(document.getElementById("table"),{scale:2}).then(canvas=>{
+        canvas.toBlob(blob=>{
+            navigator.clipboard.write([
+                new ClipboardItem({"image/png":blob})
+            ]);
+            alert("Copied ✅");
+        });
     });
+}
+
+// ===============================
+// 🔥 EXCEL EXPORT (FIXED)
+// ===============================
+function exportExcel(){
+
+    if(typeof XLSX === "undefined"){
+        alert("Excel library missing ❌");
+        return;
+    }
+
+    let d = JSON.parse(sessionStorage.getItem("data") || "{}");
+    if(!d.final) return;
+
+    let ws_data=[["Emp","Name","Login","Net","Break","Meeting","AHT","Call","IB","OB"]];
+
+    d.final.forEach(r=>{
+        ws_data.push([
+            r.emp,r.name,
+            toTime(r.login),toTime(r.net),
+            toTime(r.breakTime),toTime(r.meeting),
+            toTime(r.aht),r.total,r.ib,r.ob
+        ]);
+    });
+
+    let ws = XLSX.utils.aoa_to_sheet(ws_data);
+    let wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb,ws,"Report");
+
+    XLSX.writeFile(wb,"Agent_Report.xlsx");
+}
+
+// ===============================
+// 🔍 SEARCH
+// ===============================
+function searchAgent(){
+    let v=document.getElementById("search").value.toLowerCase();
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
+    });
+}
+
+// ===============================
+// 🔄 RESET
+// ===============================
+function resetApp(){
+    sessionStorage.clear();
+    location="index.html";
+}
+
+// ===============================
+// 🔥 ROW CLICK
+// ===============================
+document.addEventListener("click", function(e){
+    let row = e.target.closest("tr");
+    if(!row || row.parentNode.tagName !== "TBODY") return;
+
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.classList.remove("rowActive");
+    });
+
+    row.classList.add("rowActive");
 });

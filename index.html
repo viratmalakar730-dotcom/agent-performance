@@ -1,35 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload Reports</title>
-    <link rel="stylesheet" href="style.css">
-
-    <!-- XLSX -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-    <!-- Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
+<title>Upload</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 
 <div class="container">
+
     <div class="upload-box">
 
         <h2>Agent Performance Dashboard</h2>
 
-        <p class="label">APR File</p>
+        <label class="label">APR Report</label>
         <input type="file" id="aprFile"><br><br>
 
-        <p class="label">CDR File</p>
+        <label class="label">CDR Report</label>
         <input type="file" id="cdrFile"><br><br>
 
-        <button onclick="processFiles()">Generate Dashboard</button>
+        <button onclick="processFiles()">Generate Report</button>
 
-        <p id="loading" class="loading">Processing... ⏳</p>
+        <div id="loading" class="loading">Processing... ⏳</div>
 
     </div>
+
 </div>
+
+<!-- XLSX -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
 
 <script src="script.js"></script>
 

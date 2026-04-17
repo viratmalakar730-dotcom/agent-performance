@@ -32,15 +32,12 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-// ===============================
-// 🔥 CALL COLOR LOGIC (FIXED)
-// ===============================
-function getGradientClass(val, max){
-    let p = val / max;
-
+// 🔥 CALL COLOR
+function getGradientClass(val,max){
+    let p = val/max;
     if(p >= 0.75) return "green";
     if(p >= 0.45) return "yellow";
-    return "red3D"; // 🔥 FIXED (earlier "red")
+    return "red3D";
 }
 
 
@@ -73,18 +70,19 @@ function processFiles(){
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
             // 🔥 REPORT TIME
-            let reportRow = aprData[1]?.[0] || "";
+            let reportRow = aprData[1][0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 CLEAN
+            // CLEAN
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP
+            // APR LOOP
             aprData.forEach(r=>{
+
                 let emp = r[1];
                 if(!emp) return;
 
@@ -112,8 +110,9 @@ function processFiles(){
                 };
             });
 
-            // 🔥 CDR LOOP
+            // CDR LOOP
             cdrData.forEach(r=>{
+
                 let emp = r[1];
                 let skill = r[7];
                 let dispo = (r[25] || "").toLowerCase();
@@ -144,12 +143,6 @@ function processFiles(){
                 ob: r.total - r.ib
             }));
 
-            if(!final.length){
-                alert("No data generated ❌");
-                return;
-            }
-
-            // 🔥 SAVE
             sessionStorage.setItem("data", JSON.stringify({
                 final,
                 ivr,
@@ -193,18 +186,17 @@ function loadDashboard(final, ivr, reportTime){
         totalOB+=r.ob;
         totalTalk+=(r.aht*r.total);
 
-        let netCls = r.net >= 28800 ? "netGreen" : "";
-
-        let breakCls = r.breakTime > 2100 ? "breakRed" : "";
-        let meetingCls = r.meeting > 2100 ? "meetRed" : "";
-
+        // 🔥 CONDITIONAL FORMATTING
+        let netCls = r.net >= 28800 ? "netGreen" : "red3D";
+        let breakCls = r.breakTime > 2100 ? "red3D" : "green";
+        let meetingCls = r.meeting > 2100 ? "red3D" : "green";
         let callCls = getGradientClass(r.total, max);
 
         let tr=document.createElement("tr");
 
         tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
         <td>${toTime(r.login)}</td>
         <td class="${netCls}">${toTime(r.net)}</td>
         <td class="${breakCls}">${toTime(r.breakTime)}</td>
@@ -226,15 +218,13 @@ function loadDashboard(final, ivr, reportTime){
     let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
     document.getElementById("aht").innerText = toTime(overallAHT);
 
-    if(document.getElementById("reportTime")){
-        document.getElementById("reportTime").innerText =
-            "Report Time: " + (reportTime || "");
-    }
+    document.getElementById("reportTime").innerText =
+        "Last Update Till: " + (reportTime || "");
 }
 
 
 // ===============================
-// 🔥 AUTO LOAD + LIVE
+// 🔥 LIVE + AUTO REFRESH
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
@@ -246,11 +236,14 @@ document.addEventListener("DOMContentLoaded", ()=>{
 
     db.ref("dashboard").on("value",(snap)=>{
         let data = snap.val();
-
         if(data && data.final){
             loadDashboard(data.final, data.ivr, data.reportTime);
         }
     });
+
+    setInterval(()=>{
+        location.reload();
+    },120000);
 });
 
 
@@ -272,3 +265,18 @@ function resetApp(){
     sessionStorage.clear();
     location="index.html";
 }
+
+
+// ===============================
+// 🔥 ROW CLICK HIGHLIGHT
+// ===============================
+document.addEventListener("click", function(e){
+    let row = e.target.closest("tr");
+    if(!row || row.parentNode.tagName !== "TBODY") return;
+
+    document.querySelectorAll("#table tbody tr").forEach(r=>{
+        r.classList.remove("rowActive");
+    });
+
+    row.classList.add("rowActive");
+});

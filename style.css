@@ -9,19 +9,19 @@ body {
     font-weight: bold;
 }
 
-/* 🔥 TITLE (STRONG 3D) */
+/* 🔥 TITLE (ENHANCED 3D) */
 h2 {
     font-size: 34px;
     color: gold;
     margin-top: 20px;
 
     text-shadow:
-        4px 4px 8px rgba(0,0,0,0.9),
+        5px 5px 10px rgba(0,0,0,1),
         -1px -1px 2px rgba(255,255,255,0.3),
-        0 0 15px gold;
+        0 0 18px gold;
 }
 
-/* 🔥 REPORT TIME (UPGRADED 3D) */
+/* 🔥 REPORT TIME */
 #reportTime {
     color: #00e5ff;
     font-size: 17px;
@@ -30,7 +30,6 @@ h2 {
 
     text-shadow:
         3px 3px 6px rgba(0,0,0,0.9),
-        -1px -1px 2px rgba(255,255,255,0.2),
         0 0 12px #00e5ff;
 }
 
@@ -51,13 +50,9 @@ h2 {
     min-width: 170px;
 
     box-shadow:
-        6px 6px 16px rgba(0,0,0,0.8),
-        inset 3px 3px 7px rgba(255,255,255,0.6),
-        inset -4px -4px 7px rgba(0,0,0,0.6);
-}
-
-.card span {
-    font-size: 22px;
+        8px 8px 18px rgba(0,0,0,0.9),
+        inset 3px 3px 7px rgba(255,255,255,0.7),
+        inset -5px -5px 8px rgba(0,0,0,0.7);
 }
 
 /* 🔍 SEARCH */
@@ -79,8 +74,8 @@ button {
     cursor: pointer;
 
     box-shadow:
-        4px 4px 10px rgba(0,0,0,0.7),
-        inset 1px 1px 3px rgba(255,255,255,0.6);
+        5px 5px 12px rgba(0,0,0,0.8),
+        inset 1px 1px 4px rgba(255,255,255,0.6);
 }
 
 button:hover {
@@ -99,10 +94,10 @@ table {
     overflow: hidden;
 
     border: 3px solid #000;
-    box-shadow: 0 0 18px rgba(0,0,0,0.8);
+    box-shadow: 0 0 22px rgba(0,0,0,0.9);
 }
 
-/* 🔵 HEADER (STRONG 3D) */
+/* 🔵 HEADER */
 th {
     background: linear-gradient(145deg, #0b3d91, #082c6c);
     color: white;
@@ -111,20 +106,19 @@ th {
     border: 2px solid #000;
 
     box-shadow:
-        inset 3px 3px 6px rgba(255,255,255,0.2),
-        inset -4px -4px 8px rgba(0,0,0,0.7);
+        inset 3px 3px 7px rgba(255,255,255,0.25),
+        inset -5px -5px 9px rgba(0,0,0,0.8);
 }
 
-/* 📌 CELLS (IMPROVED 3D) */
+/* 📌 CELLS */
 td {
     padding: 10px;
     border: 2px solid #444;
     text-align: center;
-    font-weight: bold;
 
     box-shadow:
         inset 1px 1px 3px rgba(255,255,255,0.7),
-        inset -2px -2px 4px rgba(0,0,0,0.25);
+        inset -3px -3px 5px rgba(0,0,0,0.25);
 }
 
 /* ✨ EMPLOYEE STYLE */
@@ -134,93 +128,61 @@ td:nth-child(2) {
 }
 
 /* ============================= */
-/* 🔥 CONDITIONAL 3D (FINAL FIX) */
+/* 🔥 FINAL CONDITIONAL 3D */
 /* ============================= */
 
 /* 🟢 NET LOGIN */
-.netGreen {
+.netGreen3D {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
 
     box-shadow:
-        6px 6px 14px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.4),
-        inset -4px -4px 8px rgba(0,0,0,0.6);
+        7px 7px 16px rgba(0,0,0,1),
+        inset 3px 3px 6px rgba(255,255,255,0.5),
+        inset -5px -5px 9px rgba(0,0,0,0.7);
 }
 
-/* 🔴 FIXED RED (NO MULTIPLE SHADE) */
+/* 🔴 UNIVERSAL RED */
 .red3D {
     background: #e60000;
     color: white;
 
     box-shadow:
-        6px 6px 14px rgba(0,0,0,0.9),
+        7px 7px 16px rgba(0,0,0,1),
         inset 3px 3px 6px rgba(255,255,255,0.3),
-        inset -4px -4px 8px rgba(0,0,0,0.7);
+        inset -5px -5px 9px rgba(0,0,0,0.8);
 }
 
-/* 🟡 STRONG YELLOW */
-.yellow {
-    background: linear-gradient(145deg, #ffd600, #ffea00);
-
-    box-shadow:
-        6px 6px 14px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.6),
-        inset -4px -4px 8px rgba(0,0,0,0.5);
-}
-
-/* 🟢 STRONG GREEN */
-.green {
+/* 🟢 HIGH CALL */
+.green3D {
     background: linear-gradient(145deg, #00c853, #00e676);
     color: white;
 
     box-shadow:
-        6px 6px 14px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.4),
-        inset -4px -4px 8px rgba(0,0,0,0.6);
+        7px 7px 16px rgba(0,0,0,1),
+        inset 3px 3px 6px rgba(255,255,255,0.5),
+        inset -5px -5px 9px rgba(0,0,0,0.7);
 }
 
-/* 🔴 BREAK HIGH */
-.breakRed {
-    background: #e60000;
-    color: white;
-
-    box-shadow:
-        6px 6px 14px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.3),
-        inset -4px -4px 8px rgba(0,0,0,0.7);
-}
-
-/* 🟡 BREAK MID */
-.breakYellow {
+/* 🟡 MID CALL */
+.yellow3D {
     background: linear-gradient(145deg, #ffd600, #ffea00);
+    color: black;
 
     box-shadow:
-        6px 6px 14px rgba(0,0,0,0.8),
-        inset 3px 3px 6px rgba(255,255,255,0.6),
-        inset -4px -4px 8px rgba(0,0,0,0.5);
+        7px 7px 16px rgba(0,0,0,0.9),
+        inset 3px 3px 6px rgba(255,255,255,0.7),
+        inset -5px -5px 9px rgba(0,0,0,0.6);
 }
 
-/* 🟢 MEETING NORMAL */
-.meetGreen {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
+/* 🔥 ROW CLICK */
+.rowActive {
+    background: linear-gradient(145deg, #ffe066, #ffd700) !important;
+    color: black;
 
     box-shadow:
-        6px 6px 14px rgba(0,0,0,0.8),
-        inset 3px 3px 6px rgba(255,255,255,0.4),
-        inset -4px -4px 8px rgba(0,0,0,0.6);
-}
-
-/* 🔴 MEETING HIGH */
-.meetRed {
-    background: #e60000;
-    color: white;
-
-    box-shadow:
-        6px 6px 14px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.3),
-        inset -4px -4px 8px rgba(0,0,0,0.7);
+        inset 3px 3px 6px rgba(255,255,255,0.7),
+        inset -4px -4px 7px rgba(0,0,0,0.4);
 }
 
 /* 📂 UPLOAD PAGE */
@@ -237,9 +199,9 @@ td:nth-child(2) {
     border-radius: 15px;
 
     box-shadow:
-        6px 6px 18px rgba(0,0,0,0.9),
+        8px 8px 20px rgba(0,0,0,1),
         inset 3px 3px 6px rgba(255,255,255,0.2),
-        inset -4px -4px 8px rgba(0,0,0,0.6);
+        inset -5px -5px 9px rgba(0,0,0,0.7);
 }
 
 /* LABEL */

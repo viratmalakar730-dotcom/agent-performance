@@ -1,60 +1,40 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Agent Performance Dashboard</title>
+    <title>Upload</title>
     <link rel="stylesheet" href="style.css">
 </head>
+<body>
 
-<!-- 🔥 AUTO FULLSCREEN -->
-<body onload="openFullScreen()">
+<div class="container">
 
-<h2>Agent Performance Dashboard</h2>
-<div id="reportTime"></div>
+    <div class="upload-box">
 
-<!-- 🔥 SUMMARY -->
-<div class="cards">
-    <div class="card">IVR Hit<br><span id="ivr"></span></div>
-    <div class="card">Total Mature Calls<br><span id="total"></span></div>
-    <div class="card">IB Mature<br><span id="ib"></span></div>
-    <div class="card">OB Mature<br><span id="ob"></span></div>
-    <div class="card">Overall AHT<br><span id="aht"></span></div>
+        <h2>Agent Performance Dashboard</h2>
+
+        <label class="label">APR Report</label>
+        <input type="file" id="aprFile"><br><br>
+
+        <label class="label">CDR Report</label>
+        <input type="file" id="cdrFile"><br><br>
+
+        <button onclick="processFiles()">Generate Report</button>
+
+        <div id="loading" class="loading">Processing... ⏳</div>
+
+        <!-- ❤️ FOOTER -->
+        <div style="margin-top:20px; font-weight:bold;">
+            ❤️ Powered by Chandan Malakar ❤️
+        </div>
+
+    </div>
+
 </div>
 
-<input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
+<!-- 🔥 XLSX LIBRARY -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<div>
-    <button onclick="copyImage()">Copy PNG</button>
-    <button onclick="exportExcel()">Export Excel</button>
-    <button onclick="resetApp()">Reset</button>
-</div>
-
-<!-- 🔥 TABLE -->
-<table id="table">
-<thead>
-<tr>
-<th>Employee ID</th>
-<th>Agent Full Name</th>
-<th>Total Login</th>
-<th>Net Login</th>
-<th>Total Break</th>
-<th>Total Meeting</th>
-<th>AHT</th>
-<th>Total Mature Call</th>
-<th>IB Mature</th>
-<th>OB Mature</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-
-<div style="margin-top:20px;">
-❤️ Powered by Chandan Malakar ❤️
-</div>
-
-<!-- LIBRARIES -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-<script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-
+<!-- 🔥 MAIN SCRIPT -->
 <script src="script.js"></script>
 
 </body>

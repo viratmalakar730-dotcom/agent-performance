@@ -1,18 +1,25 @@
 // ===============================
-// 🔥 FIREBASE INIT (FIXED)
+// 🔥 FIREBASE INIT (SAFE FIX)
 // ===============================
-const firebaseConfig = {
-  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
-  authDomain: "agent-performance-live.firebaseapp.com",
-  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-  projectId: "agent-performance-live"
-};
+let db = null;
 
-if (typeof firebase !== "undefined" && !firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+try {
+    const firebaseConfig = {
+        apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+        authDomain: "agent-performance-live.firebaseapp.com",
+        databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+        projectId: "agent-performance-live"
+    };
+
+    if (typeof firebase !== "undefined") {
+        if (!firebase.apps.length) {
+            firebase.initializeApp(firebaseConfig);
+        }
+        db = firebase.database();
+    }
+} catch (e) {
+    console.log("Firebase Init Error:", e);
 }
-
-const db = firebase.database();
 
 
 // ===============================
@@ -48,7 +55,7 @@ function getCallClass(val, max){
 
 
 // ===============================
-// 🔥 PROCESS FILES (MAIN FIXED)
+// 🔥 PROCESS FILES
 // ===============================
 function processFiles(){
 
@@ -158,16 +165,18 @@ function processFiles(){
                 reportTime
             }));
 
-            // 🔥 🚀 FORCE FIREBASE UPDATE (IMPORTANT FIX)
-            db.ref("dashboard").set({
-                final: final,
-                ivr: ivr,
-                reportTime: reportTime || new Date().toLocaleString()
-            }).then(()=>{
-                console.log("🔥 Firebase Updated Successfully");
-            }).catch(err=>{
-                console.log("❌ Firebase Error:", err);
-            });
+            // 🔥 FIREBASE UPDATE (FIXED)
+            if(db){
+                db.ref("dashboard").set({
+                    final: final,
+                    ivr: ivr,
+                    reportTime: reportTime || new Date().toLocaleString()
+                }).then(()=>{
+                    console.log("🔥 Firebase Updated Successfully");
+                }).catch(err=>{
+                    console.log("❌ Firebase Error:", err);
+                });
+            }
 
             window.location = "dashboard.html";
         };
@@ -243,17 +252,15 @@ function loadDashboard(final, ivr, reportTime){
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
-    // 🔥 ALWAYS LOAD FIREBASE FIRST
-    db.ref("dashboard").on("value",(snap)=>{
+    if(db){
+        db.ref("dashboard").on("value",(snap)=>{
+            let data = snap.val();
 
-        let data = snap.val();
-
-        console.log("🔥 LIVE DATA:", data);
-
-        if(data && data.final){
-            loadDashboard(data.final, data.ivr, data.reportTime);
-        }
-    });
+            if(data && data.final){
+                loadDashboard(data.final, data.ivr, data.reportTime);
+            }
+        });
+    }
 });
 
 

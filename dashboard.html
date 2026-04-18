@@ -1,28 +1,15 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
-<link rel="stylesheet" href="style.css">
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/7.20.0/firebase-database.js"></script>
-
-<!-- PNG -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-<!-- EXCEL -->
-<script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
-
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<div class="top-banner">
-    <div class="title-card">Live Agent Performance Dashboard</div>
-    <div id="reportTime" class="time-card"></div>
-</div>
+<h2>Agent Performance Dashboard</h2>
+<div id="reportTime"></div>
 
-<!-- SUMMARY -->
+<!-- 🔥 SUMMARY -->
 <div class="cards">
     <div class="card">IVR Hit<br><span id="ivr"></span></div>
     <div class="card">Total Mature Calls<br><span id="total"></span></div>
@@ -31,17 +18,17 @@
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
-<!-- SEARCH -->
+<!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<!-- BUTTONS -->
+<!-- 🔘 BUTTONS -->
 <div>
-<button onclick="copyImage()">Copy PNG</button>
-<button onclick="exportExcel()">Export Excel</button>
-<button onclick="resetApp()">Reset</button>
+    <button onclick="copyImage()">Copy PNG</button>
+    <button onclick="exportExcel()">Export Excel</button>
+    <button onclick="resetApp()">Reset</button>
 </div>
 
-<!-- TABLE -->
+<!-- 📊 TABLE -->
 <table id="table">
 <thead>
 <tr>
@@ -60,6 +47,9 @@
 <tbody></tbody>
 </table>
 
+<!-- LIBRARIES -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
 <script src="script.js"></script>
 
 </body>

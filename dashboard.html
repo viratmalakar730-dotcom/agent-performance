@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Dashboard</title>
+    <title>Agent Performance Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+
+<!-- 🔥 AUTO FULLSCREEN -->
+<body onload="openFullScreen()">
 
 <h2>Agent Performance Dashboard</h2>
 <div id="reportTime"></div>
@@ -18,17 +20,15 @@
     <div class="card">Overall AHT<br><span id="aht"></span></div>
 </div>
 
-<!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search Agent..." onkeyup="searchAgent()">
 
-<!-- 🔘 BUTTONS -->
 <div>
     <button onclick="copyImage()">Copy PNG</button>
     <button onclick="exportExcel()">Export Excel</button>
     <button onclick="resetApp()">Reset</button>
 </div>
 
-<!-- 📊 TABLE -->
+<!-- 🔥 TABLE -->
 <table id="table">
 <thead>
 <tr>
@@ -47,9 +47,14 @@
 <tbody></tbody>
 </table>
 
+<div style="margin-top:20px;">
+❤️ Powered by Chandan Malakar ❤️
+</div>
+
 <!-- LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://unpkg.com/xlsx-js-style@1.2.0/dist/xlsx.bundle.js"></script>
+
 <script src="script.js"></script>
 
 </body>

@@ -21,7 +21,6 @@ try {
     console.log("Firebase Error:", e);
 }
 
-
 // ===============================
 // 🔥 TIME FUNCTIONS
 // ===============================
@@ -39,13 +38,11 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-
 // ===============================
 // 🔥 CALL COLOR
 // ===============================
 function getCallClass(val, max){
     if(max === 0) return "";
-
     let r = val / max;
 
     if(r >= 0.75) return "green3D";
@@ -53,9 +50,8 @@ function getCallClass(val, max){
     return "red3D";
 }
 
-
 // ===============================
-// 🔥 PROCESS FILES (UPLOAD)
+// 🔥 PROCESS FILES
 // ===============================
 function processFiles(){
 
@@ -82,18 +78,15 @@ function processFiles(){
             let cdr = XLSX.read(e2.target.result, {type:'binary'});
             let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
 
-            // 🔥 REPORT TIME
             let reportRow = aprData[1]?.[0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 REMOVE HEADER
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
             let map = {};
             let ivr = 0;
 
-            // 🔥 APR LOOP
             aprData.forEach(r=>{
                 let emp = r[1];
                 if(!emp) return;
@@ -122,7 +115,6 @@ function processFiles(){
                 };
             });
 
-            // 🔥 CDR LOOP
             cdrData.forEach(r=>{
                 let emp = r[1];
                 let skill = r[7];
@@ -134,7 +126,6 @@ function processFiles(){
 
                 if(dispo === "callmatured" || dispo === "transfer"){
                     map[emp].total++;
-
                     if(skill === "INBOUND"){
                         map[emp].ib++;
                     }
@@ -142,16 +133,9 @@ function processFiles(){
             });
 
             let final = Object.values(map).map(r=>({
-                emp: r.emp || "",
-                name: r.name || "",
-                login: r.login || 0,
-                net: r.net || 0,
-                breakTime: r.breakTime || 0,
-                meeting: r.meeting || 0,
+                ...r,
                 aht: r.total ? r.ahtRaw / r.total : 0,
-                total: r.total || 0,
-                ib: r.ib || 0,
-                ob: (r.total || 0) - (r.ib || 0)
+                ob: r.total - r.ib
             }));
 
             if(!final.length){
@@ -159,14 +143,11 @@ function processFiles(){
                 return;
             }
 
-            // 🔥 ONLY FIREBASE SAVE
             if(db){
                 db.ref("dashboard").set({
                     final,
                     ivr,
                     reportTime
-                }).then(()=>{
-                    console.log("🔥 Firebase Updated Successfully");
                 });
             }
 
@@ -179,7 +160,6 @@ function processFiles(){
     reader1.readAsBinaryString(aprFile);
 }
 
-
 // ===============================
 // 🔥 LOAD DASHBOARD
 // ===============================
@@ -188,7 +168,7 @@ function loadDashboard(final, ivr, reportTime){
     let tb = document.querySelector("#table tbody");
     if(!tb) return;
 
-    tb.innerHTML = "";   // 🔥 MUST
+    tb.innerHTML = "";
 
     let max = Math.max(...final.map(x=>x.total));
 
@@ -232,32 +212,26 @@ function loadDashboard(final, ivr, reportTime){
     let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
     document.getElementById("aht").innerText = toTime(overallAHT);
 
-    let rt = document.getElementById("reportTime");
-    if(rt){
-        rt.innerText = "Last Update Till: " + (reportTime || "");
-    }
+    document.getElementById("reportTime").innerText =
+        "Last Update Till: " + (reportTime || "");
 }
 
-
 // ===============================
-// 🔥 LIVE ONLY (NO SESSION)
+// 🔥 LIVE LISTENER
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
     if(db){
         db.ref("dashboard").on("value",(snap)=>{
-
             let data = snap.val();
+            console.log("LIVE:", data);
 
-            console.log("🔥 LIVE FIREBASE:", data);
-
-            if(data && data.final && data.final.length){
+            if(data && data.final){
                 loadDashboard(data.final, data.ivr, data.reportTime);
             }
         });
     }
 });
-
 
 // ===============================
 // 🔍 SEARCH
@@ -268,7 +242,6 @@ function searchAgent(){
         r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
     });
 }
-
 
 // ===============================
 // 🖼 PNG COPY
@@ -282,16 +255,11 @@ function copyImage(){
     });
 }
 
-
 // ===============================
 // 📊 EXCEL EXPORT
 // ===============================
 function exportExcel(){
-
-    if(!db) return;
-
     db.ref("dashboard").once("value").then(snap=>{
-
         let d = snap.val();
         if(!d || !d.final) return;
 
@@ -314,7 +282,6 @@ function exportExcel(){
     });
 }
 
-
 // ===============================
 // 🔄 RESET
 // ===============================
@@ -322,10 +289,17 @@ function resetApp(){
     location="index.html";
 }
 
-
 // ===============================
 // 🔄 AUTO REFRESH
 // ===============================
 setInterval(()=>{
     location.reload();
 },120000);
+
+// ===============================
+// 🔥 FULLSCREEN
+// ===============================
+function openFullScreen(){
+    let elem = document.documentElement;
+    if (elem.requestFullscreen) elem.requestFullscreen();
+}

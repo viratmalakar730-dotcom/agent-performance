@@ -1,37 +1,52 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload</title>
+    <title>Agent Performance Dashboard</title>
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="container">
+<h2 style="text-align:center;">Agent Performance Dashboard</h2>
 
-    <div class="upload-box">
+<div style="text-align:center; margin-top:30px;">
 
-        <h2>Agent Performance Dashboard</h2>
+    <input type="file" id="aprFile" accept=".xlsx,.xls">
+    <br><br>
 
-        <label class="label">APR Report</label>
-        <input type="file" id="aprFile"><br><br>
+    <input type="file" id="cdrFile" accept=".xlsx,.xls">
+    <br><br>
 
-        <label class="label">CDR Report</label>
-        <input type="file" id="cdrFile"><br><br>
-
-        <!-- 🔥 FIXED BUTTON -->
-        <button onclick="processFiles()">Generate Report</button>
-
-        <div id="loading" class="loading">Processing... ⏳</div>
-
-    </div>
+    <!-- 🔥 BUTTON FIX -->
+    <button id="generateBtn">Generate Dashboard</button>
 
 </div>
 
-<!-- 🔥 IMPORTANT LIBRARY -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<div id="loading" style="display:none; text-align:center; margin-top:20px;">
+    Processing... ⏳
+</div>
 
-<!-- 🔥 YOUR SCRIPT (VERY IMPORTANT) -->
+<!-- XLSX -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<!-- FIREBASE -->
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.7.0/firebase-firestore-compat.js"></script>
+
+<!-- MAIN SCRIPT -->
 <script src="script.js"></script>
+
+<script>
+// 🔥 BUTTON EVENT FIX
+document.getElementById("generateBtn").addEventListener("click", function(){
+    if(typeof processFiles === "function"){
+        processFiles();
+    }else{
+        alert("❌ Script not loaded properly");
+        console.error("processFiles not found");
+    }
+});
+</script>
 
 </body>
 </html>

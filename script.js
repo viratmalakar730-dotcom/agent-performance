@@ -1,5 +1,5 @@
 // ===============================
-// 🔥 FIREBASE INIT (FIXED)
+// 🔥 FIREBASE INIT
 // ===============================
 let db;
 
@@ -21,6 +21,7 @@ try {
     console.log("Firebase Error:", e);
 }
 
+
 // ===============================
 // 🔥 TIME FUNCTIONS
 // ===============================
@@ -38,6 +39,7 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
+
 // ===============================
 // 🔥 CALL COLOR
 // ===============================
@@ -51,8 +53,9 @@ function getCallClass(val, max){
     return "red3D";
 }
 
+
 // ===============================
-// 🔥 PROCESS FILES
+// 🔥 PROCESS FILES (UPLOAD)
 // ===============================
 function processFiles(){
 
@@ -131,6 +134,7 @@ function processFiles(){
 
                 if(dispo === "callmatured" || dispo === "transfer"){
                     map[emp].total++;
+
                     if(skill === "INBOUND"){
                         map[emp].ib++;
                     }
@@ -155,21 +159,14 @@ function processFiles(){
                 return;
             }
 
-            // 🔥 SAVE LOCAL
-            sessionStorage.setItem("data", JSON.stringify({
-                final,
-                ivr,
-                reportTime
-            }));
-
-            // 🔥 SAVE FIREBASE
+            // 🔥 ONLY FIREBASE SAVE
             if(db){
                 db.ref("dashboard").set({
                     final,
                     ivr,
                     reportTime
                 }).then(()=>{
-                    console.log("🔥 Firebase Updated");
+                    console.log("🔥 Firebase Updated Successfully");
                 });
             }
 
@@ -182,6 +179,7 @@ function processFiles(){
     reader1.readAsBinaryString(aprFile);
 }
 
+
 // ===============================
 // 🔥 LOAD DASHBOARD
 // ===============================
@@ -190,7 +188,7 @@ function loadDashboard(final, ivr, reportTime){
     let tb = document.querySelector("#table tbody");
     if(!tb) return;
 
-    tb.innerHTML="";
+    tb.innerHTML = "";   // 🔥 MUST
 
     let max = Math.max(...final.map(x=>x.total));
 
@@ -240,23 +238,18 @@ function loadDashboard(final, ivr, reportTime){
     }
 }
 
+
 // ===============================
-// 🔥 AUTO LOAD (FIXED)
+// 🔥 LIVE ONLY (NO SESSION)
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
-    // 🔥 LOCAL LOAD FIRST
-    let local = JSON.parse(sessionStorage.getItem("data") || "{}");
-
-    if(local.final && local.final.length){
-        loadDashboard(local.final, local.ivr, local.reportTime);
-    }
-
-    // 🔥 FIREBASE LIVE
     if(db){
         db.ref("dashboard").on("value",(snap)=>{
+
             let data = snap.val();
-            console.log("🔥 Firebase Data:", data);
+
+            console.log("🔥 LIVE FIREBASE:", data);
 
             if(data && data.final && data.final.length){
                 loadDashboard(data.final, data.ivr, data.reportTime);
@@ -264,6 +257,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
         });
     }
 });
+
 
 // ===============================
 // 🔍 SEARCH
@@ -274,6 +268,7 @@ function searchAgent(){
         r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
     });
 }
+
 
 // ===============================
 // 🖼 PNG COPY
@@ -287,39 +282,46 @@ function copyImage(){
     });
 }
 
+
 // ===============================
 // 📊 EXCEL EXPORT
 // ===============================
 function exportExcel(){
 
-    let d=JSON.parse(sessionStorage.getItem("data")||"{}");
-    if(!d.final) return;
+    if(!db) return;
 
-    let ws_data=[["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
+    db.ref("dashboard").once("value").then(snap=>{
 
-    d.final.forEach(r=>{
-        ws_data.push([
-            r.emp,r.name,
-            toTime(r.login),toTime(r.net),
-            toTime(r.breakTime),toTime(r.meeting),
-            toTime(r.aht),r.total,r.ib,r.ob
-        ]);
+        let d = snap.val();
+        if(!d || !d.final) return;
+
+        let ws_data=[["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
+
+        d.final.forEach(r=>{
+            ws_data.push([
+                r.emp,r.name,
+                toTime(r.login),toTime(r.net),
+                toTime(r.breakTime),toTime(r.meeting),
+                toTime(r.aht),r.total,r.ib,r.ob
+            ]);
+        });
+
+        let ws=XLSX.utils.aoa_to_sheet(ws_data);
+        let wb=XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
+
+        XLSX.writeFile(wb,"Agent_Report.xlsx");
     });
-
-    let ws=XLSX.utils.aoa_to_sheet(ws_data);
-    let wb=XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
-
-    XLSX.writeFile(wb,"Agent_Report.xlsx");
 }
+
 
 // ===============================
 // 🔄 RESET
 // ===============================
 function resetApp(){
-    sessionStorage.clear();
     location="index.html";
 }
+
 
 // ===============================
 // 🔄 AUTO REFRESH

@@ -1,170 +1,254 @@
 // ===============================
-// 🔥 SAFE FIREBASE INIT
+// 🔥 SAFE FIREBASE
 // ===============================
-let db = null;
-
+let db=null;
 try{
-    const firebaseConfig = {
-        apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
-        authDomain: "agent-performance-live.firebaseapp.com",
-        databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-        projectId: "agent-performance-live"
-    };
-
-    if (typeof firebase !== "undefined") {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        db = firebase.database();
-    }
-}catch(e){
-    console.log("Firebase Disabled:", e);
+const firebaseConfig={
+apiKey:"AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+authDomain:"agent-performance-live.firebaseapp.com",
+databaseURL:"https://agent-performance-live-default-rtdb.firebaseio.com/",
+projectId:"agent-performance-live"
+};
+if(typeof firebase!=="undefined"){
+if(!firebase.apps.length){firebase.initializeApp(firebaseConfig);}
+db=firebase.database();
 }
-
-// ===============================
-// 🔥 SAVE CLOUD (SAFE)
-// ===============================
-function saveToCloud(payload){
-    try{
-        if(db){
-            db.ref("dashboard").set(payload);
-        }
-    }catch(e){
-        console.log("Cloud Error:", e);
-    }
-}
+}catch(e){}
 
 // ===============================
 // 🔥 TIME
 // ===============================
 function toSeconds(t){
-    if(!t) return 0;
-    let a = t.toString().split(":").map(Number);
-    return (a[0]||0)*3600 + (a[1]||0)*60 + (a[2]||0);
+if(!t) return 0;
+let a=t.toString().split(":").map(Number);
+return (a[0]||0)*3600+(a[1]||0)*60+(a[2]||0);
 }
 
 function toTime(sec){
-    sec = Math.max(0, Math.round(sec));
-    let h = Math.floor(sec/3600);
-    let m = Math.floor((sec%3600)/60);
-    let s = sec%60;
-    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
+sec=Math.max(0,Math.round(sec));
+let h=Math.floor(sec/3600);
+let m=Math.floor((sec%3600)/60);
+let s=sec%60;
+return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
 // ===============================
-// 📂 READ EXCEL
+// 🔥 CALL COLOR
 // ===============================
-function readExcel(file,skip){
-    return new Promise((res,rej)=>{
-        let r=new FileReader();
-
-        r.onload=e=>{
-            try{
-                let wb=XLSX.read(new Uint8Array(e.target.result),{type:'array'});
-                let d=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
-                res(d.slice(skip));
-            }catch(err){
-                console.error("Excel Read Error:", err);
-                rej(err);
-            }
-        };
-
-        r.onerror = err => {
-            console.error("File Read Error:", err);
-            rej(err);
-        };
-
-        r.readAsArrayBuffer(file);
-    });
+function getCallClass(val,max){
+if(max===0) return "";
+let r=val/max;
+if(r>=0.75) return "green3D";
+if(r>=0.4) return "yellow3D";
+return "red3D";
 }
 
 // ===============================
-// 🔥 PROCESS FILES (DEBUG VERSION)
+// 🔥 PROCESS FILES
 // ===============================
-async function processFiles(){
+function processFiles(){
 
-    console.log("🔥 Button Clicked");
+let aprFile=document.getElementById("aprFile").files[0];
+let cdrFile=document.getElementById("cdrFile").files[0];
 
-    try{
+if(!aprFile||!cdrFile){alert("Upload both files");return;}
 
-        let aprFile=document.getElementById("aprFile")?.files[0];
-        let cdrFile=document.getElementById("cdrFile")?.files[0];
+document.getElementById("loading").style.display="block";
 
-        if(!aprFile || !cdrFile){
-            alert("Upload both files ❌");
-            return;
-        }
+let r1=new FileReader();
+let r2=new FileReader();
 
-        document.getElementById("loading").style.display="block";
+r1.onload=function(e){
 
-        console.log("📂 Reading APR...");
-        let apr=await readExcel(aprFile,3);
+let apr=XLSX.read(e.target.result,{type:'binary'});
+let aprData=XLSX.utils.sheet_to_json(apr.Sheets[apr.SheetNames[0]],{header:1});
 
-        console.log("📂 Reading CDR...");
-        let cdr=await readExcel(cdrFile,2);
+r2.onload=function(e2){
 
-        console.log("✅ Files Loaded");
+let cdr=XLSX.read(e2.target.result,{type:'binary'});
+let cdrData=XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]],{header:1});
 
-        let final=[];
-        let ivr=0;
+let reportRow=aprData[1]?.[0]||"";
+let reportTime=reportRow.split("to")[1]?.trim()||"";
 
-        cdr.forEach(c=>{
-            if((c[7]||"").toUpperCase().includes("INBOUND")) ivr++;
-        });
+aprData.splice(0,3);
+cdrData.splice(0,2);
 
-        apr.forEach(r=>{
+let map={},ivr=0;
 
-            if(!r[1]) return;
+aprData.forEach(r=>{
+let emp=r[1]; if(!emp) return;
 
-            let emp=(r[1]||"").toString().trim();
-            let name=r[2];
+let login=toSeconds(r[3]);
+let breakTime=toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
+let meeting=toSeconds(r[20])+toSeconds(r[23]);
 
-            let login=toSeconds(r[3]);
+map[emp]={
+emp,name:r[2],login,
+breakTime,meeting,
+net:login-breakTime,
+ahtRaw:toSeconds(r[5]),
+total:0,ib:0
+};
+});
 
-            let breakTime=
-            toSeconds(r[19])+toSeconds(r[22])+toSeconds(r[24]);
+cdrData.forEach(r=>{
+let emp=r[1];
+let skill=r[7];
+let dispo=(r[25]||"").toLowerCase();
 
-            let meeting=
-            toSeconds(r[20])+toSeconds(r[23]);
+if(skill==="INBOUND") ivr++;
 
-            let net=Math.max(0,login-breakTime);
+if(!map[emp]) return;
 
-            let calls=cdr.filter(c=>{
-                return (c[1]||"").toString().trim()===emp &&
-                ((c[25]||"").toLowerCase().includes("callmatured") ||
-                 (c[25]||"").toLowerCase().includes("transfer"));
-            });
+if(dispo==="callmatured"||dispo==="transfer"){
+map[emp].total++;
+if(skill==="INBOUND") map[emp].ib++;
+}
+});
 
-            let total=calls.length;
+let final=Object.values(map).map(r=>({
+...r,
+aht:r.total?r.ahtRaw/r.total:0,
+ob:r.total-r.ib
+}));
 
-            let ib=calls.filter(c=>
-                (c[7]||"").toUpperCase().includes("INBOUND")
-            ).length;
+sessionStorage.setItem("data",JSON.stringify({final,ivr,reportTime}));
+if(db) db.ref("dashboard").set({final,ivr,reportTime});
 
-            let ob=total-ib;
+window.location="dashboard.html";
+};
 
-            let aht=total?Math.round(toSeconds(r[5])/total):0;
+r2.readAsBinaryString(cdrFile);
+};
 
-            final.push({emp,name,login,net,breakTime,meeting,aht,total,ib,ob});
-        });
-
-        console.log("📊 Data Prepared:", final.length);
-
-        let payload = { final, ivr };
-
-        sessionStorage.setItem("data", JSON.stringify(payload));
-
-        saveToCloud(payload);
-
-        console.log("🚀 Redirecting...");
-
-        location="dashboard.html";
-
-    }catch(e){
-        console.error("❌ PROCESS ERROR:", e);
-        alert("Error aaya — console check karo (F12)");
-    }
+r1.readAsBinaryString(aprFile);
 }
 
-// 🔥 FIX BUTTON
-window.processFiles = processFiles;
+// ===============================
+// 🔥 LOAD DASHBOARD
+// ===============================
+function loadDashboard(final,ivr,reportTime){
+
+let tb=document.querySelector("#table tbody");
+if(!tb) return;
+tb.innerHTML="";
+
+let max=Math.max(...final.map(x=>x.total));
+
+let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
+
+final.forEach(r=>{
+
+totalCalls+=r.total;
+totalIB+=r.ib;
+totalOB+=r.ob;
+totalTalk+=(r.aht*r.total);
+
+let netCls=r.net>=28800?"netGreen3D":"";
+let breakCls=r.breakTime>2100?"red3D":"";
+let meetingCls=r.meeting>2100?"red3D":"";
+let callCls=getCallClass(r.total,max);
+
+let tr=document.createElement("tr");
+
+tr.innerHTML=`
+<td>${r.emp}</td>
+<td>${r.name}</td>
+<td>${toTime(r.login)}</td>
+<td class="${netCls}">${toTime(r.net)}</td>
+<td class="${breakCls}">${toTime(r.breakTime)}</td>
+<td class="${meetingCls}">${toTime(r.meeting)}</td>
+<td>${toTime(r.aht)}</td>
+<td class="${callCls}">${r.total}</td>
+<td>${r.ib}</td>
+<td>${r.ob}</td>
+`;
+
+tb.appendChild(tr);
+});
+
+document.getElementById("ivr").innerText=ivr;
+document.getElementById("total").innerText=totalCalls;
+document.getElementById("ib").innerText=totalIB;
+document.getElementById("ob").innerText=totalOB;
+
+document.getElementById("aht").innerText=
+totalCalls?toTime(totalTalk/totalCalls):"00:00:00";
+
+document.getElementById("reportTime").innerText=
+"Last Update Till: "+reportTime;
+}
+
+// ===============================
+// 🔥 LOAD + LIVE
+// ===============================
+document.addEventListener("DOMContentLoaded",()=>{
+
+let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+if(d.final){loadDashboard(d.final,d.ivr,d.reportTime);}
+
+if(db){
+db.ref("dashboard").on("value",snap=>{
+let data=snap.val();
+if(data&&data.final){
+loadDashboard(data.final,data.ivr,data.reportTime);
+}
+});
+}
+});
+
+// ===============================
+// 🔥 PNG
+// ===============================
+function copyImage(){
+html2canvas(document.getElementById("table")).then(c=>{
+c.toBlob(b=>{
+navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
+alert("Copied!");
+});
+});
+}
+
+// ===============================
+// 🔥 EXCEL
+// ===============================
+function exportExcel(){
+let d=JSON.parse(sessionStorage.getItem("data")||"{}");
+if(!d.final) return;
+
+let ws_data=[["Emp","Name","Login","Net","Break","Meeting","AHT","Call","IB","OB"]];
+
+d.final.forEach(r=>{
+ws_data.push([
+r.emp,r.name,
+toTime(r.login),toTime(r.net),
+toTime(r.breakTime),toTime(r.meeting),
+toTime(r.aht),r.total,r.ib,r.ob
+]);
+});
+
+let ws=XLSX.utils.aoa_to_sheet(ws_data);
+let wb=XLSX.utils.book_new();
+XLSX.utils.book_append_sheet(wb,ws,"Report");
+
+XLSX.writeFile(wb,"Agent_Report.xlsx");
+}
+
+// ===============================
+// 🔍 SEARCH
+// ===============================
+function searchAgent(){
+let v=document.getElementById("search").value.toLowerCase();
+document.querySelectorAll("#table tbody tr").forEach(r=>{
+r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
+});
+}
+
+// ===============================
+// 🔄 RESET
+// ===============================
+function resetApp(){
+sessionStorage.clear();
+location="index.html";
+}

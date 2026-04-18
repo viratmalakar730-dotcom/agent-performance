@@ -1,7 +1,7 @@
 // ===============================
-// 🔥 FIREBASE INIT (SAFE FIX)
+// 🔥 FIREBASE INIT (FIXED)
 // ===============================
-let db = null;
+let db;
 
 try {
     const firebaseConfig = {
@@ -18,9 +18,8 @@ try {
         db = firebase.database();
     }
 } catch (e) {
-    console.log("Firebase Init Error:", e);
+    console.log("Firebase Error:", e);
 }
-
 
 // ===============================
 // 🔥 TIME FUNCTIONS
@@ -39,7 +38,6 @@ function toTime(sec){
     return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
 }
 
-
 // ===============================
 // 🔥 CALL COLOR
 // ===============================
@@ -52,7 +50,6 @@ function getCallClass(val, max){
     if(r >= 0.4) return "yellow3D";
     return "red3D";
 }
-
 
 // ===============================
 // 🔥 PROCESS FILES
@@ -86,7 +83,7 @@ function processFiles(){
             let reportRow = aprData[1]?.[0] || "";
             let reportTime = reportRow.split("to")[1]?.trim() || "";
 
-            // 🔥 REMOVE HEADERS
+            // 🔥 REMOVE HEADER
             aprData.splice(0,3);
             cdrData.splice(0,2);
 
@@ -165,16 +162,14 @@ function processFiles(){
                 reportTime
             }));
 
-            // 🔥 FIREBASE UPDATE (FIXED)
+            // 🔥 SAVE FIREBASE
             if(db){
                 db.ref("dashboard").set({
-                    final: final,
-                    ivr: ivr,
-                    reportTime: reportTime || new Date().toLocaleString()
+                    final,
+                    ivr,
+                    reportTime
                 }).then(()=>{
-                    console.log("🔥 Firebase Updated Successfully");
-                }).catch(err=>{
-                    console.log("❌ Firebase Error:", err);
+                    console.log("🔥 Firebase Updated");
                 });
             }
 
@@ -186,7 +181,6 @@ function processFiles(){
 
     reader1.readAsBinaryString(aprFile);
 }
-
 
 // ===============================
 // 🔥 LOAD DASHBOARD
@@ -246,23 +240,30 @@ function loadDashboard(final, ivr, reportTime){
     }
 }
 
-
 // ===============================
-// 🔥 LIVE LISTENER (FIXED)
+// 🔥 AUTO LOAD (FIXED)
 // ===============================
 document.addEventListener("DOMContentLoaded", ()=>{
 
+    // 🔥 LOCAL LOAD FIRST
+    let local = JSON.parse(sessionStorage.getItem("data") || "{}");
+
+    if(local.final && local.final.length){
+        loadDashboard(local.final, local.ivr, local.reportTime);
+    }
+
+    // 🔥 FIREBASE LIVE
     if(db){
         db.ref("dashboard").on("value",(snap)=>{
             let data = snap.val();
+            console.log("🔥 Firebase Data:", data);
 
-            if(data && data.final){
+            if(data && data.final && data.final.length){
                 loadDashboard(data.final, data.ivr, data.reportTime);
             }
         });
     }
 });
-
 
 // ===============================
 // 🔍 SEARCH
@@ -273,7 +274,6 @@ function searchAgent(){
         r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
     });
 }
-
 
 // ===============================
 // 🖼 PNG COPY
@@ -286,7 +286,6 @@ function copyImage(){
         });
     });
 }
-
 
 // ===============================
 // 📊 EXCEL EXPORT
@@ -314,7 +313,6 @@ function exportExcel(){
     XLSX.writeFile(wb,"Agent_Report.xlsx");
 }
 
-
 // ===============================
 // 🔄 RESET
 // ===============================
@@ -322,7 +320,6 @@ function resetApp(){
     sessionStorage.clear();
     location="index.html";
 }
-
 
 // ===============================
 // 🔄 AUTO REFRESH

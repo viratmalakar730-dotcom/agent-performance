@@ -5,30 +5,20 @@
 
 <link rel="stylesheet" href="style.css">
 
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.6.1/firebase-database-compat.js"></script>
+
+<!-- html2canvas -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
 </head>
 
-<body>
+<body onload="openFullScreen()">
 
 <h2>Live Agent Performance Dashboard</h2>
 
-<div id="reportTime" style="
-color:#00e5ff;
-font-size:16px;
-margin-top:5px;
-font-weight:bold;
-text-shadow:0 0 8px #00e5ff;">
-</div>
-
-<div class="cards">
-    <div class="card">IVR Hit<br><span id="ivr"></span></div>
-    <div class="card">Total Mature Calls<br><span id="total"></span></div>
-    <div class="card">IB Mature<br><span id="ib"></span></div>
-    <div class="card">OB Mature<br><span id="ob"></span></div>
-    <div class="card">Overall AHT<br><span id="aht"></span></div>
-</div>
+<div id="reportTime"></div>
 
 <table id="table">
 <thead>

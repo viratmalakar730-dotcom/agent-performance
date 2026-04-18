@@ -212,8 +212,11 @@ function loadDashboard(final, ivr, reportTime){
     let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
     document.getElementById("aht").innerText = toTime(overallAHT);
 
-    document.getElementById("reportTime").innerText =
-        "Last Update Till: " + (reportTime || "");
+    // 🔥 REPORT TIME BACK (FIX)
+    let rt = document.getElementById("reportTime");
+    if(rt){
+        rt.innerText = "Last Update Till: " + (reportTime || "");
+    }
 }
 
 // ===============================
@@ -224,6 +227,7 @@ document.addEventListener("DOMContentLoaded", ()=>{
     if(db){
         db.ref("dashboard").on("value",(snap)=>{
             let data = snap.val();
+
             console.log("LIVE:", data);
 
             if(data && data.final){
@@ -234,59 +238,16 @@ document.addEventListener("DOMContentLoaded", ()=>{
 });
 
 // ===============================
-// 🔍 SEARCH
+// 🔥 FULLSCREEN BUTTON
 // ===============================
-function searchAgent(){
-    let v=document.getElementById("search").value.toLowerCase();
-    document.querySelectorAll("#table tbody tr").forEach(r=>{
-        r.style.display=r.innerText.toLowerCase().includes(v)?"":"none";
-    });
-}
+function openFullScreen(){
+    let elem = document.documentElement;
 
-// ===============================
-// 🖼 PNG COPY
-// ===============================
-function copyImage(){
-    html2canvas(document.getElementById("table"),{scale:2}).then(c=>{
-        c.toBlob(b=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":b})]);
-            alert("Copied!");
-        });
-    });
-}
-
-// ===============================
-// 📊 EXCEL EXPORT
-// ===============================
-function exportExcel(){
-    db.ref("dashboard").once("value").then(snap=>{
-        let d = snap.val();
-        if(!d || !d.final) return;
-
-        let ws_data=[["Employee ID","Agent Full Name","Total Login","Net Login","Total Break","Total Meeting","AHT","Total Mature Call","IB Mature","OB Mature"]];
-
-        d.final.forEach(r=>{
-            ws_data.push([
-                r.emp,r.name,
-                toTime(r.login),toTime(r.net),
-                toTime(r.breakTime),toTime(r.meeting),
-                toTime(r.aht),r.total,r.ib,r.ob
-            ]);
-        });
-
-        let ws=XLSX.utils.aoa_to_sheet(ws_data);
-        let wb=XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb,ws,"Dashboard");
-
-        XLSX.writeFile(wb,"Agent_Report.xlsx");
-    });
-}
-
-// ===============================
-// 🔄 RESET
-// ===============================
-function resetApp(){
-    location="index.html";
+    if (!document.fullscreenElement) {
+        elem.requestFullscreen();
+    } else {
+        document.exitFullscreen();
+    }
 }
 
 // ===============================
@@ -295,11 +256,3 @@ function resetApp(){
 setInterval(()=>{
     location.reload();
 },120000);
-
-// ===============================
-// 🔥 FULLSCREEN
-// ===============================
-function openFullScreen(){
-    let elem = document.documentElement;
-    if (elem.requestFullscreen) elem.requestFullscreen();
-}

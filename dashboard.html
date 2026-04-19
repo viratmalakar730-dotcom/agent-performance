@@ -4,8 +4,39 @@
 <title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+
+/* 🔥 TABLE SCROLL */
+.table-container{
+    max-height: 520px;
+    overflow-y: auto;
+    overflow-x: auto;
+    margin: 10px;
+    border: 2px solid #0b3d91;
+}
+
+/* 🔥 HEADER FREEZE */
+thead th{
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    background: #0b3d91;
+}
+
+/* SCROLLBAR */
+.table-container::-webkit-scrollbar{
+    width: 8px;
+}
+.table-container::-webkit-scrollbar-thumb{
+    background:#0b3d91;
+}
+
+</style>
+
 </head>
 
 <body>
@@ -14,32 +45,42 @@
 
 <div id="reportTime"></div>
 
-<div style="margin:20px;">
-<button onclick="exportExcel()">📤 Excel</button>
-<button onclick="downloadPNG()">🖼 PNG</button>
-<button onclick="resetDashboard()">🔄 Reset</button>
+<!-- BUTTONS -->
+<div style="margin:10px;">
+    <button onclick="downloadPNG()">📋 Copy</button>
+    <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
 
+<!-- TABLE -->
+<div class="table-container">
 <table id="table">
+
 <thead>
 <tr>
-<th>Emp ID</th>
-<th>Name</th>
+<th>Employee ID</th>
+<th>Agent Full Name</th>
 <th>Total Login</th>
 <th>Net Login</th>
-<th>Break</th>
-<th>Meeting</th>
+<th>Total Break</th>
+<th>Total Meeting</th>
 <th>AHT</th>
-<th>Total Calls</th>
-<th>IB</th>
-<th>OB</th>
+<th>Total Mature Call</th>
+<th>IB Mature</th>
+<th>OB Mature</th>
 </tr>
 </thead>
-<tbody></tbody>
-</table>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<tbody>
+<!-- DATA LOAD -->
+</tbody>
+
+</table>
+</div>
+
+<!-- LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- MAIN SCRIPT -->
 <script src="script.js"></script>
 
 </body>

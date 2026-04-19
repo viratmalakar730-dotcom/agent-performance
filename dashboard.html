@@ -1,76 +1,102 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Dashboard</title>
-<link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<style>
-.table-container{
-    max-height:520px;
-    overflow:auto;
+/* BODY */
+body{
+    font-family:Arial;
+    background:#0b1f3a;
+    color:white;
+    text-align:center;
 }
 
-/* TV MODE */
-body.tv{
-    background:black;
-    zoom:1.2;
+/* TITLE */
+h2{
+    color:#d4af37;
 }
 
-body.tv button,
-body.tv input{
-    display:none;
+/* ================= HEADER 3D ================= */
+th{
+    background: linear-gradient(145deg,#0b3d91,#072c6b);
+    color:#d4af37;
+    padding:10px;
+    border:1px solid black;
+
+    /* 🔥 DEEP 3D HEADER */
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.1),
+        inset 3px 3px 8px rgba(0,0,0,0.7),
+        0 5px 10px rgba(0,0,0,0.8);
+
+    position:sticky;
+    top:0;
+    z-index:5;
 }
-</style>
 
-</head>
+/* ================= TABLE ================= */
+table{
+    width:98%;
+    margin:auto;
+    border-collapse:collapse;
+    background:white;
+    color:black;
+    font-weight:bold;
+}
 
-<body>
+/* ================= CELLS 3D ================= */
+td{
+    padding:8px;
+    border:1px solid black;
 
-<h2>📊 Agent Performance Dashboard</h2>
+    background: linear-gradient(145deg,#ffffff,#e5e7eb);
 
-<div id="reportTime"></div>
+    box-shadow:
+        inset -2px -2px 5px rgba(255,255,255,0.7),
+        inset 2px 2px 5px rgba(0,0,0,0.3),
+        0 2px 4px rgba(0,0,0,0.3);
+}
 
-<input type="text" id="search" placeholder="Search..." onkeyup="searchTable()">
+/* ROW HOVER */
+tbody tr:hover td{
+    background:#dbeafe;
+}
 
-<div>
-<button onclick="exportExcel()">📤 Excel</button>
-<button onclick="downloadPNG()">📋 Copy</button>
-<button onclick="resetDashboard()">🔄 Reset</button>
-<button onclick="toggleTV()">📺 TV Mode</button>
-</div>
+/* ================= CARDS ================= */
+#cards{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin:10px;
+}
 
-<div id="cards"></div>
+.card{
+    background:linear-gradient(145deg,#0b3d91,#072c6b);
+    padding:15px;
+    border-radius:10px;
+    width:150px;
 
-<div class="table-container">
-<table id="table">
+    box-shadow:
+        5px 5px 15px rgba(0,0,0,0.7),
+        -2px -2px 5px rgba(255,255,255,0.1);
+}
 
-<thead>
-<tr>
-<th>S.No</th>
-<th>Employee ID</th>
-<th>Agent Full Name</th>
-<th>Total Login</th>
-<th>Net Login</th>
-<th>Total Break</th>
-<th>Total Meeting</th>
-<th>AHT</th>
-<th>Total Mature</th>
-<th>IB</th>
-<th>OB</th>
-</tr>
-</thead>
+/* ================= BUTTON ================= */
+button{
+    padding:8px 15px;
+    margin:5px;
+    background:#d4af37;
+    border:none;
+    cursor:pointer;
+}
 
-<tbody></tbody>
+/* ================= COLORS ================= */
+.red3d{
+    background:linear-gradient(#dc2626,#7f1d1d);
+    color:white;
+}
 
-</table>
-</div>
+.yellow3d{
+    background:linear-gradient(#facc15,#ca8a04);
+}
 
-<script src="xlsx.full.min.js"></script>
-<script src="html2canvas.min.js"></script>
-<script src="script.js"></script>
-
-</body>
-</html>
+.green3d{
+    background:linear-gradient(#22c55e,#15803d);
+    color:white;
+}

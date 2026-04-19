@@ -1,42 +1,36 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Upload Reports</title>
-<style>
-body {
-    background:#0f172a;
-    color:white;
-    font-family:Arial;
-    text-align:center;
-    padding-top:100px;
-}
-
-.box {
-    background:#1e293b;
-    padding:40px;
-    border-radius:10px;
-    display:inline-block;
-}
-
-input,button {
-    margin:10px;
-    padding:10px;
-}
-</style>
+<title>Upload</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
+<div class="container">
+<div class="upload-box">
 
-<div class="box">
-    <h2>Upload APR + CDR</h2>
+<h2>Agent Performance Dashboard</h2>
 
-    <input type="file" id="aprFile"><br>
-    <input type="file" id="cdrFile"><br>
+<label class="label">APR Report</label>
+<input type="file" id="aprFile"><br>
 
-    <button onclick="processFiles()">Generate Dashboard</button>
+<label class="label">CDR Report</label>
+<input type="file" id="cdrFile"><br>
+
+<button onclick="processFiles()">Generate Report</button>
+
+<div id="loading" class="loading" style="display:none;">
+Processing... ⏳
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+</div>
+</div>
+
+<div style="text-align:center;margin-top:20px;font-weight:bold;">
+❤️ Powered by Chandan Malakar ❤️
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 
 </body>

@@ -1,180 +1,221 @@
-console.log("🔥 FINAL VERSION WITH HEADER FIX");
+console.log("🚀 PRO DASHBOARD LOADED");
 
-// ================= GLOBAL =================
+// ================= FIREBASE =================
 let db;
-let reportDate = "";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+  apiKey: "AIzaSy...",
   authDomain: "agent-performance-live.firebaseapp.com",
   databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
   projectId: "agent-performance-live"
 };
 
 if (typeof firebase !== "undefined") {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
+  if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+  db = firebase.database();
 }
 
 // ================= TIME =================
 function timeToSeconds(t){
-    if(!t || t === "-") return 0;
-    let p = t.toString().split(":");
-    return (+p[0]*3600)+(+p[1]*60)+(+p[2]||0);
+  if(!t || t === "-") return 0;
+  if(typeof t === "number") return Math.floor(t*86400);
+  let p=t.toString().split(":");
+  return (+p[0]*3600)+(+p[1]*60)+(+p[2]||0);
 }
 
 function secondsToTime(sec){
-    sec = Math.max(0,sec);
-    let h = String(Math.floor(sec/3600)).padStart(2,'0');
-    let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
-    let s = String(sec%60).padStart(2,'0');
-    return `${h}:${m}:${s}`;
+  sec=Math.max(0,sec);
+  let h=String(Math.floor(sec/3600)).padStart(2,'0');
+  let m=String(Math.floor((sec%3600)/60)).padStart(2,'0');
+  let s=String(sec%60).padStart(2,'0');
+  return `${h}:${m}:${s}`;
 }
 
 // ================= PROCESS =================
 function processFiles(){
 
-    let aprFile = document.getElementById("aprFile").files[0];
-    let cdrFile = document.getElementById("cdrFile").files[0];
+  let aprFile=document.getElementById("aprFile").files[0];
+  let cdrFile=document.getElementById("cdrFile").files[0];
 
-    if(!aprFile || !cdrFile){
-        alert("APR + CDR upload karo");
-        return;
-    }
+  if(!aprFile || !cdrFile){
+    alert("APR + CDR upload karo");
+    return;
+  }
 
-    readAPR(aprFile,(apr)=>{
-        readCDR(cdrFile,(cdr)=>{
+  document.getElementById("loading").style.display="block";
 
-            let final = buildDashboard(apr,cdr);
+  readAPR(aprFile,(apr)=>{
+    readCDR(cdrFile,(cdr)=>{
 
-            let payload = {
-                final,
-                reportTime: new Date().toLocaleString(),
-                reportDate: reportDate
-            };
+      let final=buildDashboard(apr,cdr);
 
-            db.ref("dashboard").set(payload);
+      let payload={
+        final,
+        reportTime:new Date().toLocaleString()
+      };
 
-            alert("✅ Done");
-            window.location.href = "dashboard.html";
-        });
+      db.ref("dashboard").set(payload);
+
+      document.getElementById("loading").style.display="none";
+
+      alert("✅ Report Generated");
+      window.location.href="dashboard.html";
     });
+  });
 }
 
-// ================= APR READ =================
+// ================= APR READ (3rd row header) =================
 function readAPR(file,cb){
 
-    let reader = new FileReader();
+  let r=new FileReader();
 
-    reader.onload = function(e){
+  r.onload=e=>{
+    let data=new Uint8Array(e.target.result);
+    let wb=XLSX.read(data,{type:"array"});
+    let sheet=wb.Sheets[wb.SheetNames[0]];
 
-        let data = new Uint8Array(e.target.result);
-        let wb = XLSX.read(data,{type:"array"});
-        let sheet = wb.Sheets[wb.SheetNames[0]];
+    let raw=XLSX.utils.sheet_to_json(sheet,{header:1});
 
-        let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
+    // remove top 2 rows
+    let trimmed=raw.slice(2);
 
-        // 🔥 DATE EXTRACT (2nd row)
-        let row2 = raw[1]?.[0] || "";
-        if(row2.includes("to")){
-            reportDate = row2.split("to")[1].trim();
-        }
+    let headers=trimmed[0];
+    let rows=trimmed.slice(1);
 
-        // 🔥 REMOVE TOP 2 ROW
-        let trimmed = raw.slice(2);
-
-        // 🔥 HEADER FROM 3rd ROW
-        let headers = trimmed[0];
-        let rows = trimmed.slice(1);
-
-        let json = rows.map(r=>{
-            let obj = {};
-            headers.forEach((h,i)=>{
-                obj[h] = r[i];
-            });
-            return obj;
-        });
-
-        cb(json);
-    };
-
-    reader.readAsArrayBuffer(file);
-}
-
-// ================= CDR READ =================
-function readCDR(file,cb){
-
-    let reader = new FileReader();
-
-    reader.onload = function(e){
-
-        let data = new Uint8Array(e.target.result);
-        let wb = XLSX.read(data,{type:"array"});
-        let sheet = wb.Sheets[wb.SheetNames[0]];
-
-        let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
-
-        // 🔥 REMOVE TOP 1 ROW
-        let trimmed = raw.slice(1);
-
-        let headers = trimmed[0];
-        let rows = trimmed.slice(1);
-
-        let json = rows.map(r=>{
-            let obj = {};
-            headers.forEach((h,i)=>{
-                obj[h] = r[i];
-            });
-            return obj;
-        });
-
-        cb(json);
-    };
-
-    reader.readAsArrayBuffer(file);
-}
-
-// ================= CORE =================
-function buildDashboard(apr,cdr){
-
-    let result = [];
-
-    apr.forEach(a=>{
-
-        let emp = a["Agent Name"] || "NA";
-        let name = a["Agent Full Name"] || "Unknown";
-
-        let login = timeToSeconds(a["Total Login Time"]);
-        let lunch = timeToSeconds(a["LUNCHBREAK"]);
-        let tea = timeToSeconds(a["TEABREAK"]);
-        let short = timeToSeconds(a["SHORTBREAK"]);
-        let system = timeToSeconds(a["SYSTEMDOWN"]);
-        let meeting = timeToSeconds(a["MEETING"]);
-
-        let totalBreak = lunch + tea + short;
-        let netLogin = login - (totalBreak + system);
-
-        let agentCDR = cdr.filter(r =>
-            r["User Full Name"] === name &&
-            r["Call Status"] === "Answered"
-        );
-
-        let calls = agentCDR.length;
-
-        let totalTalk = agentCDR.reduce((s,r)=>
-            s + timeToSeconds(r["Talk Duration"]),0);
-
-        let aht = calls ? totalTalk/calls : 0;
-
-        result.push({
-            emp,name,calls,
-            netLogin:secondsToTime(netLogin),
-            break:secondsToTime(totalBreak),
-            meeting:secondsToTime(meeting),
-            talk:secondsToTime(totalTalk),
-            aht:secondsToTime(aht)
-        });
+    let json=rows.map(row=>{
+      let obj={};
+      headers.forEach((h,i)=>obj[h]=row[i]);
+      return obj;
     });
 
-    return result;
+    cb(json);
+  };
+
+  r.readAsArrayBuffer(file);
 }
+
+// ================= CDR READ (2nd row header) =================
+function readCDR(file,cb){
+
+  let r=new FileReader();
+
+  r.onload=e=>{
+    let data=new Uint8Array(e.target.result);
+    let wb=XLSX.read(data,{type:"array"});
+    let sheet=wb.Sheets[wb.SheetNames[0]];
+
+    let raw=XLSX.utils.sheet_to_json(sheet,{header:1});
+
+    let trimmed=raw.slice(1);
+
+    let headers=trimmed[0];
+    let rows=trimmed.slice(1);
+
+    let json=rows.map(row=>{
+      let obj={};
+      headers.forEach((h,i)=>obj[h]=row[i]);
+      return obj;
+    });
+
+    cb(json);
+  };
+
+  r.readAsArrayBuffer(file);
+}
+
+// ================= CORE LOGIC =================
+function buildDashboard(apr,cdr){
+
+  let result=[];
+
+  apr.forEach(a=>{
+
+    if(!a) return;
+
+    let emp=a["Agent Name"] || "NA";
+    let name=a["Agent Full Name"] || "Unknown";
+
+    let login=timeToSeconds(a["Total Login Time"]);
+    let lunch=timeToSeconds(a["LUNCHBREAK"]);
+    let tea=timeToSeconds(a["TEABREAK"]);
+    let short=timeToSeconds(a["SHORTBREAK"]);
+    let meeting=timeToSeconds(a["MEETING"]);
+
+    let totalBreak=lunch+tea+short;
+    let netLogin=login-totalBreak;
+
+    let agentCDR=cdr.filter(r=>
+      (r["User Full Name"]||"")===name &&
+      r["Call Status"]==="Answered"
+    );
+
+    let calls=agentCDR.length;
+
+    let totalTalk=agentCDR.reduce((s,r)=>
+      s+timeToSeconds(r["Talk Duration"]),0);
+
+    let aht=calls?totalTalk/calls:0;
+
+    // IB / OB
+    let ib=agentCDR.filter(r=>r["Call Type"]==="IB").length;
+    let ob=agentCDR.filter(r=>r["Call Type"]==="OB").length;
+
+    result.push({
+      emp,
+      name,
+      login:secondsToTime(login),
+      netLogin:secondsToTime(netLogin),
+      break:secondsToTime(totalBreak),
+      meeting:secondsToTime(meeting),
+      aht:secondsToTime(aht),
+      calls,
+      ib,
+      ob
+    });
+
+  });
+
+  return result;
+}
+
+// ================= LOAD =================
+function loadDashboard(data){
+
+  let tbody=document.querySelector("#table tbody");
+  tbody.innerHTML="";
+
+  data.final.forEach(r=>{
+
+    let tr=document.createElement("tr");
+
+    tr.innerHTML=`
+      <td>${r.emp}</td>
+      <td>${r.name}</td>
+      <td>${r.login}</td>
+      <td>${r.netLogin}</td>
+      <td>${r.break}</td>
+      <td>${r.meeting}</td>
+      <td>${r.aht}</td>
+      <td>${r.calls}</td>
+      <td>${r.ib}</td>
+      <td>${r.ob}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("reportTime").innerText=
+    "Last Update Till: "+data.reportTime;
+}
+
+// ================= LIVE =================
+document.addEventListener("DOMContentLoaded",()=>{
+
+  if(db){
+    db.ref("dashboard").on("value",(snap)=>{
+      let d=snap.val();
+      if(d) loadDashboard(d);
+    });
+  }
+
+});

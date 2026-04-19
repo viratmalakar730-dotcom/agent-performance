@@ -1,4 +1,4 @@
-console.log("🚀 PRO VERSION LOADED");
+console.log("🚀 FINAL PRO SCRIPT (THEME SAFE)");
 
 // ================= GLOBAL =================
 let db;
@@ -12,6 +12,7 @@ const firebaseConfig = {
   projectId: "agent-performance-live"
 };
 
+// Firebase Init
 if (typeof firebase !== "undefined") {
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     db = firebase.database();
@@ -19,20 +20,25 @@ if (typeof firebase !== "undefined") {
 
 // ================= TIME UTILS =================
 function timeToSeconds(t) {
-    if (!t || t === "-") return 0;
-    let parts = t.split(":");
+    if (!t || t === "-" || t === undefined) return 0;
+
+    if (typeof t === "number") {
+        return Math.floor(t * 24 * 60 * 60);
+    }
+
+    let parts = t.toString().split(":");
     return (+parts[0] * 3600) + (+parts[1] * 60) + (+parts[2] || 0);
 }
 
 function secondsToTime(sec) {
-    sec = Math.floor(sec);
+    sec = Math.max(0, Math.floor(sec));
     let h = String(Math.floor(sec / 3600)).padStart(2, '0');
     let m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
     let s = String(sec % 60).padStart(2, '0');
     return `${h}:${m}:${s}`;
 }
 
-// ================= FILE PROCESS =================
+// ================= PROCESS =================
 function processFiles() {
 
     const aprFile = document.getElementById("aprFile")?.files[0];
@@ -51,29 +57,43 @@ function processFiles() {
 
             let finalData = buildDashboard(aprData, cdrData);
 
+            // 🔥 REMOVE UNDEFINED (Firebase fix)
+            finalData = finalData.map(r => ({
+                emp: r.emp || "NA",
+                name: r.name || "Unknown",
+                calls: r.calls || 0,
+                netLogin: r.netLogin || "00:00:00",
+                break: r.break || "00:00:00",
+                meeting: r.meeting || "00:00:00",
+                talk: r.talk || "00:00:00",
+                aht: r.aht || "00:00:00",
+                util: r.util || "0%"
+            }));
+
             let payload = {
                 final: finalData,
                 reportTime: new Date().toLocaleString()
             };
 
-            // 🔥 HISTORY SAVE (upgrade)
-            db.ref("history/" + Date.now()).set(payload);
-
-            // 🔥 LIVE DASHBOARD
-            db.ref("dashboard").set(payload);
+            // 🔥 HISTORY SAFE
+            if (db) {
+                db.ref("history/" + Date.now()).set(payload);
+                db.ref("dashboard").set(payload);
+            }
 
             alert("✅ Report Generated Successfully");
         });
     });
 }
 
-// ================= EXCEL READ =================
+// ================= READ =================
 function readExcel(file, callback) {
     let reader = new FileReader();
 
     reader.onload = function (e) {
         let data = new Uint8Array(e.target.result);
         let workbook = XLSX.read(data, { type: "array" });
+
         let sheet = workbook.Sheets[workbook.SheetNames[0]];
         let json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
@@ -83,63 +103,64 @@ function readExcel(file, callback) {
     reader.readAsArrayBuffer(file);
 }
 
-// ================= CORE LOGIC =================
+// ================= CORE =================
 function buildDashboard(apr, cdr) {
 
     let result = [];
 
-    apr.forEach(agent => {
+    apr.forEach(a => {
 
-        let name = agent["Agent Full Name"];
-        let emp = agent["Agent Name"];
+        if (!a || Object.keys(a).length === 0) return;
 
-        // 🔹 TIME FIELDS
-        let login = timeToSeconds(agent["Total Login Time"]);
-        let lunch = timeToSeconds(agent["LUNCHBREAK"]);
-        let tea = timeToSeconds(agent["TEABREAK"]);
-        let short = timeToSeconds(agent["SHORTBREAK"]);
-        let system = timeToSeconds(agent["SYSTEMDOWN"]);
-        let meeting = timeToSeconds(agent["MEETING"]);
+        // ✅ SAFE COLUMN
+        let emp = a["Agent Name"] || a["Username"] || "NA";
+        let name = a["Agent Full Name"] || a["User Full Name"] || "Unknown";
 
-        // 🔥 CALCULATIONS
+        if (emp === "NA" && name === "Unknown") return;
+
+        // TIME
+        let login = timeToSeconds(a["Total Login Time"]);
+        let lunch = timeToSeconds(a["LUNCHBREAK"]);
+        let tea = timeToSeconds(a["TEABREAK"]);
+        let short = timeToSeconds(a["SHORTBREAK"]);
+        let system = timeToSeconds(a["SYSTEMDOWN"]);
+        let meeting = timeToSeconds(a["MEETING"]);
+
         let totalBreak = lunch + tea + short;
         let netLogin = login - (totalBreak + system);
 
-        // 🔹 CDR FILTER (MATURE CALLS)
+        // CDR
         let agentCDR = cdr.filter(r =>
-            r["User Full Name"] === name &&
+            (r["User Full Name"] || "") === name &&
             r["Call Status"] === "Answered" &&
             timeToSeconds(r["Talk Duration"]) > 0
         );
 
-        let totalCalls = agentCDR.length;
+        let calls = agentCDR.length;
 
         let totalTalk = agentCDR.reduce((sum, r) =>
             sum + timeToSeconds(r["Talk Duration"]), 0);
 
-        let aht = totalCalls ? totalTalk / totalCalls : 0;
-
-        // 🔹 UTILIZATION
-        let utilization = netLogin ? (totalTalk / netLogin) * 100 : 0;
+        let aht = calls ? totalTalk / calls : 0;
+        let util = netLogin ? (totalTalk / netLogin) * 100 : 0;
 
         result.push({
             emp,
             name,
-            calls: totalCalls,
-            login: secondsToTime(login),
+            calls,
             netLogin: secondsToTime(netLogin),
             break: secondsToTime(totalBreak),
             meeting: secondsToTime(meeting),
             talk: secondsToTime(totalTalk),
             aht: secondsToTime(aht),
-            utilization: utilization.toFixed(1) + "%"
+            util: util.toFixed(1) + "%"
         });
     });
 
     return result;
 }
 
-// ================= LIVE TABLE =================
+// ================= LIVE =================
 document.addEventListener("DOMContentLoaded", () => {
 
     if (!db) return;
@@ -158,31 +179,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
             let tr = document.createElement("tr");
 
-            // 🔥 CONDITIONAL COLOR
-            let netSec = timeToSeconds(r.netLogin);
-            let colorClass = "";
+            // 🔥 COLOR SAFE (theme compatible)
+            let sec = timeToSeconds(r.netLogin);
+            let cls = "";
 
-            if (netSec > 7 * 3600) colorClass = "green";
-            else if (netSec > 5 * 3600) colorClass = "yellow";
-            else colorClass = "red";
+            if (sec > 7 * 3600) cls = "green";
+            else if (sec > 5 * 3600) cls = "yellow";
+            else cls = "red";
 
             tr.innerHTML = `
                 <td>${r.emp}</td>
                 <td>${r.name}</td>
                 <td>${r.calls}</td>
-                <td class="${colorClass}">${r.netLogin}</td>
+                <td class="${cls}">${r.netLogin}</td>
                 <td>${r.break}</td>
                 <td>${r.meeting}</td>
                 <td>${r.talk}</td>
                 <td>${r.aht}</td>
-                <td>${r.utilization}</td>
+                <td>${r.util}</td>
             `;
 
             tbody.appendChild(tr);
         });
 
-        // 🔹 REPORT TIME
-        document.getElementById("reportTime").innerText =
-            "Last Update Till: " + d.reportTime;
+        // ✅ REPORT TIME SAFE
+        let rt = document.getElementById("reportTime");
+        if (rt) {
+            rt.innerText = "Last Update Till: " + d.reportTime;
+        }
     });
 });

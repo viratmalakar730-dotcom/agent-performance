@@ -1,7 +1,7 @@
 /* ================= BODY ================= */
 body{
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(145deg,#071a2f,#020617);
+    font-family: Arial, sans-serif;
+    background: #0b1f3a;
     color: white;
     margin: 0;
     text-align: center;
@@ -9,155 +9,114 @@ body{
 
 /* ================= TITLE ================= */
 h2{
-    margin-top: 20px;
-    font-size: 30px;
+    margin: 15px;
     color: #d4af37;
-    text-shadow: 2px 2px 8px rgba(0,0,0,0.6);
-}
-
-/* ================= CENTER ================= */
-.container{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:90vh;
-}
-
-/* ================= 3D BOX ================= */
-.upload-box{
-    display:flex;
-    gap:25px;
-}
-
-/* 🔥 3D CARD */
-.box{
-    background: linear-gradient(145deg,#0b3d91,#072c6b);
-    padding:30px;
-    width:220px;
-    border-radius:18px;
-
-    /* 3D SHADOW */
-    box-shadow:
-        10px 10px 25px rgba(0,0,0,0.7),
-        -5px -5px 15px rgba(255,255,255,0.05);
-
-    transition:0.4s;
-}
-
-/* HOVER LIFT */
-.box:hover{
-    transform: translateY(-10px) scale(1.05);
-    box-shadow:
-        15px 15px 35px rgba(0,0,0,0.9),
-        0 0 15px #d4af37;
-}
-
-/* ================= BUTTON ================= */
-button{
-    margin-top:10px;
-    padding:10px 20px;
-    border:none;
-    border-radius:10px;
-
-    background: linear-gradient(145deg,#d4af37,#b8962e);
-    color:black;
-    font-weight:bold;
-    cursor:pointer;
-
-    box-shadow:
-        5px 5px 15px rgba(0,0,0,0.6),
-        inset -2px -2px 5px rgba(255,255,255,0.3);
-
-    transition:0.3s;
-}
-
-/* PRESS EFFECT */
-button:active{
-    transform: scale(0.95);
-    box-shadow:
-        inset 3px 3px 8px rgba(0,0,0,0.6);
 }
 
 /* ================= TABLE ================= */
 table{
-    width:95%;
-    margin:20px auto;
-    border-collapse:collapse;
+    width: 98%;
+    margin: 15px auto;
+    border-collapse: collapse;
+    background: white;
+    color: black;
 
-    background: linear-gradient(145deg,#ffffff,#e5e7eb);
-    color:black;
-    border-radius:15px;
-    overflow:hidden;
-
-    /* 3D SHADOW */
-    box-shadow:
-        15px 15px 40px rgba(0,0,0,0.8),
-        -5px -5px 15px rgba(255,255,255,0.05);
+    /* 🔥 subtle 3D */
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
 }
 
-/* HEADER */
+/* ================= HEADER ================= */
 th{
-    background: linear-gradient(145deg,#0b3d91,#072c6b);
-    color:#d4af37;
-    padding:12px;
+    background: linear-gradient(180deg,#0b3d91,#072c6b);
+    color: white;
+    padding: 8px;
+    font-size: 13px;
 
-    box-shadow: inset 0 -2px 5px rgba(0,0,0,0.5);
+    border: 1px solid #000;
+
+    /* slight depth */
+    box-shadow: inset 0 -2px 4px rgba(0,0,0,0.5);
 }
 
-/* BODY */
+/* ================= BODY ================= */
 td{
-    padding:10px;
-    border:1px solid #ddd;
-    transition:0.2s;
+    padding: 6px;
+    font-size: 13px;
+    border: 1px solid #000;
+    text-align: center;
 }
 
-/* ROW HOVER (3D) */
+/* ================= ROW HOVER ================= */
 tr:hover{
-    transform: scale(1.01);
-    background:#f3f4f6;
+    background: #f1f5f9;
 }
 
-/* ================= STATUS ================= */
-.green{
-    background:#16a34a;
-    color:white;
-    font-weight:bold;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-}
+/* ================= PERFORMANCE COLORS ================= */
 
-.yellow{
-    background:#eab308;
-    font-weight:bold;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
-}
-
+/* 🔴 LOW */
 .red{
-    background:#dc2626;
-    color:white;
-    font-weight:bold;
-    box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
+    background: linear-gradient(145deg,#dc2626,#991b1b);
+    color: white;
+    font-weight: bold;
+}
+
+/* 🟡 MID */
+.yellow{
+    background: linear-gradient(145deg,#facc15,#eab308);
+    font-weight: bold;
+}
+
+/* 🟢 HIGH */
+.green{
+    background: linear-gradient(145deg,#22c55e,#15803d);
+    color: white;
+    font-weight: bold;
+}
+
+/* ================= EXTRA UPGRADE ================= */
+
+/* highlight mature call column */
+td:nth-child(8){
+    font-weight: bold;
+}
+
+/* zebra rows */
+tbody tr:nth-child(even){
+    background: #f9fafb;
+}
+
+/* sticky header (🔥 upgrade) */
+thead th{
+    position: sticky;
+    top: 0;
+    z-index: 2;
 }
 
 /* ================= REPORT TIME ================= */
 #reportTime{
-    color:#d4af37;
-    font-weight:bold;
-    text-shadow:0 0 10px rgba(212,175,55,0.6);
+    color: #d4af37;
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* ================= BUTTON ================= */
+button{
+    margin: 5px;
+    padding: 8px 18px;
+    border: none;
+    background: #0b3d91;
+    color: white;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover{
+    background: #072c6b;
 }
 
 /* ================= RESPONSIVE ================= */
 @media(max-width:768px){
-
-    .upload-box{
-        flex-direction:column;
-        align-items:center;
-    }
-
-    .box{
-        width:80%;
-    }
-
     table{
-        font-size:12px;
+        font-size: 11px;
     }
 }

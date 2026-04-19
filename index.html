@@ -1,48 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Agent Performance Dashboard</title>
+<title>Upload Reports</title>
+<style>
+body {
+    background:#0f172a;
+    color:white;
+    font-family:Arial;
+    text-align:center;
+    padding-top:100px;
+}
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+.box {
+    background:#1e293b;
+    padding:40px;
+    border-radius:10px;
+    display:inline-block;
+}
 
-<!-- XLSX -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<link rel="stylesheet" href="style.css">
+input,button {
+    margin:10px;
+    padding:10px;
+}
+</style>
 </head>
 
 <body>
 
-<h2>Agent Performance Dashboard</h2>
+<div class="box">
+    <h2>Upload APR + CDR</h2>
 
-<div class="upload-box">
-    <input type="file" id="aprFile">
-    <input type="file" id="cdrFile">
-    <button onclick="processFiles()">Generate Report</button>
+    <input type="file" id="aprFile"><br>
+    <input type="file" id="cdrFile"><br>
+
+    <button onclick="processFiles()">Generate Dashboard</button>
 </div>
 
-<div id="reportTime"></div>
-
-<table id="table">
-    <thead>
-        <tr>
-            <th>Emp ID</th>
-            <th>Name</th>
-            <th>Calls</th>
-            <th>Net Login</th>
-            <th>Break</th>
-            <th>Meeting</th>
-            <th>Talk</th>
-            <th>AHT</th>
-            <th>Utilization</th>
-        </tr>
-    </thead>
-    <tbody></tbody>
-</table>
-
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 
 </body>

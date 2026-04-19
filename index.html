@@ -1,34 +1,53 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Upload Report</title>
+<title>Upload Agent Report</title>
+
 <link rel="stylesheet" href="style.css">
 
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 </head>
 
 <body>
 
+<h2>📤 Agent Performance Report</h2>
+
 <div class="container">
-<div class="upload-box">
 
-<h2>📤 Upload Agent Report</h2>
+    <div class="upload-wrapper">
 
-<label class="label">APR File</label>
-<input type="file" id="aprFile"><br>
+        <!-- APR BOX -->
+        <div class="box">
+            <h3>APR File</h3>
+            <input type="file" id="aprFile">
+        </div>
 
-<label class="label">CDR File</label>
-<input type="file" id="cdrFile"><br>
+        <!-- CDR BOX -->
+        <div class="box">
+            <h3>CDR File</h3>
+            <input type="file" id="cdrFile">
+        </div>
 
-<button onclick="processFiles()">🚀 Generate Dashboard</button>
+        <!-- GENERATE BOX -->
+        <div class="box">
+            <h3>Generate</h3>
+            <button onclick="processFiles()">🚀 Generate</button>
+            <div id="loading" class="loading" style="display:none;">
+                Processing...
+            </div>
+        </div>
 
-<div id="loading" class="loading" style="display:none;">Processing...</div>
+    </div>
 
 </div>
-</div>
 
+<!-- Excel Library -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- Main Script -->
 <script src="script.js"></script>
 
 </body>

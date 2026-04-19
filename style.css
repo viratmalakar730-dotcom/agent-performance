@@ -1,37 +1,18 @@
-/* ================= BASE THEME (UNCHANGED) ================= */
+/* ================= BASE ================= */
 body{
     font-family: Arial;
-    background: #0b1f3a;
+    background: linear-gradient(135deg,#0b1f3a,#07152a);
     color: white;
     text-align: center;
     margin: 0;
     padding: 0;
 }
 
+/* ================= TITLE ================= */
 h2{
     margin-top: 20px;
-}
-
-/* ================= TABLE ================= */
-table{
-    width: 90%;
-    margin: auto;
-    background: white;
-    color: black;
-    border-collapse: collapse;
-    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
-    border-radius: 10px;
-    overflow: hidden;
-}
-
-th{
-    background: #0b3d91;
-    color: white;
-}
-
-td, th{
-    padding: 10px;
-    border: 1px solid black;
+    font-size: 28px;
+    letter-spacing: 1px;
 }
 
 /* ================= UPLOAD PAGE ================= */
@@ -43,10 +24,15 @@ td, th{
 }
 
 .upload-box{
-    background: #112d4e;
+    background: linear-gradient(145deg,#0b3d91,#0b1f3a);
     padding: 40px;
     border-radius: 15px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    transition: 0.3s;
+}
+
+.upload-box:hover{
+    transform: scale(1.02);
 }
 
 .label{
@@ -60,37 +46,92 @@ button{
     padding: 10px 20px;
     border: none;
     border-radius: 8px;
-    background: linear-gradient(145deg,#1e3a8a,#0b1f3a);
+    background: linear-gradient(145deg,#0b3d91,#d4af37);
     color: white;
     cursor: pointer;
+    font-weight: bold;
     transition: 0.3s;
 }
 
 button:hover{
-    transform: scale(1.05);
-    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    transform: scale(1.08);
+    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
 }
 
 /* ================= LOADING ================= */
 .loading{
     margin-top: 15px;
     font-weight: bold;
-    color: yellow;
+    color: #ffd700;
 }
 
 /* ================= REPORT TIME ================= */
 #reportTime{
     margin-top: 10px;
     font-weight: bold;
+    color: #ffd700;
 }
 
-/* ================= 3D CARDS ================= */
+/* ================= TABLE ================= */
+table{
+    width: 95%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: white;
+    color: black;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* HEADER */
+th{
+    background: linear-gradient(90deg,#0b3d91,#d4af37);
+    color: white;
+    padding: 12px;
+    font-size: 14px;
+}
+
+/* BODY */
+td{
+    padding: 10px;
+    border: 1px solid #ddd;
+}
+
+/* ROW HOVER */
+tr:hover{
+    background: #f3f4f6;
+}
+
+/* ================= COLOR STATUS ================= */
+.green{
+    background: #16a34a;
+    color: white;
+    font-weight: bold;
+}
+
+.yellow{
+    background: #eab308;
+    font-weight: bold;
+}
+
+.red{
+    background: #dc2626;
+    color: white;
+    font-weight: bold;
+}
+
+/* ================= CARDS ================= */
 #cards{
     margin: 20px;
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
 }
 
 .card{
-    background: linear-gradient(145deg,#1e3a8a,#0b1f3a);
+    background: linear-gradient(145deg,#0b3d91,#d4af37);
     padding: 20px;
     border-radius: 15px;
     box-shadow: 0 10px 25px rgba(0,0,0,0.6);
@@ -110,10 +151,17 @@ button:hover{
     margin: 20px;
 }
 
-/* ================= SCROLL FIX ================= */
+/* ================= SCROLL ================= */
 table{
     display: block;
     overflow-x: auto;
+}
+
+/* ================= FOOTER ================= */
+footer{
+    margin-top: 20px;
+    font-weight: bold;
+    color: #ffd700;
 }
 
 /* ================= RESPONSIVE ================= */
@@ -130,5 +178,9 @@ table{
     #cards{
         flex-direction: column;
         align-items: center;
+    }
+
+    button{
+        width: 90%;
     }
 }

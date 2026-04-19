@@ -1,40 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Upload</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>Agent Performance Dashboard</title>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<!-- XLSX -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
+
+<link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div class="container">
+<h2>Agent Performance Dashboard</h2>
 
-    <div class="upload-box">
-
-        <h2>Agent Performance Dashboard</h2>
-
-        <label class="label">APR Report</label>
-        <input type="file" id="aprFile"><br><br>
-
-        <label class="label">CDR Report</label>
-        <input type="file" id="cdrFile"><br><br>
-
-        <button onclick="processFiles()">Generate Report</button>
-
-        <div id="loading" class="loading">Processing... ⏳</div>
-
-        <!-- ❤️ FOOTER -->
-        <div style="margin-top:20px; font-weight:bold;">
-            ❤️ Powered by Chandan Malakar ❤️
-        </div>
-
-    </div>
-
+<div class="upload-box">
+    <input type="file" id="aprFile">
+    <input type="file" id="cdrFile">
+    <button onclick="processFiles()">Generate Report</button>
 </div>
 
-<!-- 🔥 XLSX LIBRARY -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<div id="reportTime"></div>
 
-<!-- 🔥 MAIN SCRIPT -->
+<table id="table">
+    <thead>
+        <tr>
+            <th>Emp ID</th>
+            <th>Name</th>
+            <th>Calls</th>
+            <th>Net Login</th>
+            <th>Break</th>
+            <th>Meeting</th>
+            <th>Talk</th>
+            <th>AHT</th>
+            <th>Utilization</th>
+        </tr>
+    </thead>
+    <tbody></tbody>
+</table>
+
 <script src="script.js"></script>
 
 </body>

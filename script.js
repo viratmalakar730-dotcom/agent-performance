@@ -129,10 +129,6 @@ function buildDashboard(apr,cdr){
 
         let login = timeToSeconds(a["Total Login Time"]);
 
-        if(login > (8*3600 + 15*60)){
-            login = 8*3600;
-        }
-
         let breakTime =
             timeToSeconds(a["LUNCHBREAK"]) +
             timeToSeconds(a["TEABREAK"]) +

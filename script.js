@@ -1,4 +1,4 @@
-console.log("🔥 FINAL COLUMN BASED ENGINE");
+console.log("🔥 FINAL PRO SYSTEM");
 
 // ================= FIREBASE =================
 let db = null;
@@ -59,7 +59,8 @@ function processFiles(){
 
             document.getElementById("loading").style.display="none";
 
-            window.location.href = "live.html";
+            // 🔥 FIX: dashboard main page
+            window.location.href = "dashboard.html";
         });
     });
 }
@@ -75,7 +76,7 @@ function readAPR(file,cb){
         let sheet = wb.Sheets[wb.SheetNames[0]];
         let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-        // 🔥 DATE FROM 2nd ROW
+        // 🔥 DATE EXTRACT
         let row2 = raw[1]?.[0] || "";
         if(row2.toLowerCase().includes("to")){
             window.reportDate = row2.split("to")[1].trim();
@@ -109,7 +110,6 @@ function readCDR(file,cb){
         let sheet = wb.Sheets[wb.SheetNames[0]];
         let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-        // 🔥 REMOVE TOP 1 ROW
         let trimmed = raw.slice(1);
 
         let headers = trimmed[0];
@@ -145,56 +145,44 @@ function buildDashboard(apr,cdr){
         let totalBreak = lunch + tea + short;
         let netLogin = login - totalBreak;
 
-        // 🔥 EMP MATCH
         let agentCDR = cdr.filter(r=>{
             let cEmp = (r["Username"]||"").toString().trim();
             return cEmp === emp;
         });
 
-        // ================= TOTAL MATURE =================
+        // 🔥 TOTAL MATURE
         let totalMature = agentCDR.filter(r=>{
-            let dispo = (r["Disposition"]||"").toUpperCase();
-            return dispo.includes("CALLMATURED") || dispo.includes("TRANSFER");
+            let d = (r["Disposition"]||"").toUpperCase();
+            return d.includes("CALLMATURED") || d.includes("TRANSFER");
         }).length;
 
-        // ================= IB MATURE =================
+        // 🔥 IB
         let ibMature = agentCDR.filter(r=>{
-
-            let dispo = (r["Disposition"]||"").toUpperCase();
-            let campaign = (r["Campaign"]||"").toUpperCase();
-
-            return (
-                (dispo.includes("CALLMATURED") || dispo.includes("TRANSFER")) &&
-                campaign.includes("CSRINBOUND")
-            );
-
+            let d = (r["Disposition"]||"").toUpperCase();
+            let c = (r["Campaign"]||"").toUpperCase();
+            return (d.includes("CALLMATURED") || d.includes("TRANSFER")) &&
+                   c.includes("CSRINBOUND");
         }).length;
 
-        // ================= OB MATURE =================
+        // 🔥 OB
         let obMature = totalMature - ibMature;
 
-        // ================= TALK =================
-        let totalTalk = agentCDR.reduce((sum,r)=>{
-            return sum + timeToSeconds(r["Talk Duration"]);
-        },0);
+        // 🔥 TALK
+        let totalTalk = agentCDR.reduce((s,r)=>
+            s + timeToSeconds(r["Talk Duration"]),0);
 
-        // ================= AHT =================
-        let ahtSec = totalMature ? totalTalk / totalMature : 0;
+        let aht = totalMature ? totalTalk / totalMature : 0;
 
         result.push({
-            emp,
-            name,
-            login: secondsToTime(login),
-            netLogin: secondsToTime(netLogin),
-            break: secondsToTime(totalBreak),
-            meeting: a["MEETING"] || "00:00:00",
-
-            calls: totalMature,
-            ib: ibMature,
-            ob: obMature,
-
-            talk: secondsToTime(totalTalk),
-            aht: secondsToTime(ahtSec)
+            emp,name,
+            login:secondsToTime(login),
+            netLogin:secondsToTime(netLogin),
+            break:secondsToTime(totalBreak),
+            meeting:a["MEETING"] || "00:00:00",
+            aht:secondsToTime(aht),
+            calls:totalMature,
+            ib:ibMature,
+            ob:obMature
         });
 
     });
@@ -261,7 +249,7 @@ function resetDashboard(){
 document.addEventListener("DOMContentLoaded",()=>{
     if(db){
         db.ref("dashboard").on("value",(snap)=>{
-            let d=snap.val();
+            let d = snap.val();
             if(d) loadDashboard(d);
         });
     }

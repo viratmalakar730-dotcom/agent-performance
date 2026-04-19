@@ -1,6 +1,8 @@
-console.log("🔥 FINAL FIXED SYSTEM");
+console.log("🔥 FINAL UPGRADED SYSTEM");
 
-// ================= FIREBASE FIX =================
+// ================= FIREBASE =================
+let db = null;
+
 const firebaseConfig = {
   apiKey: "AIzaSy...",
   authDomain: "agent-performance-live.firebaseapp.com",
@@ -9,9 +11,8 @@ const firebaseConfig = {
 };
 
 if (typeof firebase !== "undefined") {
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
-    }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
 }
 
 // ================= SAFE STRING =================
@@ -37,10 +38,103 @@ function secondsToTime(sec){
     return `${h}:${m}:${s}`;
 }
 
+// ================= PROCESS =================
+function processFiles(){
+
+    let aprFile = document.getElementById("aprFile")?.files[0];
+    let cdrFile = document.getElementById("cdrFile")?.files[0];
+
+    if(!aprFile || !cdrFile){
+        alert("Upload both files");
+        return;
+    }
+
+    document.getElementById("loading").style.display="block";
+
+    readAPR(aprFile,(apr)=>{
+        readCDR(cdrFile,(cdr)=>{
+
+            let final = buildDashboard(apr,cdr);
+
+            let payload = {
+                final,
+                reportTime: window.reportDate || ""
+            };
+
+            if(db) db.ref("dashboard").set(payload);
+
+            document.getElementById("loading").style.display="none";
+
+            window.location.href="dashboard.html";
+        });
+    });
+}
+
+// ================= APR =================
+function readAPR(file,cb){
+
+    let r = new FileReader();
+
+    r.onload = e=>{
+        let data = new Uint8Array(e.target.result);
+        let wb = XLSX.read(data,{type:"array"});
+        let sheet = wb.Sheets[wb.SheetNames[0]];
+        let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
+
+        let row2 = raw[1]?.[0] || "";
+        if(row2.toLowerCase().includes("to")){
+            window.reportDate = row2.split("to")[1].trim();
+        }
+
+        let trimmed = raw.slice(2);
+
+        let headers = trimmed[0];
+        let rows = trimmed.slice(1);
+
+        let json = rows.map(r=>{
+            let obj = {};
+            headers.forEach((h,i)=> obj[h]=r[i]);
+            return obj;
+        });
+
+        cb(json);
+    };
+
+    r.readAsArrayBuffer(file);
+}
+
+// ================= CDR =================
+function readCDR(file,cb){
+
+    let r = new FileReader();
+
+    r.onload = e=>{
+        let data = new Uint8Array(e.target.result);
+        let wb = XLSX.read(data,{type:"array"});
+        let sheet = wb.Sheets[wb.SheetNames[0]];
+        let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
+
+        let trimmed = raw.slice(1);
+
+        let headers = trimmed[0];
+        let rows = trimmed.slice(1);
+
+        let json = rows.map(r=>{
+            let obj = {};
+            headers.forEach((h,i)=> obj[h]=r[i]);
+            return obj;
+        });
+
+        cb(json);
+    };
+
+    r.readAsArrayBuffer(file);
+}
+
 // ================= CORE =================
 function buildDashboard(apr,cdr){
 
-    let result=[];
+    let result = [];
 
     apr.forEach(a=>{
 
@@ -51,49 +145,51 @@ function buildDashboard(apr,cdr){
 
         // 🔥 LOGIN CAP
         if(login > (8*3600 + 15*60)){
-            login = 8*3600;
+            login = 8 * 3600;
         }
 
-        let breakTime =
-            timeToSeconds(a["LUNCHBREAK"]) +
-            timeToSeconds(a["TEABREAK"]) +
-            timeToSeconds(a["SHORTBREAK"]);
+        let lunch = timeToSeconds(a["LUNCHBREAK"]);
+        let tea = timeToSeconds(a["TEABREAK"]);
+        let short = timeToSeconds(a["SHORTBREAK"]);
 
-        let net = login - breakTime;
+        let totalBreak = lunch + tea + short;
+        let netLogin = login - totalBreak;
 
-        let agentCDR = cdr.filter(r =>
-            safeStr(r["Username"]) === emp
-        );
+        let agentCDR = cdr.filter(r=>{
+            return safeStr(r["Username"]) === emp;
+        });
 
-        let total = agentCDR.filter(r=>{
+        let totalMature = agentCDR.filter(r=>{
             let d = safeStr(r["Disposition"]).toUpperCase();
             return d.includes("CALLMATURED") || d.includes("TRANSFER");
         }).length;
 
-        let ib = agentCDR.filter(r=>{
+        let ibMature = agentCDR.filter(r=>{
             let d = safeStr(r["Disposition"]).toUpperCase();
             let c = safeStr(r["Campaign"]).toUpperCase();
             return (d.includes("CALLMATURED") || d.includes("TRANSFER")) &&
                    c.includes("CSRINBOUND");
         }).length;
 
-        let ob = total - ib;
+        let obMature = totalMature - ibMature;
 
-        let talk = agentCDR.reduce((s,r)=>
+        let totalTalk = agentCDR.reduce((s,r)=>
             s + timeToSeconds(r["Talk Duration"]),0);
 
-        let aht = total ? talk/total : 0;
+        let aht = totalMature ? totalTalk / totalMature : 0;
 
         result.push({
             emp,name,
             login:secondsToTime(login),
-            netLogin:secondsToTime(net),
-            break:secondsToTime(breakTime),
+            netLogin:secondsToTime(netLogin),
+            break:secondsToTime(totalBreak),
             meeting:a["MEETING"] || "00:00:00",
             aht:secondsToTime(aht),
-            calls:total,
-            ib,ob
+            calls:totalMature,
+            ib:ibMature,
+            ob:obMature
         });
+
     });
 
     return result;
@@ -113,18 +209,24 @@ function loadDashboard(data){
         let brk = timeToSeconds(r.break);
         let meet = timeToSeconds(r.meeting);
 
+        // 🔥 NET LOGIN
         let netCls = net > 8*3600 ? "green3d" : "red3d";
+
+        // 🔥 BREAK
         let breakCls = brk > 2100 ? "red3d" : "";
+
+        // 🔥 MEETING
         let meetCls = meet > 2100 ? "red3d" : "";
 
+        // 🔥 CALLS
         let callCls="";
         if(r.calls >= 100) callCls="green3d";
         else if(r.calls >= 70) callCls="yellow3d";
         else callCls="red3d";
 
-        let tr=document.createElement("tr");
+        let tr = document.createElement("tr");
 
-        tr.innerHTML=`
+        tr.innerHTML = `
         <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${r.login}</td>
@@ -140,14 +242,37 @@ function loadDashboard(data){
         tbody.appendChild(tr);
     });
 
-    document.getElementById("reportTime").innerText =
-    "Last Update Till: " + (data.reportTime || "");
+    let rt = document.getElementById("reportTime");
+    if(rt){
+        rt.innerText = "Last Update Till: " + (data.reportTime || "");
+    }
 }
 
-// ================= FIREBASE LISTENER =================
+// ================= COPY PNG =================
+function downloadPNG(){
+    html2canvas(document.getElementById("table"),{scale:3}).then(canvas=>{
+        canvas.toBlob(blob=>{
+            navigator.clipboard.write([
+                new ClipboardItem({"image/png": blob})
+            ]);
+            alert("Copied ✅");
+        });
+    });
+}
+
+// ================= RESET =================
+function resetDashboard(){
+
+    if(confirm("Reset dashboard?")){
+        if(db) db.ref("dashboard").remove();
+        location.href="index.html";
+    }
+}
+
+// ================= LIVE =================
 document.addEventListener("DOMContentLoaded",()=>{
-    if (typeof firebase !== "undefined") {
-        firebase.database().ref("dashboard").on("value",(snap)=>{
+    if(db){
+        db.ref("dashboard").on("value",(snap)=>{
             let d = snap.val();
             if(d) loadDashboard(d);
         });

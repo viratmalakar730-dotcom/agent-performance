@@ -27,36 +27,32 @@ thead th{
 
 <div id="reportTime"></div>
 
-<!-- 🔥 SEARCH -->
-<input type="text" id="search" placeholder="Search Agent..." onkeyup="searchTable()" style="padding:8px;width:250px;margin:10px;">
+<input type="text" id="search" placeholder="Search Agent..." onkeyup="searchTable()">
 
-<!-- 🔥 BUTTONS -->
 <div>
 <button onclick="exportExcel()">📤 Excel</button>
 <button onclick="downloadPNG()">📋 Copy</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
 
-<!-- 🔥 CARDS -->
-<div id="cards" style="display:flex;gap:15px;justify-content:center;flex-wrap:wrap;margin:15px;"></div>
+<div id="cards"></div>
 
-<!-- TABLE -->
 <div class="table-container">
 <table id="table">
 
 <thead>
 <tr>
 <th>S.No</th>
-<th>Emp ID</th>
-<th>Name</th>
-<th>Login</th>
+<th>Employee ID</th>
+<th>Agent Full Name</th>
+<th>Total Login</th>
 <th>Net Login</th>
-<th>Break</th>
-<th>Meeting</th>
+<th>Total Break</th>
+<th>Total Meeting</th>
 <th>AHT</th>
-<th>Total</th>
-<th>IB</th>
-<th>OB</th>
+<th>Total Mature</th>
+<th>IB Mature</th>
+<th>OB Mature</th>
 </tr>
 </thead>
 
@@ -65,9 +61,8 @@ thead th{
 </table>
 </div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
+<script src="xlsx.full.min.js"></script>
+<script src="html2canvas.min.js"></script>
 <script src="script.js"></script>
 
 </body>

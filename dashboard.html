@@ -12,10 +12,16 @@
     max-height:520px;
     overflow:auto;
 }
-thead th{
-    position:sticky;
-    top:0;
-    z-index:5;
+
+/* TV MODE */
+body.tv{
+    background:black;
+    zoom:1.2;
+}
+
+body.tv button,
+body.tv input{
+    display:none;
 }
 </style>
 
@@ -27,12 +33,13 @@ thead th{
 
 <div id="reportTime"></div>
 
-<input type="text" id="search" placeholder="Search Agent..." onkeyup="searchTable()">
+<input type="text" id="search" placeholder="Search..." onkeyup="searchTable()">
 
 <div>
 <button onclick="exportExcel()">📤 Excel</button>
 <button onclick="downloadPNG()">📋 Copy</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
+<button onclick="toggleTV()">📺 TV Mode</button>
 </div>
 
 <div id="cards"></div>
@@ -51,8 +58,8 @@ thead th{
 <th>Total Meeting</th>
 <th>AHT</th>
 <th>Total Mature</th>
-<th>IB Mature</th>
-<th>OB Mature</th>
+<th>IB</th>
+<th>OB</th>
 </tr>
 </thead>
 

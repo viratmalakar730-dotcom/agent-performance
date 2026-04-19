@@ -1,4 +1,4 @@
-console.log("🔥 FINAL PRO MAX");
+console.log("🔥 FINAL PRO MAX SYSTEM");
 
 // ================= FIREBASE =================
 const firebaseConfig = {
@@ -12,142 +12,169 @@ if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 let db = firebase.database();
 
 // ================= HELPERS =================
-function safeStr(v){ return (v??"").toString().trim(); }
+function safeStr(v){
+    if(v === undefined || v === null) return "";
+    return String(v).trim();
+}
 
 function timeToSeconds(t){
     if(!t || t === "-") return 0;
     if(typeof t === "number") return Math.floor(t*86400);
+
     let p = String(t).split(":");
     return (+p[0]*3600)+(+p[1]*60)+(+p[2]||0);
 }
 
 function secondsToTime(sec){
-    sec=Math.max(0,Math.floor(sec));
-    let h=String(Math.floor(sec/3600)).padStart(2,'0');
-    let m=String(Math.floor((sec%3600)/60)).padStart(2,'0');
-    let s=String(sec%60).padStart(2,'0');
+    sec = Math.max(0, Math.floor(sec));
+    let h = String(Math.floor(sec/3600)).padStart(2,'0');
+    let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
+    let s = String(sec%60).padStart(2,'0');
     return `${h}:${m}:${s}`;
 }
 
 // ================= PROCESS =================
 function processFiles(){
-    let apr=document.getElementById("aprFile").files[0];
-    let cdr=document.getElementById("cdrFile").files[0];
 
-    if(!apr||!cdr){ alert("Upload both"); return; }
+    let apr = document.getElementById("aprFile")?.files[0];
+    let cdr = document.getElementById("cdrFile")?.files[0];
+
+    if(!apr || !cdr){
+        alert("Upload APR + CDR");
+        return;
+    }
+
+    document.getElementById("loading").style.display="block";
 
     readAPR(apr,(aprData)=>{
         readCDR(cdr,(cdrData)=>{
-            let final=buildDashboard(aprData,cdrData);
-            let summary=buildSummary(cdrData,final);
+
+            let final = buildDashboard(aprData,cdrData);
+            let summary = buildSummary(cdrData,final);
 
             db.ref("dashboard").set({
                 final,
                 summary,
-                reportTime:window.reportDate||""
+                reportTime: window.reportDate || ""
             });
 
-            location.href="dashboard.html";
+            window.location.href="dashboard.html";
         });
     });
 }
 
-// ================= APR =================
+// ================= READ APR =================
 function readAPR(file,cb){
-    let r=new FileReader();
-    r.onload=e=>{
-        let wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
-        let raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
-        let row2=raw[1]?.[0]||"";
+    let r = new FileReader();
+
+    r.onload = e=>{
+        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+
+        let row2 = raw[1]?.[0] || "";
         if(row2.toLowerCase().includes("to")){
-            window.reportDate=row2.split("to")[1].trim();
+            window.reportDate = row2.split("to")[1].trim();
         }
 
-        let data=raw.slice(2);
-        let headers=data[0];
+        let data = raw.slice(2);
+        let headers = data[0];
 
-        let json=data.slice(1).map(r=>{
-            let obj={};
-            headers.forEach((h,i)=>obj[h]=r[i]);
+        let json = data.slice(1).map(r=>{
+            let obj = {};
+            headers.forEach((h,i)=> obj[h]=r[i]);
             return obj;
         });
 
         cb(json);
     };
+
     r.readAsArrayBuffer(file);
 }
 
-// ================= CDR =================
+// ================= READ CDR =================
 function readCDR(file,cb){
-    let r=new FileReader();
-    r.onload=e=>{
-        let wb=XLSX.read(new Uint8Array(e.target.result),{type:"array"});
-        let raw=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
-        let data=raw.slice(1);
-        let headers=data[0];
+    let r = new FileReader();
 
-        let json=data.slice(1).map(r=>{
-            let obj={};
-            headers.forEach((h,i)=>obj[h]=r[i]);
+    r.onload = e=>{
+        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+
+        let data = raw.slice(1);
+        let headers = data[0];
+
+        let json = data.slice(1).map(r=>{
+            let obj = {};
+            headers.forEach((h,i)=> obj[h]=r[i]);
             return obj;
         });
 
         cb(json);
     };
+
     r.readAsArrayBuffer(file);
 }
 
 // ================= CORE =================
 function buildDashboard(apr,cdr){
 
-    let result=[];
+    let result = [];
 
     apr.forEach(a=>{
 
-        let emp=safeStr(a["Agent Name"]);
-        let name=safeStr(a["Agent Full Name"]);
+        let emp = safeStr(a["Agent Name"]);
+        let name = safeStr(a["Agent Full Name"]);
 
-        let login=timeToSeconds(a["Total Login Time"]);
-        if(login>(8*3600+15*60)) login=8*3600;
+        let login = timeToSeconds(a["Total Login Time"]);
 
-        let breakTime=
-        timeToSeconds(a["LUNCHBREAK"])+
-        timeToSeconds(a["TEABREAK"])+
-        timeToSeconds(a["SHORTBREAK"]);
+        // 🔥 LOGIN CAP
+        if(login > (8*3600 + 15*60)){
+            login = 8*3600;
+        }
 
-        let net=login-breakTime;
+        let breakTime =
+            timeToSeconds(a["LUNCHBREAK"]) +
+            timeToSeconds(a["TEABREAK"]) +
+            timeToSeconds(a["SHORTBREAK"]);
 
-        let agent=cdr.filter(r=>safeStr(r["Username"])===emp);
+        let net = login - breakTime;
 
-        let total=agent.filter(r=>{
-            let d=safeStr(r["Disposition"]).toUpperCase();
-            return d.includes("CALLMATURED")||d.includes("TRANSFER");
+        let agentCDR = cdr.filter(r =>
+            safeStr(r["Username"]) === emp
+        );
+
+        let total = agentCDR.filter(r=>{
+            let d = safeStr(r["Disposition"]).toUpperCase();
+            return d.includes("CALLMATURED") || d.includes("TRANSFER");
         }).length;
 
-        let ib=agent.filter(r=>{
-            let d=safeStr(r["Disposition"]).toUpperCase();
-            let c=safeStr(r["Campaign"]).toUpperCase();
-            return (d.includes("CALLMATURED")||d.includes("TRANSFER")) && c.includes("CSRINBOUND");
+        let ib = agentCDR.filter(r=>{
+            let d = safeStr(r["Disposition"]).toUpperCase();
+            let c = safeStr(r["Campaign"]).toUpperCase();
+            return (d.includes("CALLMATURED") || d.includes("TRANSFER")) &&
+                   c.includes("CSRINBOUND");
         }).length;
 
-        let ob=total-ib;
+        let ob = total - ib;
 
-        let talk=agent.reduce((s,r)=>s+timeToSeconds(r["Talk Duration"]),0);
-        let aht= total? talk/total:0;
+        let talk = agentCDR.reduce((s,r)=>
+            s + timeToSeconds(r["Talk Duration"]),0);
+
+        let aht = total ? talk/total : 0;
 
         result.push({
-            emp,name,
+            emp,
+            name,
             login:secondsToTime(login),
             netLogin:secondsToTime(net),
             break:secondsToTime(breakTime),
-            meeting:a["MEETING"]||"00:00:00",
+            meeting:a["MEETING"] || "00:00:00",
             aht:secondsToTime(aht),
             calls:total,
-            ib,ob
+            ib,
+            ob
         });
-
     });
 
     return result;
@@ -156,7 +183,9 @@ function buildDashboard(apr,cdr){
 // ================= SUMMARY =================
 function buildSummary(cdr,data){
 
-    let ivr = cdr.filter(r=> safeStr(r["Skill"]).toUpperCase().includes("INBOUND")).length;
+    let ivr = cdr.filter(r =>
+        safeStr(r["Skill"]).toUpperCase().includes("INBOUND")
+    ).length;
 
     let total = data.reduce((s,r)=>s+r.calls,0);
     let ib = data.reduce((s,r)=>s+r.ib,0);
@@ -165,33 +194,41 @@ function buildSummary(cdr,data){
     let totalLogin = data.length;
 
     let totalTalk = data.reduce((s,r)=>s+timeToSeconds(r.aht)*r.calls,0);
-    let overallAHT = total? totalTalk/total:0;
+    let overallAHT = total ? totalTalk/total : 0;
 
     return {
-        ivr,total,ib,ob,totalLogin,
-        aht:secondsToTime(overallAHT)
+        ivr,
+        total,
+        ib,
+        ob,
+        totalLogin,
+        aht: secondsToTime(overallAHT)
     };
 }
 
 // ================= LOAD =================
 function loadDashboard(data){
 
-    let tbody=document.querySelector("#table tbody");
-    tbody.innerHTML="";
+    let tbody = document.querySelector("#table tbody");
+    if(!tbody) return;
+
+    tbody.innerHTML = "";
 
     data.final.forEach((r,i)=>{
 
-        let loginSec=timeToSeconds(r.login);
-        let netSec=timeToSeconds(r.netLogin);
+        let loginSec = timeToSeconds(r.login);
+        let netSec = timeToSeconds(r.netLogin);
 
-        let netCls="";
-        if(loginSec>= (8*3600+15*60) && netSec<8*3600){
-            netCls="red3d";
+        let netCls = "";
+
+        // 🔥 FINAL NET LOGIN CONDITION
+        if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
+            netCls = "red3d";
         }
 
-        let tr=document.createElement("tr");
+        let tr = document.createElement("tr");
 
-        tr.innerHTML=`
+        tr.innerHTML = `
         <td>${i+1}</td>
         <td>${r.emp}</td>
         <td>${r.name}</td>
@@ -209,34 +246,35 @@ function loadDashboard(data){
     });
 
     // 🔥 CARDS
-    let c=data.summary;
-    document.getElementById("cards").innerHTML=`
-    <div class="card">IVR Hit<br>${c.ivr}</div>
+    let c = data.summary;
+
+    document.getElementById("cards").innerHTML = `
+    <div class="card">Total IVR Hit<br>${c.ivr}</div>
     <div class="card">Total Mature<br>${c.total}</div>
     <div class="card">IB Mature<br>${c.ib}</div>
     <div class="card">OB Mature<br>${c.ob}</div>
-    <div class="card">AHT<br>${c.aht}</div>
-    <div class="card">Agents<br>${c.totalLogin}</div>
+    <div class="card">Overall AHT<br>${c.aht}</div>
+    <div class="card">Total Login Count<br>${c.totalLogin}</div>
     `;
 
-    document.getElementById("reportTime").innerText=
-    "Last Update Till: "+data.reportTime;
+    document.getElementById("reportTime").innerText =
+    "Last Update Till: " + (data.reportTime || "");
 }
 
 // ================= SEARCH =================
 function searchTable(){
-    let input=document.getElementById("search").value.toLowerCase();
-    let rows=document.querySelectorAll("#table tbody tr");
+    let input = document.getElementById("search").value.toLowerCase();
+    let rows = document.querySelectorAll("#table tbody tr");
 
     rows.forEach(r=>{
-        let text=r.innerText.toLowerCase();
-        r.style.display=text.includes(input)?"":"none";
+        let text = r.innerText.toLowerCase();
+        r.style.display = text.includes(input) ? "" : "none";
     });
 }
 
 // ================= EXPORT =================
 function exportExcel(){
-    let wb=XLSX.utils.table_to_book(document.getElementById("table"));
+    let wb = XLSX.utils.table_to_book(document.getElementById("table"));
     XLSX.writeFile(wb,"Dashboard.xlsx");
 }
 
@@ -244,8 +282,10 @@ function exportExcel(){
 function downloadPNG(){
     html2canvas(document.getElementById("table"),{scale:3}).then(canvas=>{
         canvas.toBlob(blob=>{
-            navigator.clipboard.write([new ClipboardItem({"image/png":blob})]);
-            alert("Copied");
+            navigator.clipboard.write([
+                new ClipboardItem({"image/png":blob})
+            ]);
+            alert("Copied ✅");
         });
     });
 }
@@ -259,7 +299,7 @@ function resetDashboard(){
 // ================= LIVE =================
 document.addEventListener("DOMContentLoaded",()=>{
     db.ref("dashboard").on("value",snap=>{
-        let d=snap.val();
+        let d = snap.val();
         if(d) loadDashboard(d);
     });
 });

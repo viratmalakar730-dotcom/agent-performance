@@ -1,32 +1,91 @@
-/* BODY */
+/* ================= BODY ================= */
 body{
-    font-family:Arial;
+    font-family: Arial, sans-serif;
     background:#0b1f3a;
     color:white;
+    margin:0;
     text-align:center;
 }
 
-/* TITLE */
+/* ================= TITLE ================= */
 h2{
     color:#d4af37;
+    margin:15px;
 }
 
-/* ================= HEADER 3D ================= */
-th{
+/* ================= UPLOAD PAGE ================= */
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+}
+
+/* 🔥 SINGLE BOX (ALL INPUT INSIDE) */
+.box{
     background: linear-gradient(145deg,#0b3d91,#072c6b);
-    color:#d4af37;
-    padding:10px;
-    border:1px solid black;
+    padding:30px;
+    border-radius:20px;
+    width:350px;
 
-    /* 🔥 DEEP 3D HEADER */
+    /* 3D */
     box-shadow:
-        inset -3px -3px 6px rgba(255,255,255,0.1),
-        inset 3px 3px 8px rgba(0,0,0,0.7),
-        0 5px 10px rgba(0,0,0,0.8);
+        10px 10px 30px rgba(0,0,0,0.8),
+        -3px -3px 10px rgba(255,255,255,0.05);
+}
 
-    position:sticky;
-    top:0;
-    z-index:5;
+/* INPUT */
+.box input{
+    margin:10px 0;
+    padding:8px;
+    width:90%;
+    border-radius:5px;
+    border:none;
+}
+
+/* ================= BUTTON ================= */
+button{
+    padding:10px 18px;
+    border:none;
+    border-radius:8px;
+    background:#d4af37;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+    margin:8px;
+
+    box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
+}
+
+button:hover{
+    transform:scale(1.05);
+}
+
+/* ================= CARDS ================= */
+#cards{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin:15px;
+}
+
+.card{
+    background:linear-gradient(145deg,#0b3d91,#072c6b);
+    padding:15px;
+    border-radius:12px;
+    width:150px;
+
+    box-shadow:
+        5px 5px 15px rgba(0,0,0,0.7),
+        -2px -2px 5px rgba(255,255,255,0.1);
+}
+
+/* ================= TABLE CONTAINER ================= */
+.table-container{
+    max-height:520px;
+    overflow:auto;
+    margin:10px;
 }
 
 /* ================= TABLE ================= */
@@ -37,9 +96,29 @@ table{
     background:white;
     color:black;
     font-weight:bold;
+    font-size:15px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,0.7);
 }
 
-/* ================= CELLS 3D ================= */
+/* ================= HEADER (ULTRA 3D) ================= */
+th{
+    background: linear-gradient(145deg,#0b3d91,#072c6b);
+    color:#d4af37;
+    padding:10px;
+    border:1px solid black;
+
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.1),
+        inset 3px 3px 8px rgba(0,0,0,0.7),
+        0 5px 10px rgba(0,0,0,0.8);
+
+    position:sticky;
+    top:0;
+    z-index:5;
+}
+
+/* ================= CELLS (3D) ================= */
 td{
     padding:8px;
     border:1px solid black;
@@ -52,41 +131,29 @@ td{
         0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* ROW HOVER */
+/* ================= HOVER FIX ================= */
 tbody tr:hover td{
-    background:#dbeafe;
+    background:#1e3a8a !important;
+    color:white !important;
+    transform:scale(1.01);
 }
 
-/* ================= CARDS ================= */
-#cards{
-    display:flex;
-    gap:15px;
-    justify-content:center;
-    flex-wrap:wrap;
+/* ================= SCROLL ================= */
+.table-container::-webkit-scrollbar{
+    width:8px;
+}
+.table-container::-webkit-scrollbar-thumb{
+    background:#0b3d91;
+}
+
+/* ================= REPORT TIME ================= */
+#reportTime{
+    color:#d4af37;
+    font-weight:bold;
     margin:10px;
 }
 
-.card{
-    background:linear-gradient(145deg,#0b3d91,#072c6b);
-    padding:15px;
-    border-radius:10px;
-    width:150px;
-
-    box-shadow:
-        5px 5px 15px rgba(0,0,0,0.7),
-        -2px -2px 5px rgba(255,255,255,0.1);
-}
-
-/* ================= BUTTON ================= */
-button{
-    padding:8px 15px;
-    margin:5px;
-    background:#d4af37;
-    border:none;
-    cursor:pointer;
-}
-
-/* ================= COLORS ================= */
+/* ================= CONDITIONAL COLORS ================= */
 .red3d{
     background:linear-gradient(#dc2626,#7f1d1d);
     color:white;
@@ -99,4 +166,20 @@ button{
 .green3d{
     background:linear-gradient(#22c55e,#15803d);
     color:white;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:768px){
+
+    .box{
+        width:90%;
+    }
+
+    table{
+        font-size:12px;
+    }
+
+    button{
+        width:90%;
+    }
 }

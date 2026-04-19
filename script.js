@@ -1,4 +1,4 @@
-console.log("🔥 FINAL ULTRA PRO SYSTEM");
+console.log("🔥 FINAL CLEAN SYSTEM");
 
 // ================= FIREBASE =================
 const firebaseConfig = {
@@ -70,11 +70,12 @@ function readAPR(file,cb){
         let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
         let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
+        // 🔥 DATE FIX FINAL
         let row2 = raw[1] || [];
-        let rowText = row2.join(" ").toLowerCase();
+        let fullText = row2.join(" ");
 
-        if(rowText.includes("to")){
-            window.reportDate = rowText.split("to")[1].trim();
+        if(fullText.includes("to")){
+            window.reportDate = fullText.split("to")[1].trim();
         }
 
         let data = raw.slice(2);
@@ -128,7 +129,6 @@ function buildDashboard(apr,cdr){
 
         let login = timeToSeconds(a["Total Login Time"]);
 
-        // 🔥 LOGIN CAP
         if(login > (8*3600 + 15*60)){
             login = 8*3600;
         }
@@ -164,16 +164,14 @@ function buildDashboard(apr,cdr){
         let aht = total ? talk/total : 0;
 
         result.push({
-            emp,
-            name,
+            emp,name,
             login:secondsToTime(login),
             netLogin:secondsToTime(net),
             break:secondsToTime(breakTime),
             meeting:a["MEETING"] || "00:00:00",
             aht:secondsToTime(aht),
             calls:total,
-            ib,
-            ob
+            ib,ob
         });
     });
 
@@ -197,11 +195,7 @@ function buildSummary(cdr,data){
     let overallAHT = total ? totalTalk/total : 0;
 
     return {
-        ivr,
-        total,
-        ib,
-        ob,
-        totalLogin,
+        ivr,total,ib,ob,totalLogin,
         aht: secondsToTime(overallAHT)
     };
 }
@@ -210,8 +204,6 @@ function buildSummary(cdr,data){
 function loadDashboard(data){
 
     let tbody = document.querySelector("#table tbody");
-    if(!tbody) return;
-
     tbody.innerHTML = "";
 
     data.final.forEach((r,i)=>{
@@ -253,8 +245,10 @@ function loadDashboard(data){
         tbody.appendChild(tr);
     });
 
-    // 🔥 CARDS
-    let c = data.summary;
+    // 🔥 CARDS FIXED
+    let c = data.summary || {
+        ivr:0,total:0,ib:0,ob:0,totalLogin:0,aht:"00:00:00"
+    };
 
     document.getElementById("cards").innerHTML = `
     <div class="card">Total IVR Hit<br>${c.ivr}</div>
@@ -302,17 +296,6 @@ function downloadPNG(){
 function resetDashboard(){
     db.ref("dashboard").remove();
     location.href="index.html";
-}
-
-// ================= TV MODE =================
-function toggleTV(){
-    document.body.classList.toggle("tv");
-
-    if(document.body.classList.contains("tv")){
-        document.documentElement.requestFullscreen();
-    }else{
-        document.exitFullscreen();
-    }
 }
 
 // ================= LIVE =================

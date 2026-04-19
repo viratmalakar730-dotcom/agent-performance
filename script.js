@@ -1,36 +1,24 @@
-console.log("🚀 FINAL ULTIMATE SCRIPT");
+console.log("🔥 FINAL RESTORED VERSION");
 
-// ================= FIREBASE SAFE INIT =================
+// ================= FIREBASE =================
 let db = null;
 
 const firebaseConfig = {
-  apiKey: "AIzaSy...", // apna real key
+  apiKey: "AIzaSy...",
   authDomain: "agent-performance-live.firebaseapp.com",
   databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
   projectId: "agent-performance-live"
 };
 
-try {
-    if (typeof firebase !== "undefined") {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        db = firebase.database();
-        console.log("✅ Firebase Connected");
-    } else {
-        console.error("❌ Firebase not loaded");
-    }
-} catch (e) {
-    console.error("Firebase Init Error:", e);
+if (typeof firebase !== "undefined") {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
 }
 
 // ================= TIME =================
 function timeToSeconds(t){
     if(!t || t === "-" || t === undefined) return 0;
-
-    if(typeof t === "number"){
-        return Math.floor(t * 24 * 60 * 60);
-    }
+    if(typeof t === "number") return Math.floor(t*86400);
 
     let p = t.toString().split(":");
     return (+p[0]*3600)+(+p[1]*60)+(+p[2]||0);
@@ -63,25 +51,19 @@ function processFiles(){
             let final = buildDashboard(apr,cdr);
 
             let payload = {
-                final: final,
+                final,
                 reportTime: new Date().toLocaleString()
             };
 
-            if(db){
-                db.ref("dashboard").set(payload);
-            } else {
-                alert("Firebase not initialized");
-            }
+            if(db) db.ref("dashboard").set(payload);
 
             document.getElementById("loading").style.display="none";
-
-            alert("✅ Report Generated");
             window.location.href="dashboard.html";
         });
     });
 }
 
-// ================= APR READ (3rd row header) =================
+// ================= APR =================
 function readAPR(file,cb){
 
     let reader = new FileReader();
@@ -94,12 +76,7 @@ function readAPR(file,cb){
 
         let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-        // 🔥 extract date from 2nd row
-        let row2 = raw[1]?.[0] || "";
-        console.log("Report Date Row:", row2);
-
-        // remove top 2 rows
-        let trimmed = raw.slice(2);
+        let trimmed = raw.slice(2); // row fix
 
         let headers = trimmed[0];
         let rows = trimmed.slice(1);
@@ -116,7 +93,7 @@ function readAPR(file,cb){
     reader.readAsArrayBuffer(file);
 }
 
-// ================= CDR READ (2nd row header) =================
+// ================= CDR =================
 function readCDR(file,cb){
 
     let reader = new FileReader();
@@ -153,7 +130,7 @@ function buildDashboard(apr,cdr){
 
     apr.forEach(a=>{
 
-        if(!a || Object.keys(a).length===0) return;
+        if(!a) return;
 
         let emp = a["Agent Name"] || "NA";
         let name = a["Agent Full Name"] || "Unknown";
@@ -162,37 +139,51 @@ function buildDashboard(apr,cdr){
         let lunch = timeToSeconds(a["LUNCHBREAK"]);
         let tea = timeToSeconds(a["TEABREAK"]);
         let short = timeToSeconds(a["SHORTBREAK"]);
-        let meeting = timeToSeconds(a["MEETING"]);
 
         let totalBreak = lunch + tea + short;
         let netLogin = login - totalBreak;
 
+        // ================= CDR FILTER =================
+
         let agentCDR = cdr.filter(r =>
-            (r["User Full Name"] || "") === name &&
-            r["Call Status"] === "Answered"
+            (r["User Full Name"] || "").trim() === name.trim()
         );
 
-        let calls = agentCDR.length;
+        // 🔥 IVR HIT
+        let ivrHit = agentCDR.length;
 
-        let totalTalk = agentCDR.reduce((sum,r)=>
-            sum + timeToSeconds(r["Talk Duration"]),0);
+        // 🔥 MATURE CALL (Answered + Talk > 0)
+        let mature = agentCDR.filter(r =>
+            r["Call Status"] === "Answered" &&
+            timeToSeconds(r["Talk Duration"]) > 0
+        );
 
-        let aht = calls ? totalTalk/calls : 0;
+        let totalMature = mature.length;
 
-        let ib = agentCDR.filter(r=>r["Call Type"]==="IB").length;
-        let ob = agentCDR.filter(r=>r["Call Type"]==="OB").length;
+        let totalTalk = mature.reduce((s,r)=>
+            s + timeToSeconds(r["Talk Duration"]),0);
+
+        // 🔥 AHT
+        let aht = totalMature ? totalTalk / totalMature : 0;
+
+        // 🔥 IB / OB Mature
+        let ibMature = mature.filter(r=>r["Call Type"]==="IB").length;
+        let obMature = mature.filter(r=>r["Call Type"]==="OB").length;
 
         result.push({
-            emp: emp || "NA",
-            name: name || "Unknown",
+            emp,
+            name,
             login: secondsToTime(login),
             netLogin: secondsToTime(netLogin),
             break: secondsToTime(totalBreak),
-            meeting: secondsToTime(meeting),
-            aht: secondsToTime(aht),
-            calls: calls || 0,
-            ib: ib || 0,
-            ob: ob || 0
+
+            ivrHit,
+            totalMature,
+            ibMature,
+            obMature,
+
+            talk: secondsToTime(totalTalk),
+            aht: secondsToTime(aht)
         });
     });
 
@@ -203,92 +194,34 @@ function buildDashboard(apr,cdr){
 function loadDashboard(data){
 
     let tbody = document.querySelector("#table tbody");
-    if(!tbody) return;
-
     tbody.innerHTML = "";
 
     data.final.forEach(r=>{
 
         let tr = document.createElement("tr");
 
+        // 🔥 3D COLOR वापस
+        let sec = timeToSeconds(r.netLogin);
+        let cls = sec>7*3600 ? "green" : sec>5*3600 ? "yellow" : "red";
+
         tr.innerHTML = `
         <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${r.login}</td>
-        <td>${r.netLogin}</td>
+        <td class="${cls}">${r.netLogin}</td>
         <td>${r.break}</td>
-        <td>${r.meeting}</td>
+        <td>${r.ivrHit}</td>
+        <td>${r.totalMature}</td>
+        <td>${r.ibMature}</td>
+        <td>${r.obMature}</td>
         <td>${r.aht}</td>
-        <td>${r.calls}</td>
-        <td>${r.ib}</td>
-        <td>${r.ob}</td>
         `;
 
         tbody.appendChild(tr);
     });
 
-    loadCards(data.final);
-
-    let rt = document.getElementById("reportTime");
-    if(rt){
-        rt.innerText = "Last Update Till: " + data.reportTime;
-    }
-}
-
-// ================= CARDS =================
-function loadCards(data){
-
-    let totalCalls = 0;
-
-    data.forEach(r=>{
-        totalCalls += r.calls || 0;
-    });
-
-    let cards = document.getElementById("cards");
-    if(!cards) return;
-
-    cards.innerHTML = `
-        <div class="card">👥 Agents<br>${data.length}</div>
-        <div class="card">📞 Calls<br>${totalCalls}</div>
-    `;
-}
-
-// ================= EXPORT =================
-function exportExcel(){
-    let table = document.getElementById("table");
-    if(!table) return;
-
-    let wb = XLSX.utils.table_to_book(table,{sheet:"Report"});
-    XLSX.writeFile(wb,"Agent_Report.xlsx");
-}
-
-// ================= PNG =================
-function downloadPNG(){
-
-    let table = document.getElementById("table");
-    if(!table) return;
-
-    html2canvas(table,{scale:2}).then(canvas=>{
-        let link = document.createElement("a");
-        link.download = "dashboard.png";
-        link.href = canvas.toDataURL();
-        link.click();
-    });
-}
-
-// ================= RESET =================
-function resetDashboard(){
-
-    if(confirm("Reset dashboard?")){
-
-        if(db){
-            db.ref("dashboard").remove();
-        }
-
-        document.querySelector("#table tbody").innerHTML="";
-        document.getElementById("cards").innerHTML="";
-        document.getElementById("reportTime").innerText="";
-    }
+    document.getElementById("reportTime").innerText =
+        "Last Update Till: " + data.reportTime;
 }
 
 // ================= LIVE =================

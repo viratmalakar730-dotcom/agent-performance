@@ -1,4 +1,4 @@
-console.log("🔥 FINAL FIXED VERSION");
+console.log("🔥 FINAL PRO VERSION (EMP ID BASED)");
 
 // ================= FIREBASE =================
 let db = null;
@@ -57,21 +57,19 @@ function processFiles(){
             if(db) db.ref("dashboard").set(payload);
 
             document.getElementById("loading").style.display="none";
-            window.location.href="dashboard.html";
+
+            window.location.href="live.html";
         });
     });
 }
 
 // ================= APR =================
 function readAPR(file,cb){
-
     let r=new FileReader();
-
     r.onload=e=>{
         let data=new Uint8Array(e.target.result);
         let wb=XLSX.read(data,{type:"array"});
         let sheet=wb.Sheets[wb.SheetNames[0]];
-
         let raw=XLSX.utils.sheet_to_json(sheet,{header:1});
 
         let trimmed=raw.slice(2);
@@ -87,20 +85,16 @@ function readAPR(file,cb){
 
         cb(json);
     };
-
     r.readAsArrayBuffer(file);
 }
 
 // ================= CDR =================
 function readCDR(file,cb){
-
     let r=new FileReader();
-
     r.onload=e=>{
         let data=new Uint8Array(e.target.result);
         let wb=XLSX.read(data,{type:"array"});
         let sheet=wb.Sheets[wb.SheetNames[0]];
-
         let raw=XLSX.utils.sheet_to_json(sheet,{header:1});
 
         let trimmed=raw.slice(1);
@@ -116,13 +110,7 @@ function readCDR(file,cb){
 
         cb(json);
     };
-
     r.readAsArrayBuffer(file);
-}
-
-// ================= MATCH FIX =================
-function normalize(str){
-    return (str||"").toString().trim().toLowerCase().replace(/\s+/g," ");
 }
 
 // ================= CORE =================
@@ -132,10 +120,8 @@ function buildDashboard(apr,cdr){
 
     apr.forEach(a=>{
 
-        let emp=a["Agent Name"]||"NA";
+        let emp=(a["Agent Name"]||"").toString().trim();
         let name=a["Agent Full Name"]||"Unknown";
-
-        let norm=normalize(name);
 
         let login=timeToSeconds(a["Total Login Time"]);
         let lunch=timeToSeconds(a["LUNCHBREAK"]);
@@ -145,18 +131,17 @@ function buildDashboard(apr,cdr){
         let totalBreak=lunch+tea+short;
         let netLogin=login-totalBreak;
 
-        // 🔥 FIXED MATCH
+        // 🔥 EMP ID MATCH
         let agentCDR=cdr.filter(r=>{
-            let cName=normalize(r["User Full Name"]);
-            return cName===norm || cName.includes(norm);
+            let cEmp=(r["Username"]||"").toString().trim();
+            return cEmp===emp;
         });
 
-        let ivrHit=agentCDR.length;
-
-        let mature=agentCDR.filter(r=>
-            r["Call Status"]==="Answered" &&
-            timeToSeconds(r["Talk Duration"])>0
-        );
+        let mature=agentCDR.filter(r=>{
+            let status=(r["Call Status"]||"").toLowerCase();
+            let talk=timeToSeconds(r["Talk Duration"]);
+            return (status.includes("answer")||status.includes("connect")) && talk>0;
+        });
 
         let totalMature=mature.length;
 
@@ -178,7 +163,6 @@ function buildDashboard(apr,cdr){
             calls:totalMature,
             ib,ob
         });
-
     });
 
     return result;
@@ -219,8 +203,7 @@ function loadDashboard(data){
 
 // ================= BUTTONS =================
 function exportExcel(){
-    let table=document.getElementById("table");
-    let wb=XLSX.utils.table_to_book(table);
+    let wb=XLSX.utils.table_to_book(document.getElementById("table"));
     XLSX.writeFile(wb,"Report.xlsx");
 }
 

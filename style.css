@@ -153,21 +153,40 @@ tbody tr:hover td{
     margin:10px;
 }
 
-/* ================= CONDITIONAL COLORS ================= */
-.red3d{
-    background:linear-gradient(#dc2626,#7f1d1d);
-    color:white;
-}
-
-.yellow3d{
-    background:linear-gradient(#facc15,#ca8a04);
-}
-
+/* 🔥 ULTRA 3D GREEN */
 .green3d{
-    background:linear-gradient(#22c55e,#15803d);
+    background: linear-gradient(145deg,#22c55e,#15803d);
     color:white;
+    font-weight:bold;
+
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.2),
+        inset 3px 3px 8px rgba(0,0,0,0.7),
+        0 4px 10px rgba(0,0,0,0.8);
 }
 
+/* 🔥 ULTRA 3D YELLOW */
+.yellow3d{
+    background: linear-gradient(145deg,#facc15,#ca8a04);
+    font-weight:bold;
+
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.2),
+        inset 3px 3px 8px rgba(0,0,0,0.7),
+        0 4px 10px rgba(0,0,0,0.8);
+}
+
+/* 🔥 ULTRA 3D RED */
+.red3d{
+    background: linear-gradient(145deg,#dc2626,#7f1d1d);
+    color:white;
+    font-weight:bold;
+
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.2),
+        inset 3px 3px 8px rgba(0,0,0,0.8),
+        0 4px 10px rgba(0,0,0,0.9);
+}
 /* ================= RESPONSIVE ================= */
 @media(max-width:768px){
 

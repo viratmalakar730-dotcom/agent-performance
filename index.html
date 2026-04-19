@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Live Dashboard</title>
+<title>Upload Report</title>
 <link rel="stylesheet" href="style.css">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -10,28 +10,25 @@
 
 <body>
 
-<h2>📺 Live Dashboard</h2>
+<div class="container">
+<div class="upload-box">
 
-<div id="reportTime"></div>
+<h2>📤 Upload Agent Report</h2>
 
-<table id="table">
-<thead>
-<tr>
-<th>Emp ID</th>
-<th>Name</th>
-<th>Login</th>
-<th>Net Login</th>
-<th>Break</th>
-<th>Meeting</th>
-<th>AHT</th>
-<th>Calls</th>
-<th>IB</th>
-<th>OB</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
+<label class="label">APR File</label>
+<input type="file" id="aprFile"><br>
 
+<label class="label">CDR File</label>
+<input type="file" id="cdrFile"><br>
+
+<button onclick="processFiles()">🚀 Generate Dashboard</button>
+
+<div id="loading" class="loading" style="display:none;">Processing...</div>
+
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="script.js"></script>
 
 </body>

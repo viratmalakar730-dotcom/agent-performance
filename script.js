@@ -209,10 +209,15 @@ function loadDashboard(data){
         let breakSec = timeToSeconds(r.break);
         let meetSec = timeToSeconds(r.meeting);
 
-        let netCls = "";
-        if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
-            netCls = "red3d";
-        }
+        // 🔥 NET LOGIN FINAL LOGIC
+let netCls = "";
+
+if(netSec > 8*3600){
+    netCls = "green3d";
+}
+else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
+    netCls = "red3d";
+}
 
         let breakCls = breakSec > 2100 ? "red3d" : "";
         let meetCls = meetSec > 2100 ? "red3d" : "";

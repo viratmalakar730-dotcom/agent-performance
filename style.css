@@ -1,65 +1,32 @@
-/* ================= BODY ================= */
+/* BODY */
 body{
-    font-family: Arial, sans-serif;
-    background:#0b1f3a !important;
-    color:white !important;
-    margin:0;
+    font-family:Arial;
+    background:#0b1f3a;
+    color:white;
     text-align:center;
 }
 
-/* ================= TITLE ================= */
+/* TITLE */
 h2{
     color:#d4af37;
-    font-weight:bold;
-    margin:15px;
 }
 
-/* ================= CONTAINER ================= */
-.container{
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    height:90vh;
-}
-
-/* ================= BOX ================= */
-.box{
+/* ================= HEADER 3D ================= */
+th{
     background: linear-gradient(145deg,#0b3d91,#072c6b);
-    padding:25px;
-    border-radius:15px;
-    width:350px;
+    color:#d4af37;
+    padding:10px;
+    border:1px solid black;
 
-    /* 3D effect */
+    /* 🔥 DEEP 3D HEADER */
     box-shadow:
-        10px 10px 25px rgba(0,0,0,0.7),
-        -3px -3px 10px rgba(255,255,255,0.05);
-}
+        inset -3px -3px 6px rgba(255,255,255,0.1),
+        inset 3px 3px 8px rgba(0,0,0,0.7),
+        0 5px 10px rgba(0,0,0,0.8);
 
-/* ================= BUTTON ================= */
-button{
-    padding:10px 18px;
-    border:none;
-    border-radius:8px;
-    background:#d4af37;
-    color:black;
-    font-weight:bold;
-    cursor:pointer;
-    margin-top:10px;
-
-    box-shadow: 5px 5px 10px rgba(0,0,0,0.5);
-}
-
-button:hover{
-    transform:scale(1.05);
-}
-
-/* ================= TABLE CONTAINER ================= */
-.table-container{
-    max-height:520px;
-    overflow-y:auto;
-    overflow-x:auto;
-    margin:10px;
-    border:2px solid #0b3d91;
+    position:sticky;
+    top:0;
+    z-index:5;
 }
 
 /* ================= TABLE ================= */
@@ -67,91 +34,69 @@ table{
     width:98%;
     margin:auto;
     border-collapse:collapse;
-    background:white !important;
+    background:white;
     color:black;
     font-weight:bold;
-    font-size:15px;
-
-    box-shadow:0 10px 25px rgba(0,0,0,0.7);
 }
 
-/* ================= HEADER ================= */
-th{
-    background:#0b3d91 !important;
-    color:#d4af37 !important;
-    padding:10px;
-    border:1px solid black;
-
-    position:sticky;
-    top:0;
-    z-index:5;
-}
-
-/* ================= CELLS ================= */
+/* ================= CELLS 3D ================= */
 td{
     padding:8px;
     border:1px solid black;
 
-    /* 3D cell */
+    background: linear-gradient(145deg,#ffffff,#e5e7eb);
+
     box-shadow:
-        inset 0 0 4px rgba(0,0,0,0.4),
-        0 2px 4px rgba(0,0,0,0.2);
+        inset -2px -2px 5px rgba(255,255,255,0.7),
+        inset 2px 2px 5px rgba(0,0,0,0.3),
+        0 2px 4px rgba(0,0,0,0.3);
 }
 
-/* ================= ROW HOVER ================= */
-tbody tr:hover{
+/* ROW HOVER */
+tbody tr:hover td{
     background:#dbeafe;
+}
+
+/* ================= CARDS ================= */
+#cards{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    flex-wrap:wrap;
+    margin:10px;
+}
+
+.card{
+    background:linear-gradient(145deg,#0b3d91,#072c6b);
+    padding:15px;
+    border-radius:10px;
+    width:150px;
+
+    box-shadow:
+        5px 5px 15px rgba(0,0,0,0.7),
+        -2px -2px 5px rgba(255,255,255,0.1);
+}
+
+/* ================= BUTTON ================= */
+button{
+    padding:8px 15px;
+    margin:5px;
+    background:#d4af37;
+    border:none;
     cursor:pointer;
 }
 
-/* ================= SCROLLBAR ================= */
-.table-container::-webkit-scrollbar{
-    width:8px;
-}
-.table-container::-webkit-scrollbar-thumb{
-    background:#0b3d91;
-}
-
-/* ================= REPORT TIME ================= */
-#reportTime{
-    color:#d4af37;
-    font-weight:bold;
-    font-size:16px;
-}
-
-/* ================= 3D COLORS ================= */
-.green3d{
-    background: linear-gradient(145deg,#22c55e,#15803d);
+/* ================= COLORS ================= */
+.red3d{
+    background:linear-gradient(#dc2626,#7f1d1d);
     color:white;
-    font-weight:bold;
-    box-shadow: inset 0 0 6px rgba(0,0,0,0.6);
 }
 
 .yellow3d{
-    background: linear-gradient(145deg,#facc15,#ca8a04);
-    font-weight:bold;
-    box-shadow: inset 0 0 6px rgba(0,0,0,0.6);
+    background:linear-gradient(#facc15,#ca8a04);
 }
 
-.red3d{
-    background: linear-gradient(145deg,#dc2626,#7f1d1d);
+.green3d{
+    background:linear-gradient(#22c55e,#15803d);
     color:white;
-    font-weight:bold;
-    box-shadow: inset 0 0 6px rgba(0,0,0,0.7);
-}
-
-/* ================= RESPONSIVE ================= */
-@media(max-width:768px){
-
-    .box{
-        width:90%;
-    }
-
-    table{
-        font-size:12px;
-    }
-
-    button{
-        width:90%;
-    }
 }

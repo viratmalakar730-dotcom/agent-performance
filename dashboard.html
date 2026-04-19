@@ -1,233 +1,47 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-<meta charset="UTF-8">
-<title>Agent Performance Dashboard</title>
-
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
-<!-- XLSX -->
-<script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-
-<style>
-body { font-family: Arial; background:#0f172a; color:white; padding:20px; }
-h1 { text-align:center; }
-
-input,button { margin:10px; padding:10px; }
-
-table {
-    width:100%;
-    border-collapse:collapse;
-    margin-top:20px;
-}
-
-th,td {
-    border:1px solid #444;
-    padding:8px;
-    text-align:center;
-}
-
-th { background:#1e293b; }
-
-.green { background:#16a34a; }
-.yellow { background:#ca8a04; }
-.red { background:#dc2626; }
-
-#reportTime {
-    text-align:center;
-    margin-top:10px;
-    font-weight:bold;
-}
-</style>
+<title>Dashboard</title>
+<link rel="stylesheet" href="style.css">
 </head>
 
 <body>
 
-<h1>🚀 Agent Performance Dashboard</h1>
-
-<div style="text-align:center;">
-    <input type="file" id="aprFile">
-    <input type="file" id="cdrFile">
-    <br>
-    <button onclick="processFiles()">Generate Report</button>
-</div>
+<h2>Agent Performance Dashboard</h2>
 
 <div id="reportTime"></div>
+
+<!-- 🔥 BUTTONS -->
+<div style="margin:20px;">
+<button onclick="exportExcel()">📤 Export Excel</button>
+<button onclick="downloadPNG()">🖼 PNG</button>
+<button onclick="resetDashboard()">🔄 Reset</button>
+</div>
+
+<!-- 🔥 CARDS -->
+<div id="cards" style="display:flex;gap:20px;justify-content:center;"></div>
 
 <table id="table">
 <thead>
 <tr>
-    <th>Emp ID</th>
-    <th>Name</th>
-    <th>Calls</th>
-    <th>Net Login</th>
-    <th>Break</th>
-    <th>Meeting</th>
-    <th>Talk</th>
-    <th>AHT</th>
-    <th>Utilization</th>
+<th>Employee ID</th>
+<th>Name</th>
+<th>Total Login</th>
+<th>Net Login</th>
+<th>Total Break</th>
+<th>Total Meeting</th>
+<th>AHT</th>
+<th>Total Calls</th>
+<th>IB</th>
+<th>OB</th>
 </tr>
 </thead>
 <tbody></tbody>
 </table>
 
-<script>
-// ================= FIREBASE =================
-let db;
-
-const firebaseConfig = {
-  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
-  authDomain: "agent-performance-live.firebaseapp.com",
-  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-  projectId: "agent-performance-live"
-};
-
-firebase.initializeApp(firebaseConfig);
-db = firebase.database();
-
-// ================= TIME =================
-function timeToSeconds(t) {
-    if (!t || t === "-") return 0;
-    let p = t.split(":");
-    return (+p[0]*3600)+(+p[1]*60)+(+p[2]||0);
-}
-
-function secondsToTime(sec) {
-    sec = Math.floor(sec);
-    let h = String(Math.floor(sec/3600)).padStart(2,'0');
-    let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
-    let s = String(sec%60).padStart(2,'0');
-    return `${h}:${m}:${s}`;
-}
-
-// ================= PROCESS =================
-function processFiles(){
-
-    let aprFile = document.getElementById("aprFile").files[0];
-    let cdrFile = document.getElementById("cdrFile").files[0];
-
-    if(!aprFile || !cdrFile){
-        alert("APR + CDR upload karo");
-        return;
-    }
-
-    readExcel(aprFile, (apr)=>{
-        readExcel(cdrFile, (cdr)=>{
-
-            let final = buildDashboard(apr, cdr);
-
-            let payload = {
-                final,
-                reportTime: new Date().toLocaleString()
-            };
-
-            db.ref("history/"+Date.now()).set(payload);
-            db.ref("dashboard").set(payload);
-
-            alert("✅ Report Generated");
-        });
-    });
-}
-
-// ================= READ =================
-function readExcel(file, cb){
-    let r = new FileReader();
-    r.onload = e=>{
-        let data = new Uint8Array(e.target.result);
-        let wb = XLSX.read(data,{type:"array"});
-        let sheet = wb.Sheets[wb.SheetNames[0]];
-        let json = XLSX.utils.sheet_to_json(sheet,{defval:""});
-        cb(json);
-    };
-    r.readAsArrayBuffer(file);
-}
-
-// ================= LOGIC =================
-function buildDashboard(apr, cdr){
-
-    let result = [];
-
-    apr.forEach(a=>{
-
-        let name = a["Agent Full Name"];
-        let emp = a["Agent Name"];
-
-        let login = timeToSeconds(a["Total Login Time"]);
-        let lunch = timeToSeconds(a["LUNCHBREAK"]);
-        let tea = timeToSeconds(a["TEABREAK"]);
-        let short = timeToSeconds(a["SHORTBREAK"]);
-        let system = timeToSeconds(a["SYSTEMDOWN"]);
-        let meeting = timeToSeconds(a["MEETING"]);
-
-        let totalBreak = lunch + tea + short;
-        let netLogin = login - (totalBreak + system);
-
-        let agentCDR = cdr.filter(r =>
-            r["User Full Name"] === name &&
-            r["Call Status"] === "Answered" &&
-            timeToSeconds(r["Talk Duration"]) > 0
-        );
-
-        let calls = agentCDR.length;
-
-        let totalTalk = agentCDR.reduce((s,r)=>
-            s + timeToSeconds(r["Talk Duration"]),0);
-
-        let aht = calls ? totalTalk / calls : 0;
-
-        let util = netLogin ? (totalTalk/netLogin)*100 : 0;
-
-        result.push({
-            emp,name,calls,
-            netLogin:secondsToTime(netLogin),
-            break:secondsToTime(totalBreak),
-            meeting:secondsToTime(meeting),
-            talk:secondsToTime(totalTalk),
-            aht:secondsToTime(aht),
-            util:util.toFixed(1)+"%"
-        });
-    });
-
-    return result;
-}
-
-// ================= LIVE =================
-db.ref("dashboard").on("value",snap=>{
-
-    let d = snap.val();
-    if(!d) return;
-
-    let tbody = document.querySelector("#table tbody");
-    tbody.innerHTML="";
-
-    d.final.forEach(r=>{
-
-        let tr = document.createElement("tr");
-
-        let sec = timeToSeconds(r.netLogin);
-        let cls = sec>7*3600?"green":sec>5*3600?"yellow":"red";
-
-        tr.innerHTML=`
-            <td>${r.emp}</td>
-            <td>${r.name}</td>
-            <td>${r.calls}</td>
-            <td class="${cls}">${r.netLogin}</td>
-            <td>${r.break}</td>
-            <td>${r.meeting}</td>
-            <td>${r.talk}</td>
-            <td>${r.aht}</td>
-            <td>${r.util}</td>
-        `;
-
-        tbody.appendChild(tr);
-    });
-
-    document.getElementById("reportTime").innerText =
-        "Last Update Till: "+d.reportTime;
-});
-</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="script.js"></script>
 
 </body>
 </html>

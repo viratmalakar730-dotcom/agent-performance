@@ -1,4 +1,4 @@
-console.log("🔥 FINAL PRO MAX SYSTEM");
+console.log("🔥 FINAL ULTRA PRO SYSTEM");
 
 // ================= FIREBASE =================
 const firebaseConfig = {
@@ -13,14 +13,12 @@ let db = firebase.database();
 
 // ================= HELPERS =================
 function safeStr(v){
-    if(v === undefined || v === null) return "";
-    return String(v).trim();
+    return (v ?? "").toString().trim();
 }
 
 function timeToSeconds(t){
     if(!t || t === "-") return 0;
     if(typeof t === "number") return Math.floor(t*86400);
-
     let p = String(t).split(":");
     return (+p[0]*3600)+(+p[1]*60)+(+p[2]||0);
 }
@@ -72,9 +70,11 @@ function readAPR(file,cb){
         let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
         let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
-        let row2 = raw[1]?.[0] || "";
-        if(row2.toLowerCase().includes("to")){
-            window.reportDate = row2.split("to")[1].trim();
+        let row2 = raw[1] || [];
+        let rowText = row2.join(" ").toLowerCase();
+
+        if(rowText.includes("to")){
+            window.reportDate = rowText.split("to")[1].trim();
         }
 
         let data = raw.slice(2);
@@ -218,13 +218,21 @@ function loadDashboard(data){
 
         let loginSec = timeToSeconds(r.login);
         let netSec = timeToSeconds(r.netLogin);
+        let breakSec = timeToSeconds(r.break);
+        let meetSec = timeToSeconds(r.meeting);
 
         let netCls = "";
-
-        // 🔥 FINAL NET LOGIN CONDITION
         if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
             netCls = "red3d";
         }
+
+        let breakCls = breakSec > 2100 ? "red3d" : "";
+        let meetCls = meetSec > 2100 ? "red3d" : "";
+
+        let callCls="";
+        if(r.calls >= 100) callCls="green3d";
+        else if(r.calls >= 70) callCls="yellow3d";
+        else callCls="red3d";
 
         let tr = document.createElement("tr");
 
@@ -234,10 +242,10 @@ function loadDashboard(data){
         <td>${r.name}</td>
         <td>${r.login}</td>
         <td class="${netCls}">${r.netLogin}</td>
-        <td>${r.break}</td>
-        <td>${r.meeting}</td>
+        <td class="${breakCls}">${r.break}</td>
+        <td class="${meetCls}">${r.meeting}</td>
         <td>${r.aht}</td>
-        <td>${r.calls}</td>
+        <td class="${callCls}">${r.calls}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -294,6 +302,17 @@ function downloadPNG(){
 function resetDashboard(){
     db.ref("dashboard").remove();
     location.href="index.html";
+}
+
+// ================= TV MODE =================
+function toggleTV(){
+    document.body.classList.toggle("tv");
+
+    if(document.body.classList.contains("tv")){
+        document.documentElement.requestFullscreen();
+    }else{
+        document.exitFullscreen();
+    }
 }
 
 // ================= LIVE =================

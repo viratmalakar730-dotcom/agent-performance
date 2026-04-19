@@ -1,43 +1,37 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Upload</title>
+<title>Live Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
-<!-- ✅ Firebase ADD -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
 </head>
 
 <body>
-<div class="container">
-<div class="upload-box">
 
-<h2>Agent Performance Dashboard</h2>
+<h2>📺 Live Dashboard</h2>
 
-<label class="label">APR Report</label>
-<input type="file" id="aprFile"><br>
+<div id="reportTime"></div>
 
-<label class="label">CDR Report</label>
-<input type="file" id="cdrFile"><br>
+<table id="table">
+<thead>
+<tr>
+<th>Emp ID</th>
+<th>Name</th>
+<th>Login</th>
+<th>Net Login</th>
+<th>Break</th>
+<th>Meeting</th>
+<th>AHT</th>
+<th>Calls</th>
+<th>IB</th>
+<th>OB</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
 
-<button onclick="processFiles()">Generate Report</button>
-
-<div id="loading" class="loading" style="display:none;">
-Processing... ⏳
-</div>
-
-</div>
-</div>
-
-<div style="text-align:center;margin-top:20px;font-weight:bold;">
-❤️ Powered by Chandan Malakar ❤️
-</div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
-<!-- ✅ IMPORTANT: script.js LAST -->
 <script src="script.js"></script>
 
 </body>

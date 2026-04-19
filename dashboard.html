@@ -3,6 +3,11 @@
 <head>
 <title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- ✅ Firebase ADD -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
 </head>
 
 <body>
@@ -11,14 +16,12 @@
 
 <div id="reportTime"></div>
 
-<!-- 🔥 BUTTONS -->
 <div style="margin:20px;">
 <button onclick="exportExcel()">📤 Export Excel</button>
 <button onclick="downloadPNG()">🖼 PNG</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
 
-<!-- 🔥 CARDS -->
 <div id="cards" style="display:flex;gap:20px;justify-content:center;"></div>
 
 <table id="table">
@@ -41,6 +44,8 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- ✅ IMPORTANT -->
 <script src="script.js"></script>
 
 </body>

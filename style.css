@@ -1,75 +1,58 @@
-/* ================= BASE ================= */
+/* ================= BODY ================= */
 body{
-    font-family: Arial;
-    background: linear-gradient(135deg,#0b1f3a,#07152a);
+    font-family: 'Segoe UI', sans-serif;
+    background: radial-gradient(circle at top, #0b1f3a, #050f1f);
     color: white;
-    text-align: center;
     margin: 0;
-    padding: 0;
+    text-align: center;
 }
 
 /* ================= TITLE ================= */
 h2{
     margin-top: 20px;
-    font-size: 28px;
+    font-size: 30px;
     letter-spacing: 1px;
+    background: linear-gradient(90deg,#d4af37,#ffffff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
-/* ================= UPLOAD PAGE ================= */
+/* ================= UPLOAD BOX ================= */
 .container{
     display: flex;
     justify-content: center;
     align-items: center;
-    height: 80vh;
+    height: 90vh;
 }
 
 .upload-box{
     background: linear-gradient(145deg,#0b3d91,#0b1f3a);
     padding: 40px;
-    border-radius: 15px;
-    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+    border-radius: 20px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.7);
     transition: 0.3s;
 }
 
 .upload-box:hover{
-    transform: scale(1.02);
+    transform: translateY(-5px);
 }
 
-.label{
-    display: block;
-    margin-top: 10px;
-}
-
-/* ================= BUTTONS ================= */
+/* ================= BUTTON ================= */
 button{
     margin-top: 15px;
-    padding: 10px 20px;
+    padding: 12px 25px;
     border: none;
-    border-radius: 8px;
+    border-radius: 10px;
     background: linear-gradient(145deg,#0b3d91,#d4af37);
     color: white;
-    cursor: pointer;
     font-weight: bold;
+    cursor: pointer;
     transition: 0.3s;
 }
 
 button:hover{
     transform: scale(1.08);
-    box-shadow: 0 8px 20px rgba(0,0,0,0.6);
-}
-
-/* ================= LOADING ================= */
-.loading{
-    margin-top: 15px;
-    font-weight: bold;
-    color: #ffd700;
-}
-
-/* ================= REPORT TIME ================= */
-#reportTime{
-    margin-top: 10px;
-    font-weight: bold;
-    color: #ffd700;
+    box-shadow: 0 0 15px #d4af37;
 }
 
 /* ================= TABLE ================= */
@@ -77,11 +60,11 @@ table{
     width: 95%;
     margin: 20px auto;
     border-collapse: collapse;
-    background: white;
+    background: #ffffff;
     color: black;
-    border-radius: 12px;
+    border-radius: 15px;
     overflow: hidden;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    box-shadow: 0 15px 40px rgba(0,0,0,0.6);
 }
 
 /* HEADER */
@@ -89,7 +72,6 @@ th{
     background: linear-gradient(90deg,#0b3d91,#d4af37);
     color: white;
     padding: 12px;
-    font-size: 14px;
 }
 
 /* BODY */
@@ -98,12 +80,12 @@ td{
     border: 1px solid #ddd;
 }
 
-/* ROW HOVER */
+/* HOVER */
 tr:hover{
-    background: #f3f4f6;
+    background: #f1f5f9;
 }
 
-/* ================= COLOR STATUS ================= */
+/* ================= STATUS COLORS ================= */
 .green{
     background: #16a34a;
     color: white;
@@ -123,45 +105,43 @@ tr:hover{
 
 /* ================= CARDS ================= */
 #cards{
-    margin: 20px;
     display: flex;
-    gap: 20px;
     justify-content: center;
+    gap: 20px;
     flex-wrap: wrap;
+    margin: 20px;
 }
 
 .card{
     background: linear-gradient(145deg,#0b3d91,#d4af37);
     padding: 20px;
     border-radius: 15px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
     min-width: 150px;
-    text-align: center;
+    box-shadow: 0 15px 35px rgba(0,0,0,0.6);
     transition: 0.3s;
-    color: white;
-    font-weight: bold;
 }
 
 .card:hover{
-    transform: translateY(-8px) scale(1.05);
+    transform: translateY(-10px) scale(1.05);
+    box-shadow: 0 0 20px #d4af37;
 }
 
-/* ================= BUTTON BAR ================= */
-.button-bar{
-    margin: 20px;
-}
-
-/* ================= SCROLL ================= */
-table{
-    display: block;
-    overflow-x: auto;
-}
-
-/* ================= FOOTER ================= */
-footer{
-    margin-top: 20px;
+/* ================= REPORT TIME ================= */
+#reportTime{
+    margin-top: 10px;
     font-weight: bold;
     color: #ffd700;
+}
+
+/* ================= LOADING ================= */
+.loading{
+    color: #ffd700;
+    font-weight: bold;
+}
+
+/* ================= LIVE SCREEN ================= */
+body.live{
+    background: black;
 }
 
 /* ================= RESPONSIVE ================= */
@@ -171,16 +151,11 @@ footer{
         font-size: 12px;
     }
 
-    .upload-box{
+    button{
         width: 90%;
     }
 
-    #cards{
-        flex-direction: column;
-        align-items: center;
-    }
-
-    button{
+    .upload-box{
         width: 90%;
     }
 }

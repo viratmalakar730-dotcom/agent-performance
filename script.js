@@ -1,4 +1,4 @@
-console.log("🔥 FINAL PRO SYSTEM");
+console.log("🔥 FINAL SYSTEM");
 
 // ================= FIREBASE =================
 let db = null;
@@ -19,7 +19,6 @@ if (typeof firebase !== "undefined") {
 function timeToSeconds(t){
     if(!t || t === "-") return 0;
     if(typeof t === "number") return Math.floor(t*86400);
-
     let p = t.toString().split(":");
     return (+p[0]*3600)+(+p[1]*60)+(+p[2]||0);
 }
@@ -39,7 +38,7 @@ function processFiles(){
     let cdrFile = document.getElementById("cdrFile")?.files[0];
 
     if(!aprFile || !cdrFile){
-        alert("APR + CDR upload karo");
+        alert("Upload both files");
         return;
     }
 
@@ -59,8 +58,7 @@ function processFiles(){
 
             document.getElementById("loading").style.display="none";
 
-            // 🔥 FIX: dashboard main page
-            window.location.href = "dashboard.html";
+            window.location.href="dashboard.html";
         });
     });
 }
@@ -76,7 +74,6 @@ function readAPR(file,cb){
         let sheet = wb.Sheets[wb.SheetNames[0]];
         let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
 
-        // 🔥 DATE EXTRACT
         let row2 = raw[1]?.[0] || "";
         if(row2.toLowerCase().includes("to")){
             window.reportDate = row2.split("to")[1].trim();
@@ -150,13 +147,11 @@ function buildDashboard(apr,cdr){
             return cEmp === emp;
         });
 
-        // 🔥 TOTAL MATURE
         let totalMature = agentCDR.filter(r=>{
             let d = (r["Disposition"]||"").toUpperCase();
             return d.includes("CALLMATURED") || d.includes("TRANSFER");
         }).length;
 
-        // 🔥 IB
         let ibMature = agentCDR.filter(r=>{
             let d = (r["Disposition"]||"").toUpperCase();
             let c = (r["Campaign"]||"").toUpperCase();
@@ -164,10 +159,8 @@ function buildDashboard(apr,cdr){
                    c.includes("CSRINBOUND");
         }).length;
 
-        // 🔥 OB
         let obMature = totalMature - ibMature;
 
-        // 🔥 TALK
         let totalTalk = agentCDR.reduce((s,r)=>
             s + timeToSeconds(r["Talk Duration"]),0);
 
@@ -194,6 +187,8 @@ function buildDashboard(apr,cdr){
 function loadDashboard(data){
 
     let tbody = document.querySelector("#table tbody");
+    if(!tbody) return;
+
     tbody.innerHTML = "";
 
     data.final.forEach(r=>{
@@ -219,8 +214,30 @@ function loadDashboard(data){
         tbody.appendChild(tr);
     });
 
-    document.getElementById("reportTime").innerText =
-    "Last Update Till: " + (data.reportTime || "");
+    let rt = document.getElementById("reportTime");
+    if(rt){
+        rt.innerText = "Last Update Till: " + (data.reportTime || "");
+    }
+}
+
+// ================= RESET =================
+function resetDashboard(){
+
+    if(confirm("Reset dashboard?")){
+
+        if(db) db.ref("dashboard").remove();
+
+        localStorage.clear();
+        sessionStorage.clear();
+
+        if ('caches' in window) {
+            caches.keys().then(names => {
+                names.forEach(name => caches.delete(name));
+            });
+        }
+
+        window.location.href = "index.html";
+    }
 }
 
 // ================= BUTTONS =================
@@ -236,13 +253,6 @@ function downloadPNG(){
         a.download="dashboard.png";
         a.click();
     });
-}
-
-function resetDashboard(){
-    if(confirm("Reset?")){
-        if(db) db.ref("dashboard").remove();
-        window.location.href="index.html";
-    }
 }
 
 // ================= LIVE =================

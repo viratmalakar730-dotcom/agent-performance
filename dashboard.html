@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Live Dashboard</title>
+<title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
 
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
@@ -15,7 +15,7 @@
 <div id="reportTime"></div>
 
 <div style="margin:20px;">
-<button onclick="exportExcel()">📤 Export Excel</button>
+<button onclick="exportExcel()">📤 Excel</button>
 <button onclick="downloadPNG()">🖼 PNG</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
@@ -23,14 +23,14 @@
 <table id="table">
 <thead>
 <tr>
-<th>Employee ID</th>
+<th>Emp ID</th>
 <th>Name</th>
 <th>Total Login</th>
 <th>Net Login</th>
-<th>Total Break</th>
-<th>Total Meeting</th>
+<th>Break</th>
+<th>Meeting</th>
 <th>AHT</th>
-<th>Total Calls</th>
+<th>Calls</th>
 <th>IB</th>
 <th>OB</th>
 </tr>

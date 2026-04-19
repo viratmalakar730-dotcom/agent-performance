@@ -1,258 +1,188 @@
-// ===============================
-// 🔥 FIREBASE INIT
-// ===============================
+console.log("🚀 PRO VERSION LOADED");
+
+// ================= GLOBAL =================
 let db;
+let originalAPR = [];
+let originalCDR = [];
 
-try {
-    const firebaseConfig = {
-        apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
-        authDomain: "agent-performance-live.firebaseapp.com",
-        databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-        projectId: "agent-performance-live"
-    };
+const firebaseConfig = {
+  apiKey: "AIzaSyCzPyZwPnSST3lv1pnSibq3dQjVIg2o-xs",
+  authDomain: "agent-performance-live.firebaseapp.com",
+  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+  projectId: "agent-performance-live"
+};
 
-    if (typeof firebase !== "undefined") {
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        db = firebase.database();
-    }
-} catch (e) {
-    console.log("Firebase Error:", e);
+if (typeof firebase !== "undefined") {
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+    db = firebase.database();
 }
 
-// ===============================
-// 🔥 TIME FUNCTIONS
-// ===============================
-function toSeconds(t){
-    if(!t) return 0;
-    let a = t.toString().split(":").map(Number);
-    return (a[0]||0)*3600 + (a[1]||0)*60 + (a[2]||0);
+// ================= TIME UTILS =================
+function timeToSeconds(t) {
+    if (!t || t === "-") return 0;
+    let parts = t.split(":");
+    return (+parts[0] * 3600) + (+parts[1] * 60) + (+parts[2] || 0);
 }
 
-function toTime(sec){
-    sec = Math.max(0, Math.round(sec));
-    let h = Math.floor(sec/3600);
-    let m = Math.floor((sec%3600)/60);
-    let s = sec%60;
-    return [h,m,s].map(v=>String(v).padStart(2,'0')).join(":");
+function secondsToTime(sec) {
+    sec = Math.floor(sec);
+    let h = String(Math.floor(sec / 3600)).padStart(2, '0');
+    let m = String(Math.floor((sec % 3600) / 60)).padStart(2, '0');
+    let s = String(sec % 60).padStart(2, '0');
+    return `${h}:${m}:${s}`;
 }
 
-// ===============================
-// 🔥 CALL COLOR
-// ===============================
-function getCallClass(val, max){
-    if(max === 0) return "";
-    let r = val / max;
+// ================= FILE PROCESS =================
+function processFiles() {
 
-    if(r >= 0.75) return "green3D";
-    if(r >= 0.4) return "yellow3D";
-    return "red3D";
-}
+    const aprFile = document.getElementById("aprFile")?.files[0];
+    const cdrFile = document.getElementById("cdrFile")?.files[0];
 
-// ===============================
-// 🔥 PROCESS FILES
-// ===============================
-function processFiles(){
-
-    let aprFile = document.getElementById("aprFile").files[0];
-    let cdrFile = document.getElementById("cdrFile").files[0];
-
-    if(!aprFile || !cdrFile){
-        alert("Upload both files");
+    if (!aprFile || !cdrFile) {
+        alert("APR + CDR dono upload karo");
         return;
     }
 
-    document.getElementById("loading").style.display="block";
+    readExcel(aprFile, (aprData) => {
+        readExcel(cdrFile, (cdrData) => {
 
-    let reader1 = new FileReader();
-    let reader2 = new FileReader();
+            originalAPR = aprData;
+            originalCDR = cdrData;
 
-    reader1.onload = function(e){
+            let finalData = buildDashboard(aprData, cdrData);
 
-        let apr = XLSX.read(e.target.result, {type:'binary'});
-        let aprData = XLSX.utils.sheet_to_json(apr.Sheets[apr.SheetNames[0]], {header:1});
+            let payload = {
+                final: finalData,
+                reportTime: new Date().toLocaleString()
+            };
 
-        reader2.onload = function(e2){
+            // 🔥 HISTORY SAVE (upgrade)
+            db.ref("history/" + Date.now()).set(payload);
 
-            let cdr = XLSX.read(e2.target.result, {type:'binary'});
-            let cdrData = XLSX.utils.sheet_to_json(cdr.Sheets[cdr.SheetNames[0]], {header:1});
+            // 🔥 LIVE DASHBOARD
+            db.ref("dashboard").set(payload);
 
-            let reportRow = aprData[1]?.[0] || "";
-            let reportTime = reportRow.split("to")[1]?.trim() || "";
+            alert("✅ Report Generated Successfully");
+        });
+    });
+}
 
-            aprData.splice(0,3);
-            cdrData.splice(0,2);
+// ================= EXCEL READ =================
+function readExcel(file, callback) {
+    let reader = new FileReader();
 
-            let map = {};
-            let ivr = 0;
+    reader.onload = function (e) {
+        let data = new Uint8Array(e.target.result);
+        let workbook = XLSX.read(data, { type: "array" });
+        let sheet = workbook.Sheets[workbook.SheetNames[0]];
+        let json = XLSX.utils.sheet_to_json(sheet, { defval: "" });
 
-            aprData.forEach(r=>{
-                let emp = r[1];
-                if(!emp) return;
-
-                let login = toSeconds(r[3]);
-
-                let breakTime =
-                    toSeconds(r[19]) +
-                    toSeconds(r[22]) +
-                    toSeconds(r[24]);
-
-                let meeting =
-                    toSeconds(r[20]) +
-                    toSeconds(r[23]);
-
-                map[emp] = {
-                    emp: String(emp),
-                    name: r[2] || "",
-                    login,
-                    breakTime,
-                    meeting,
-                    net: login - breakTime,
-                    ahtRaw: toSeconds(r[5]),
-                    total: 0,
-                    ib: 0
-                };
-            });
-
-            cdrData.forEach(r=>{
-                let emp = r[1];
-                let skill = r[7];
-                let dispo = (r[25] || "").toLowerCase();
-
-                if(skill === "INBOUND") ivr++;
-
-                if(!map[emp]) return;
-
-                if(dispo === "callmatured" || dispo === "transfer"){
-                    map[emp].total++;
-                    if(skill === "INBOUND"){
-                        map[emp].ib++;
-                    }
-                }
-            });
-
-            let final = Object.values(map).map(r=>({
-                ...r,
-                aht: r.total ? r.ahtRaw / r.total : 0,
-                ob: r.total - r.ib
-            }));
-
-            if(!final.length){
-                alert("No data generated ❌");
-                return;
-            }
-
-            if(db){
-                db.ref("dashboard").set({
-                    final,
-                    ivr,
-                    reportTime
-                });
-            }
-
-            window.location = "dashboard.html";
-        };
-
-        reader2.readAsBinaryString(cdrFile);
+        callback(json);
     };
 
-    reader1.readAsBinaryString(aprFile);
+    reader.readAsArrayBuffer(file);
 }
 
-// ===============================
-// 🔥 LOAD DASHBOARD
-// ===============================
-function loadDashboard(final, ivr, reportTime){
+// ================= CORE LOGIC =================
+function buildDashboard(apr, cdr) {
 
-    let tb = document.querySelector("#table tbody");
-    if(!tb) return;
+    let result = [];
 
-    tb.innerHTML = "";
+    apr.forEach(agent => {
 
-    let max = Math.max(...final.map(x=>x.total));
+        let name = agent["Agent Full Name"];
+        let emp = agent["Agent Name"];
 
-    let totalCalls=0,totalIB=0,totalOB=0,totalTalk=0;
+        // 🔹 TIME FIELDS
+        let login = timeToSeconds(agent["Total Login Time"]);
+        let lunch = timeToSeconds(agent["LUNCHBREAK"]);
+        let tea = timeToSeconds(agent["TEABREAK"]);
+        let short = timeToSeconds(agent["SHORTBREAK"]);
+        let system = timeToSeconds(agent["SYSTEMDOWN"]);
+        let meeting = timeToSeconds(agent["MEETING"]);
 
-    final.forEach(r=>{
+        // 🔥 CALCULATIONS
+        let totalBreak = lunch + tea + short;
+        let netLogin = login - (totalBreak + system);
 
-        totalCalls+=r.total;
-        totalIB+=r.ib;
-        totalOB+=r.ob;
-        totalTalk+=(r.aht*r.total);
+        // 🔹 CDR FILTER (MATURE CALLS)
+        let agentCDR = cdr.filter(r =>
+            r["User Full Name"] === name &&
+            r["Call Status"] === "Answered" &&
+            timeToSeconds(r["Talk Duration"]) > 0
+        );
 
-        let netCls = r.net >= 28800 ? "netGreen" : "";
-        let breakCls = r.breakTime > 2100 ? "red3D" : "";
-        let meetingCls = r.meeting > 2100 ? "red3D" : "";
-        let callCls = getCallClass(r.total, max);
+        let totalCalls = agentCDR.length;
 
-        let tr=document.createElement("tr");
+        let totalTalk = agentCDR.reduce((sum, r) =>
+            sum + timeToSeconds(r["Talk Duration"]), 0);
 
-        tr.innerHTML=`
-        <td><b><i>${r.emp}</i></b></td>
-        <td><b><i>${r.name}</i></b></td>
-        <td>${toTime(r.login)}</td>
-        <td class="${netCls}">${toTime(r.net)}</td>
-        <td class="${breakCls}">${toTime(r.breakTime)}</td>
-        <td class="${meetingCls}">${toTime(r.meeting)}</td>
-        <td>${toTime(r.aht)}</td>
-        <td class="${callCls}">${r.total}</td>
-        <td>${r.ib}</td>
-        <td>${r.ob}</td>
-        `;
+        let aht = totalCalls ? totalTalk / totalCalls : 0;
 
-        tb.appendChild(tr);
+        // 🔹 UTILIZATION
+        let utilization = netLogin ? (totalTalk / netLogin) * 100 : 0;
+
+        result.push({
+            emp,
+            name,
+            calls: totalCalls,
+            login: secondsToTime(login),
+            netLogin: secondsToTime(netLogin),
+            break: secondsToTime(totalBreak),
+            meeting: secondsToTime(meeting),
+            talk: secondsToTime(totalTalk),
+            aht: secondsToTime(aht),
+            utilization: utilization.toFixed(1) + "%"
+        });
     });
 
-    document.getElementById("ivr").innerText=ivr;
-    document.getElementById("total").innerText=totalCalls;
-    document.getElementById("ib").innerText=totalIB;
-    document.getElementById("ob").innerText=totalOB;
-
-    let overallAHT = totalCalls ? totalTalk/totalCalls : 0;
-    document.getElementById("aht").innerText = toTime(overallAHT);
-
-    // 🔥 REPORT TIME BACK (FIX)
-    let rt = document.getElementById("reportTime");
-    if(rt){
-        rt.innerText = "Last Update Till: " + (reportTime || "");
-    }
+    return result;
 }
 
-// ===============================
-// 🔥 LIVE LISTENER
-// ===============================
-document.addEventListener("DOMContentLoaded", ()=>{
+// ================= LIVE TABLE =================
+document.addEventListener("DOMContentLoaded", () => {
 
-    if(db){
-        db.ref("dashboard").on("value",(snap)=>{
-            let data = snap.val();
+    if (!db) return;
 
-            console.log("LIVE:", data);
+    db.ref("dashboard").on("value", snap => {
 
-            if(data && data.final){
-                loadDashboard(data.final, data.ivr, data.reportTime);
-            }
+        let d = snap.val();
+        if (!d) return;
+
+        let tbody = document.querySelector("#table tbody");
+        if (!tbody) return;
+
+        tbody.innerHTML = "";
+
+        d.final.forEach(r => {
+
+            let tr = document.createElement("tr");
+
+            // 🔥 CONDITIONAL COLOR
+            let netSec = timeToSeconds(r.netLogin);
+            let colorClass = "";
+
+            if (netSec > 7 * 3600) colorClass = "green";
+            else if (netSec > 5 * 3600) colorClass = "yellow";
+            else colorClass = "red";
+
+            tr.innerHTML = `
+                <td>${r.emp}</td>
+                <td>${r.name}</td>
+                <td>${r.calls}</td>
+                <td class="${colorClass}">${r.netLogin}</td>
+                <td>${r.break}</td>
+                <td>${r.meeting}</td>
+                <td>${r.talk}</td>
+                <td>${r.aht}</td>
+                <td>${r.utilization}</td>
+            `;
+
+            tbody.appendChild(tr);
         });
-    }
+
+        // 🔹 REPORT TIME
+        document.getElementById("reportTime").innerText =
+            "Last Update Till: " + d.reportTime;
+    });
 });
-
-// ===============================
-// 🔥 FULLSCREEN BUTTON
-// ===============================
-function openFullScreen(){
-    let elem = document.documentElement;
-
-    if (!document.fullscreenElement) {
-        elem.requestFullscreen();
-    } else {
-        document.exitFullscreen();
-    }
-}
-
-// ===============================
-// 🔄 AUTO REFRESH
-// ===============================
-setInterval(()=>{
-    location.reload();
-},120000);

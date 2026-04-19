@@ -1,222 +1,134 @@
-@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@700&display=swap');
-
-body {
-    margin: 0;
-    font-family: 'Oswald', sans-serif;
-    background: linear-gradient(135deg, #0b1f3a, #020617);
+/* ================= BASE THEME (UNCHANGED) ================= */
+body{
+    font-family: Arial;
+    background: #0b1f3a;
     color: white;
     text-align: center;
-    font-weight: bold;
+    margin: 0;
+    padding: 0;
 }
 
-/* 🔥 TITLE (ENHANCED 3D) */
-h2 {
-    font-size: 34px;
-    color: gold;
+h2{
     margin-top: 20px;
-
-    text-shadow:
-        5px 5px 10px rgba(0,0,0,1),
-        -1px -1px 2px rgba(255,255,255,0.3),
-        0 0 18px gold;
 }
 
-/* 🔥 REPORT TIME */
-#reportTime {
-    color: #00e5ff;
-    font-size: 17px;
-    margin-top: 5px;
-    margin-bottom: 12px;
-
-    text-shadow:
-        3px 3px 6px rgba(0,0,0,0.9),
-        0 0 12px #00e5ff;
-}
-
-/* 🔥 CARDS */
-.cards {
-    display: flex;
-    justify-content: center;
-    gap: 18px;
-    margin: 25px;
-    flex-wrap: wrap;
-}
-
-.card {
-    background: linear-gradient(145deg, #ffd700, #ffcc00);
-    color: black;
-    padding: 18px 22px;
-    border-radius: 14px;
-    min-width: 170px;
-
-    box-shadow:
-        8px 8px 18px rgba(0,0,0,0.9),
-        inset 3px 3px 7px rgba(255,255,255,0.7),
-        inset -5px -5px 8px rgba(0,0,0,0.7);
-}
-
-/* 🔍 SEARCH */
-#search {
-    padding: 10px;
-    margin: 10px;
-    width: 260px;
-    border-radius: 8px;
-    border: none;
-}
-
-/* 🔘 BUTTON */
-button {
-    padding: 10px 15px;
-    margin: 10px;
-    background: linear-gradient(145deg, gold, #ffcc00);
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-
-    box-shadow:
-        5px 5px 12px rgba(0,0,0,0.8),
-        inset 1px 1px 4px rgba(255,255,255,0.6);
-}
-
-button:hover {
-    transform: scale(1.05);
-}
-
-/* 📊 TABLE */
-table {
-    width: 95%;
+/* ================= TABLE ================= */
+table{
+    width: 90%;
     margin: auto;
-    margin-top: 20px;
-    border-collapse: collapse;
     background: white;
     color: black;
-    border-radius: 12px;
+    border-collapse: collapse;
+    box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+    border-radius: 10px;
     overflow: hidden;
-
-    border: 3px solid #000;
-    box-shadow: 0 0 22px rgba(0,0,0,0.9);
 }
 
-/* 🔵 HEADER */
-th {
-    background: linear-gradient(145deg, #0b3d91, #082c6c);
+th{
+    background: #0b3d91;
     color: white;
-    padding: 14px;
-
-    border: 2px solid #000;
-
-    box-shadow:
-        inset 3px 3px 7px rgba(255,255,255,0.25),
-        inset -5px -5px 9px rgba(0,0,0,0.8);
 }
 
-/* 📌 CELLS */
-td {
+td, th{
     padding: 10px;
-    border: 2px solid #444;
-    text-align: center;
-
-    box-shadow:
-        inset 1px 1px 3px rgba(255,255,255,0.7),
-        inset -3px -3px 5px rgba(0,0,0,0.25);
+    border: 1px solid black;
 }
 
-/* ✨ EMPLOYEE STYLE */
-td:nth-child(1),
-td:nth-child(2) {
-    font-style: italic;
-}
-
-/* ============================= */
-/* 🔥 FINAL CONDITIONAL 3D */
-/* ============================= */
-
-/* 🟢 NET LOGIN */
-.netGreen3D {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
-
-    box-shadow:
-        7px 7px 16px rgba(0,0,0,1),
-        inset 3px 3px 6px rgba(255,255,255,0.5),
-        inset -5px -5px 9px rgba(0,0,0,0.7);
-}
-
-/* 🔴 UNIVERSAL RED */
-.red3D {
-    background: #e60000;
-    color: white;
-
-    box-shadow:
-        7px 7px 16px rgba(0,0,0,1),
-        inset 3px 3px 6px rgba(255,255,255,0.3),
-        inset -5px -5px 9px rgba(0,0,0,0.8);
-}
-
-/* 🟢 HIGH CALL */
-.green3D {
-    background: linear-gradient(145deg, #00c853, #00e676);
-    color: white;
-
-    box-shadow:
-        7px 7px 16px rgba(0,0,0,1),
-        inset 3px 3px 6px rgba(255,255,255,0.5),
-        inset -5px -5px 9px rgba(0,0,0,0.7);
-}
-
-/* 🟡 MID CALL */
-.yellow3D {
-    background: linear-gradient(145deg, #ffd600, #ffea00);
-    color: black;
-
-    box-shadow:
-        7px 7px 16px rgba(0,0,0,0.9),
-        inset 3px 3px 6px rgba(255,255,255,0.7),
-        inset -5px -5px 9px rgba(0,0,0,0.6);
-}
-
-/* 🔥 ROW CLICK */
-.rowActive {
-    background: linear-gradient(145deg, #ffe066, #ffd700) !important;
-    color: black;
-
-    box-shadow:
-        inset 3px 3px 6px rgba(255,255,255,0.7),
-        inset -4px -4px 7px rgba(0,0,0,0.4);
-}
-
-/* 📂 UPLOAD PAGE */
-.container {
-    height: 100vh;
+/* ================= UPLOAD PAGE ================= */
+.container{
     display: flex;
     justify-content: center;
     align-items: center;
+    height: 80vh;
 }
 
-.upload-box {
-    background: linear-gradient(145deg, #0b3d91, #001f4d);
+.upload-box{
+    background: #112d4e;
     padding: 40px;
     border-radius: 15px;
-
-    box-shadow:
-        8px 8px 20px rgba(0,0,0,1),
-        inset 3px 3px 6px rgba(255,255,255,0.2),
-        inset -5px -5px 9px rgba(0,0,0,0.7);
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
 }
 
-/* LABEL */
-.label {
-    color: gold;
+.label{
+    display: block;
+    margin-top: 10px;
 }
 
-/* LOADING */
-.loading {
-    display: none;
-    color: gold;
+/* ================= BUTTONS ================= */
+button{
+    margin-top: 15px;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 8px;
+    background: linear-gradient(145deg,#1e3a8a,#0b1f3a);
+    color: white;
+    cursor: pointer;
+    transition: 0.3s;
 }
 
-/* HOVER */
-tr:hover {
-    background: #ffe066;
-    transition: 0.2s;
+button:hover{
+    transform: scale(1.05);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+}
+
+/* ================= LOADING ================= */
+.loading{
+    margin-top: 15px;
+    font-weight: bold;
+    color: yellow;
+}
+
+/* ================= REPORT TIME ================= */
+#reportTime{
+    margin-top: 10px;
+    font-weight: bold;
+}
+
+/* ================= 3D CARDS ================= */
+#cards{
+    margin: 20px;
+}
+
+.card{
+    background: linear-gradient(145deg,#1e3a8a,#0b1f3a);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+    min-width: 150px;
+    text-align: center;
+    transition: 0.3s;
+    color: white;
+    font-weight: bold;
+}
+
+.card:hover{
+    transform: translateY(-8px) scale(1.05);
+}
+
+/* ================= BUTTON BAR ================= */
+.button-bar{
+    margin: 20px;
+}
+
+/* ================= SCROLL FIX ================= */
+table{
+    display: block;
+    overflow-x: auto;
+}
+
+/* ================= RESPONSIVE ================= */
+@media(max-width:768px){
+
+    table{
+        font-size: 12px;
+    }
+
+    .upload-box{
+        width: 90%;
+    }
+
+    #cards{
+        flex-direction: column;
+        align-items: center;
+    }
 }

@@ -1,4 +1,4 @@
-console.log("🚀 PRO DASHBOARD LOADED");
+console.log("🔥 ULTIMATE DASHBOARD");
 
 // ================= FIREBASE =================
 let db;
@@ -58,13 +58,12 @@ function processFiles(){
 
       document.getElementById("loading").style.display="none";
 
-      alert("✅ Report Generated");
       window.location.href="dashboard.html";
     });
   });
 }
 
-// ================= APR READ (3rd row header) =================
+// ================= APR =================
 function readAPR(file,cb){
 
   let r=new FileReader();
@@ -76,8 +75,7 @@ function readAPR(file,cb){
 
     let raw=XLSX.utils.sheet_to_json(sheet,{header:1});
 
-    // remove top 2 rows
-    let trimmed=raw.slice(2);
+    let trimmed=raw.slice(2); // remove top 2 rows
 
     let headers=trimmed[0];
     let rows=trimmed.slice(1);
@@ -94,7 +92,7 @@ function readAPR(file,cb){
   r.readAsArrayBuffer(file);
 }
 
-// ================= CDR READ (2nd row header) =================
+// ================= CDR =================
 function readCDR(file,cb){
 
   let r=new FileReader();
@@ -123,14 +121,12 @@ function readCDR(file,cb){
   r.readAsArrayBuffer(file);
 }
 
-// ================= CORE LOGIC =================
+// ================= CORE =================
 function buildDashboard(apr,cdr){
 
   let result=[];
 
   apr.forEach(a=>{
-
-    if(!a) return;
 
     let emp=a["Agent Name"] || "NA";
     let name=a["Agent Full Name"] || "Unknown";
@@ -156,21 +152,17 @@ function buildDashboard(apr,cdr){
 
     let aht=calls?totalTalk/calls:0;
 
-    // IB / OB
     let ib=agentCDR.filter(r=>r["Call Type"]==="IB").length;
     let ob=agentCDR.filter(r=>r["Call Type"]==="OB").length;
 
     result.push({
-      emp,
-      name,
+      emp,name,
       login:secondsToTime(login),
       netLogin:secondsToTime(netLogin),
       break:secondsToTime(totalBreak),
       meeting:secondsToTime(meeting),
       aht:secondsToTime(aht),
-      calls,
-      ib,
-      ob
+      calls,ib,ob
     });
 
   });
@@ -185,37 +177,77 @@ function loadDashboard(data){
   tbody.innerHTML="";
 
   data.final.forEach(r=>{
-
     let tr=document.createElement("tr");
 
     tr.innerHTML=`
-      <td>${r.emp}</td>
-      <td>${r.name}</td>
-      <td>${r.login}</td>
-      <td>${r.netLogin}</td>
-      <td>${r.break}</td>
-      <td>${r.meeting}</td>
-      <td>${r.aht}</td>
-      <td>${r.calls}</td>
-      <td>${r.ib}</td>
-      <td>${r.ob}</td>
+    <td>${r.emp}</td>
+    <td>${r.name}</td>
+    <td>${r.login}</td>
+    <td>${r.netLogin}</td>
+    <td>${r.break}</td>
+    <td>${r.meeting}</td>
+    <td>${r.aht}</td>
+    <td>${r.calls}</td>
+    <td>${r.ib}</td>
+    <td>${r.ob}</td>
     `;
 
     tbody.appendChild(tr);
   });
 
+  loadCards(data.final);
+
   document.getElementById("reportTime").innerText=
     "Last Update Till: "+data.reportTime;
 }
 
+// ================= CARDS =================
+function loadCards(data){
+
+  let totalCalls=0;
+
+  data.forEach(r=> totalCalls+=r.calls);
+
+  document.getElementById("cards").innerHTML=`
+    <div class="card">👥 Agents<br>${data.length}</div>
+    <div class="card">📞 Calls<br>${totalCalls}</div>
+  `;
+}
+
+// ================= EXPORT =================
+function exportExcel(){
+  let table=document.getElementById("table");
+  let wb=XLSX.utils.table_to_book(table,{sheet:"Report"});
+  XLSX.writeFile(wb,"Agent_Report.xlsx");
+}
+
+// ================= PNG =================
+function downloadPNG(){
+  html2canvas(document.getElementById("table"),{scale:2})
+  .then(canvas=>{
+    let link=document.createElement("a");
+    link.download="dashboard.png";
+    link.href=canvas.toDataURL();
+    link.click();
+  });
+}
+
+// ================= RESET =================
+function resetDashboard(){
+  if(confirm("Reset?")){
+    db.ref("dashboard").remove();
+    document.querySelector("#table tbody").innerHTML="";
+    document.getElementById("cards").innerHTML="";
+    document.getElementById("reportTime").innerText="";
+  }
+}
+
 // ================= LIVE =================
 document.addEventListener("DOMContentLoaded",()=>{
-
   if(db){
     db.ref("dashboard").on("value",(snap)=>{
       let d=snap.val();
       if(d) loadDashboard(d);
     });
   }
-
 });

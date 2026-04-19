@@ -1,19 +1,4 @@
-console.log("🔥 FINAL SYSTEM");
-
-// ================= FIREBASE =================
-let db = null;
-
-const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "agent-performance-live.firebaseapp.com",
-  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-  projectId: "agent-performance-live"
-};
-
-if (typeof firebase !== "undefined") {
-    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    db = firebase.database();
-}
+console.log("🔥 FINAL PRO SYSTEM");
 
 // ================= TIME =================
 function timeToSeconds(t){
@@ -54,9 +39,7 @@ function processFiles(){
                 reportTime: window.reportDate || ""
             };
 
-            if(db) db.ref("dashboard").set(payload);
-
-            document.getElementById("loading").style.display="none";
+            firebase.database().ref("dashboard").set(payload);
 
             window.location.href="dashboard.html";
         });
@@ -69,24 +52,20 @@ function readAPR(file,cb){
     let r = new FileReader();
 
     r.onload = e=>{
-        let data = new Uint8Array(e.target.result);
-        let wb = XLSX.read(data,{type:"array"});
-        let sheet = wb.Sheets[wb.SheetNames[0]];
-        let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
+        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
         let row2 = raw[1]?.[0] || "";
         if(row2.toLowerCase().includes("to")){
             window.reportDate = row2.split("to")[1].trim();
         }
 
-        let trimmed = raw.slice(2);
+        let data = raw.slice(2);
+        let headers = data[0];
 
-        let headers = trimmed[0];
-        let rows = trimmed.slice(1);
-
-        let json = rows.map(r=>{
-            let obj = {};
-            headers.forEach((h,i)=> obj[h]=r[i]);
+        let json = data.slice(1).map(r=>{
+            let obj={};
+            headers.forEach((h,i)=>obj[h]=r[i]);
             return obj;
         });
 
@@ -102,19 +81,15 @@ function readCDR(file,cb){
     let r = new FileReader();
 
     r.onload = e=>{
-        let data = new Uint8Array(e.target.result);
-        let wb = XLSX.read(data,{type:"array"});
-        let sheet = wb.Sheets[wb.SheetNames[0]];
-        let raw = XLSX.utils.sheet_to_json(sheet,{header:1});
+        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
-        let trimmed = raw.slice(1);
+        let data = raw.slice(1);
+        let headers = data[0];
 
-        let headers = trimmed[0];
-        let rows = trimmed.slice(1);
-
-        let json = rows.map(r=>{
-            let obj = {};
-            headers.forEach((h,i)=> obj[h]=r[i]);
+        let json = data.slice(1).map(r=>{
+            let obj={};
+            headers.forEach((h,i)=>obj[h]=r[i]);
             return obj;
         });
 
@@ -127,55 +102,53 @@ function readCDR(file,cb){
 // ================= CORE =================
 function buildDashboard(apr,cdr){
 
-    let result = [];
+    let result=[];
 
     apr.forEach(a=>{
 
-        let emp = (a["Agent Name"]||"").toString().trim();
-        let name = a["Agent Full Name"]||"Unknown";
+        let emp=(a["Agent Name"]||"").trim();
+        let name=a["Agent Full Name"]||"";
 
-        let login = timeToSeconds(a["Total Login Time"]);
-        let lunch = timeToSeconds(a["LUNCHBREAK"]);
-        let tea = timeToSeconds(a["TEABREAK"]);
-        let short = timeToSeconds(a["SHORTBREAK"]);
+        let login=timeToSeconds(a["Total Login Time"]);
 
-        let totalBreak = lunch + tea + short;
-        let netLogin = login - totalBreak;
+        if(login > (8*3600 + 15*60)){
+            login = 8*3600;
+        }
 
-        let agentCDR = cdr.filter(r=>{
-            let cEmp = (r["Username"]||"").toString().trim();
-            return cEmp === emp;
-        });
+        let breakTime =
+            timeToSeconds(a["LUNCHBREAK"]) +
+            timeToSeconds(a["TEABREAK"]) +
+            timeToSeconds(a["SHORTBREAK"]);
 
-        let totalMature = agentCDR.filter(r=>{
-            let d = (r["Disposition"]||"").toUpperCase();
-            return d.includes("CALLMATURED") || d.includes("TRANSFER");
+        let net=login-breakTime;
+
+        let agentCDR=cdr.filter(r=>(r["Username"]||"").trim()===emp);
+
+        let total=agentCDR.filter(r=>{
+            let d=(r["Disposition"]||"").toUpperCase();
+            return d.includes("CALLMATURED")||d.includes("TRANSFER");
         }).length;
 
-        let ibMature = agentCDR.filter(r=>{
-            let d = (r["Disposition"]||"").toUpperCase();
-            let c = (r["Campaign"]||"").toUpperCase();
-            return (d.includes("CALLMATURED") || d.includes("TRANSFER")) &&
-                   c.includes("CSRINBOUND");
+        let ib=agentCDR.filter(r=>{
+            let d=(r["Disposition"]||"").toUpperCase();
+            let c=(r["Campaign"]||"").toUpperCase();
+            return (d.includes("CALLMATURED")||d.includes("TRANSFER")) && c.includes("CSRINBOUND");
         }).length;
 
-        let obMature = totalMature - ibMature;
+        let ob=total-ib;
 
-        let totalTalk = agentCDR.reduce((s,r)=>
-            s + timeToSeconds(r["Talk Duration"]),0);
-
-        let aht = totalMature ? totalTalk / totalMature : 0;
+        let talk=agentCDR.reduce((s,r)=>s+timeToSeconds(r["Talk Duration"]),0);
+        let aht= total? talk/total : 0;
 
         result.push({
             emp,name,
             login:secondsToTime(login),
-            netLogin:secondsToTime(netLogin),
-            break:secondsToTime(totalBreak),
-            meeting:a["MEETING"] || "00:00:00",
+            netLogin:secondsToTime(net),
+            break:secondsToTime(breakTime),
+            meeting:a["MEETING"]||"00:00:00",
             aht:secondsToTime(aht),
-            calls:totalMature,
-            ib:ibMature,
-            ob:obMature
+            calls:total,
+            ib,ob
         });
 
     });
@@ -186,27 +159,35 @@ function buildDashboard(apr,cdr){
 // ================= LOAD =================
 function loadDashboard(data){
 
-    let tbody = document.querySelector("#table tbody");
-    if(!tbody) return;
-
-    tbody.innerHTML = "";
+    let tbody=document.querySelector("#table tbody");
+    tbody.innerHTML="";
 
     data.final.forEach(r=>{
 
-        let tr = document.createElement("tr");
+        let net=timeToSeconds(r.netLogin);
+        let brk=timeToSeconds(r.break);
+        let meet=timeToSeconds(r.meeting);
 
-        let sec = timeToSeconds(r.netLogin);
-        let cls = sec>7*3600?"green":sec>5*3600?"yellow":"red";
+        let netCls = net>8*3600?"green3d":"red3d";
+        let breakCls = brk>2100?"red3d":"";
+        let meetCls = meet>2100?"red3d":"";
 
-        tr.innerHTML = `
+        let callCls="";
+        if(r.calls>=100) callCls="green3d";
+        else if(r.calls>=70) callCls="yellow3d";
+        else callCls="red3d";
+
+        let tr=document.createElement("tr");
+
+        tr.innerHTML=`
         <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${r.login}</td>
-        <td class="${cls}">${r.netLogin}</td>
-        <td>${r.break}</td>
-        <td>${r.meeting}</td>
+        <td class="${netCls}">${r.netLogin}</td>
+        <td class="${breakCls}">${r.break}</td>
+        <td class="${meetCls}">${r.meeting}</td>
         <td>${r.aht}</td>
-        <td>${r.calls}</td>
+        <td class="${callCls}">${r.calls}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -214,53 +195,30 @@ function loadDashboard(data){
         tbody.appendChild(tr);
     });
 
-    let rt = document.getElementById("reportTime");
-    if(rt){
-        rt.innerText = "Last Update Till: " + (data.reportTime || "");
-    }
+    document.getElementById("reportTime").innerText =
+    "Last Update Till: " + (data.reportTime||"");
+}
+
+// ================= COPY =================
+function downloadPNG(){
+    html2canvas(document.getElementById("table"),{scale:3}).then(canvas=>{
+        canvas.toBlob(blob=>{
+            navigator.clipboard.write([new ClipboardItem({"image/png": blob})]);
+            alert("Copied ✅");
+        });
+    });
 }
 
 // ================= RESET =================
 function resetDashboard(){
-
-    if(confirm("Reset dashboard?")){
-
-        if(db) db.ref("dashboard").remove();
-
-        localStorage.clear();
-        sessionStorage.clear();
-
-        if ('caches' in window) {
-            caches.keys().then(names => {
-                names.forEach(name => caches.delete(name));
-            });
-        }
-
-        window.location.href = "index.html";
-    }
-}
-
-// ================= BUTTONS =================
-function exportExcel(){
-    let wb = XLSX.utils.table_to_book(document.getElementById("table"));
-    XLSX.writeFile(wb,"Report.xlsx");
-}
-
-function downloadPNG(){
-    html2canvas(document.getElementById("table")).then(canvas=>{
-        let a=document.createElement("a");
-        a.href=canvas.toDataURL();
-        a.download="dashboard.png";
-        a.click();
-    });
+    firebase.database().ref("dashboard").remove();
+    location.href="index.html";
 }
 
 // ================= LIVE =================
 document.addEventListener("DOMContentLoaded",()=>{
-    if(db){
-        db.ref("dashboard").on("value",(snap)=>{
-            let d = snap.val();
-            if(d) loadDashboard(d);
-        });
-    }
+    firebase.database().ref("dashboard").on("value",snap=>{
+        let d=snap.val();
+        if(d) loadDashboard(d);
+    });
 });

@@ -1,4 +1,4 @@
-console.log("🔥 FINAL PRO VERSION (EMP ID BASED)");
+console.log("🔥 FINAL CALCULATION ENGINE");
 
 // ================= FIREBASE =================
 let db = null;
@@ -51,7 +51,7 @@ function processFiles(){
 
             let payload={
                 final,
-                reportTime:new Date().toLocaleString()
+                reportTime: window.reportDate || ""
             };
 
             if(db) db.ref("dashboard").set(payload);
@@ -65,12 +65,20 @@ function processFiles(){
 
 // ================= APR =================
 function readAPR(file,cb){
+
     let r=new FileReader();
+
     r.onload=e=>{
         let data=new Uint8Array(e.target.result);
         let wb=XLSX.read(data,{type:"array"});
         let sheet=wb.Sheets[wb.SheetNames[0]];
         let raw=XLSX.utils.sheet_to_json(sheet,{header:1});
+
+        // 🔥 DATE EXTRACT (2nd row)
+        let row2 = raw[1]?.[0] || "";
+        if(row2.toLowerCase().includes("to")){
+            window.reportDate = row2.split("to")[1].trim();
+        }
 
         let trimmed=raw.slice(2);
 
@@ -85,12 +93,15 @@ function readAPR(file,cb){
 
         cb(json);
     };
+
     r.readAsArrayBuffer(file);
 }
 
 // ================= CDR =================
 function readCDR(file,cb){
+
     let r=new FileReader();
+
     r.onload=e=>{
         let data=new Uint8Array(e.target.result);
         let wb=XLSX.read(data,{type:"array"});
@@ -110,6 +121,7 @@ function readCDR(file,cb){
 
         cb(json);
     };
+
     r.readAsArrayBuffer(file);
 }
 
@@ -137,21 +149,34 @@ function buildDashboard(apr,cdr){
             return cEmp===emp;
         });
 
-        let mature=agentCDR.filter(r=>{
-            let status=(r["Call Status"]||"").toLowerCase();
-            let talk=timeToSeconds(r["Talk Duration"]);
-            return (status.includes("answer")||status.includes("connect")) && talk>0;
-        });
+        // 🔥 TOTAL MATURE
+        let totalMature = agentCDR.reduce((sum,r)=>{
+            return sum + (Number(r["CALLMATURED"]||0) + Number(r["TRANSFER"]||0));
+        },0);
 
-        let totalMature=mature.length;
+        // 🔥 IB MATURE
+        let ibMature = agentCDR.reduce((sum,r)=>{
 
-        let totalTalk=mature.reduce((s,r)=>
-            s+timeToSeconds(r["Talk Duration"]),0);
+            let type=(r["Call Type"]||"").toUpperCase();
+            let val=(Number(r["CALLMATURED"]||0)+Number(r["TRANSFER"]||0));
 
-        let aht=totalMature?totalTalk/totalMature:0;
+            if(type.includes("CSRINBOUND")){
+                return sum + val;
+            }
 
-        let ib=mature.filter(r=>r["Call Type"]==="IB").length;
-        let ob=mature.filter(r=>r["Call Type"]==="OB").length;
+            return sum;
+
+        },0);
+
+        // 🔥 OB MATURE
+        let obMature = totalMature - ibMature;
+
+        // 🔥 TALK TIME
+        let totalTalk = agentCDR.reduce((s,r)=>
+            s + timeToSeconds(r["Talk Duration"]),0);
+
+        // 🔥 AHT
+        let aht = totalMature ? totalTalk / totalMature : 0;
 
         result.push({
             emp,name,
@@ -159,10 +184,13 @@ function buildDashboard(apr,cdr){
             netLogin:secondsToTime(netLogin),
             break:secondsToTime(totalBreak),
             meeting:a["MEETING"]||"00:00:00",
+
             aht:secondsToTime(aht),
             calls:totalMature,
-            ib,ob
+            ib:ibMature,
+            ob:obMature
         });
+
     });
 
     return result;
@@ -198,7 +226,7 @@ function loadDashboard(data){
     });
 
     document.getElementById("reportTime").innerText=
-    "Last Update Till: "+data.reportTime;
+    "Last Update Till: "+(data.reportTime || "");
 }
 
 // ================= BUTTONS =================
@@ -219,7 +247,7 @@ function downloadPNG(){
 function resetDashboard(){
     if(confirm("Reset?")){
         if(db) db.ref("dashboard").remove();
-        location.reload();
+        window.location.href="index.html";
     }
 }
 

@@ -1,37 +1,24 @@
-/* ================= BODY (GALAXY) ================= */
+/* ================= BODY (TEXTURE BACKGROUND) ================= */
 body{
     font-family: Arial, sans-serif;
     color:white;
     margin:0;
     text-align:center;
 
-    background: radial-gradient(circle at 20% 30%, #1e3a8a, transparent),
-                radial-gradient(circle at 80% 20%, #0ea5e9, transparent),
-                radial-gradient(circle at 50% 80%, #9333ea, transparent),
-                radial-gradient(circle at 30% 70%, #0b1f3a, black);
+    background:
+        linear-gradient(to bottom, rgba(0,0,0,0.6), rgba(0,0,0,0.9)),
+        url("images/bg.png"); /* 👉 image yaha rakho */
 
-    background-color:#000;
+    background-size: cover;
+    background-position: center;
     background-attachment: fixed;
-}
-
-/* ⭐ STARS */
-body::before{
-    content:"";
-    position:fixed;
-    top:0;
-    left:0;
-    width:100%;
-    height:100%;
-    background: url("https://www.transparenttextures.com/patterns/stardust.png");
-    opacity:0.35;
-    pointer-events:none;
 }
 
 /* ================= TITLE ================= */
 h2{
     color:#d4af37;
     margin:15px;
-    text-shadow:0 0 12px rgba(212,175,55,0.8);
+    text-shadow:0 0 10px rgba(212,175,55,0.7);
 }
 
 /* ================= UPLOAD PAGE ================= */

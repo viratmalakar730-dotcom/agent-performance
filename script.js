@@ -1,4 +1,4 @@
-console.log("🔥 FINAL CLEAN SYSTEM");
+console.log("🔥 FINAL PRO SYSTEM");
 
 // ================= FIREBASE =================
 const firebaseConfig = {
@@ -173,15 +173,43 @@ function loadDashboard(data){
     "Last Update Till: " + (data.reportTime || "");
 }
 
-// ================= COPY FULL PAGE =================
+// ================= FULL PAGE COPY =================
 function downloadPNG(){
-    html2canvas(document.body,{scale:3}).then(canvas=>{
+
+    let tableBox = document.querySelector(".table-container");
+
+    // 🔥 remove scroll temporarily
+    if(tableBox){
+        tableBox.style.maxHeight = "none";
+        tableBox.style.overflow = "visible";
+    }
+
+    let body = document.body;
+    let html = document.documentElement;
+
+    let height = Math.max(
+        body.scrollHeight,
+        html.scrollHeight
+    );
+
+    html2canvas(document.body,{
+        scale:3,
+        useCORS:true,
+        windowHeight: height
+    }).then(canvas=>{
+
         canvas.toBlob(blob=>{
             navigator.clipboard.write([
                 new ClipboardItem({"image/png":blob})
             ]);
             alert("Full Page Copied ✅");
         });
+
+        // 🔁 restore scroll
+        if(tableBox){
+            tableBox.style.maxHeight = "520px";
+            tableBox.style.overflow = "auto";
+        }
     });
 }
 

@@ -5,7 +5,7 @@
 
 <link rel="stylesheet" href="style.css">
 
-<!-- ✅ Firebase -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -24,20 +24,16 @@
 
 <div id="reportTime"></div>
 
-<!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search..." onkeyup="searchTable()">
 
-<!-- 🔘 BUTTONS -->
 <div>
 <button onclick="exportExcel()">📤 Excel</button>
 <button onclick="downloadPNG()">📋 Copy</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
 
-<!-- 📊 CARDS -->
 <div id="cards"></div>
 
-<!-- 📋 TABLE -->
 <div class="table-container">
 <table id="table">
 
@@ -62,12 +58,11 @@
 </table>
 </div>
 
-<!-- ✅ REQUIRED LIBRARIES (IMPORTANT ORDER) -->
+<!-- ✅ LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
-<!-- MAIN SCRIPT -->
+<!-- MAIN -->
 <script src="script.js"></script>
 
 </body>

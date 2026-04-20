@@ -31,92 +31,6 @@ function secondsToTime(sec){
     return `${h}:${m}:${s}`;
 }
 
-// ================= PROCESS =================
-function processFiles(){
-
-    let apr = document.getElementById("aprFile")?.files[0];
-    let cdr = document.getElementById("cdrFile")?.files[0];
-
-    if(!apr || !cdr){
-        alert("Upload APR + CDR");
-        return;
-    }
-
-    document.getElementById("loading").style.display="block";
-
-    readAPR(apr,(aprData)=>{
-        readCDR(cdr,(cdrData)=>{
-
-            let final = buildDashboard(aprData,cdrData);
-            let summary = buildSummary(cdrData,final);
-
-            db.ref("dashboard").set({
-                final,
-                summary,
-                reportTime: window.reportDate || ""
-            });
-
-            window.location.href="dashboard.html";
-        });
-    });
-}
-
-// ================= READ APR =================
-function readAPR(file,cb){
-
-    let r = new FileReader();
-
-    r.onload = e=>{
-        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
-        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
-
-        // 🔥 DATE FIX FINAL
-        let row2 = raw[1] || [];
-        let fullText = row2.join(" ");
-
-        if(fullText.includes("to")){
-            window.reportDate = fullText.split("to")[1].trim();
-        }
-
-        let data = raw.slice(2);
-        let headers = data[0];
-
-        let json = data.slice(1).map(r=>{
-            let obj = {};
-            headers.forEach((h,i)=> obj[h]=r[i]);
-            return obj;
-        });
-
-        cb(json);
-    };
-
-    r.readAsArrayBuffer(file);
-}
-
-// ================= READ CDR =================
-function readCDR(file,cb){
-
-    let r = new FileReader();
-
-    r.onload = e=>{
-        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
-        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
-
-        let data = raw.slice(1);
-        let headers = data[0];
-
-        let json = data.slice(1).map(r=>{
-            let obj = {};
-            headers.forEach((h,i)=> obj[h]=r[i]);
-            return obj;
-        });
-
-        cb(json);
-    };
-
-    r.readAsArrayBuffer(file);
-}
-
 // ================= CORE =================
 function buildDashboard(apr,cdr){
 
@@ -209,15 +123,13 @@ function loadDashboard(data){
         let breakSec = timeToSeconds(r.break);
         let meetSec = timeToSeconds(r.meeting);
 
-        // 🔥 NET LOGIN FINAL LOGIC
-let netCls = "";
-
-if(netSec > 8*3600){
-    netCls = "green3d";
-}
-else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
-    netCls = "red3d";
-}
+        let netCls = "";
+        if(netSec > 8*3600){
+            netCls = "green3d";
+        }
+        else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
+            netCls = "red3d";
+        }
 
         let breakCls = breakSec > 2100 ? "red3d" : "";
         let meetCls = meetSec > 2100 ? "red3d" : "";
@@ -246,10 +158,7 @@ else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
         tbody.appendChild(tr);
     });
 
-    // 🔥 CARDS FIXED
-    let c = data.summary || {
-        ivr:0,total:0,ib:0,ob:0,totalLogin:0,aht:"00:00:00"
-    };
+    let c = data.summary || {ivr:0,total:0,ib:0,ob:0,totalLogin:0,aht:"00:00:00"};
 
     document.getElementById("cards").innerHTML = `
     <div class="card">Total IVR Hit<br>${c.ivr}</div>
@@ -264,14 +173,15 @@ else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
     "Last Update Till: " + (data.reportTime || "");
 }
 
-// ================= SEARCH =================
-function searchTable(){
-    let input = document.getElementById("search").value.toLowerCase();
-    let rows = document.querySelectorAll("#table tbody tr");
-
-    rows.forEach(r=>{
-        let text = r.innerText.toLowerCase();
-        r.style.display = text.includes(input) ? "" : "none";
+// ================= COPY FULL PAGE =================
+function downloadPNG(){
+    html2canvas(document.body,{scale:3}).then(canvas=>{
+        canvas.toBlob(blob=>{
+            navigator.clipboard.write([
+                new ClipboardItem({"image/png":blob})
+            ]);
+            alert("Full Page Copied ✅");
+        });
     });
 }
 
@@ -281,22 +191,21 @@ function exportExcel(){
     XLSX.writeFile(wb,"Dashboard.xlsx");
 }
 
-// ================= COPY =================
-function downloadPNG(){
-    html2canvas(document.getElementById("table"),{scale:3}).then(canvas=>{
-        canvas.toBlob(blob=>{
-            navigator.clipboard.write([
-                new ClipboardItem({"image/png":blob})
-            ]);
-            alert("Copied ✅");
-        });
-    });
-}
-
 // ================= RESET =================
 function resetDashboard(){
     db.ref("dashboard").remove();
     location.href="index.html";
+}
+
+// ================= SEARCH =================
+function searchTable(){
+    let input = document.getElementById("search").value.toLowerCase();
+    let rows = document.querySelectorAll("#table tbody tr");
+
+    rows.forEach(r=>{
+        let text = r.innerText.toLowerCase();
+        r.style.display = text.includes(input) ? "" : "none";
+    });
 }
 
 // ================= LIVE =================

@@ -1,4 +1,4 @@
-console.log("🔥 FINAL PRO SYSTEM");
+console.log("🔥 ULTIMATE FINAL SYSTEM");
 
 // ================= FIREBASE =================
 const firebaseConfig = {
@@ -29,6 +29,89 @@ function secondsToTime(sec){
     let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
     let s = String(sec%60).padStart(2,'0');
     return `${h}:${m}:${s}`;
+}
+
+// ================= PROCESS FILES =================
+function processFiles(){
+
+    let aprFile = document.getElementById("aprFile")?.files[0];
+    let cdrFile = document.getElementById("cdrFile")?.files[0];
+
+    if(!aprFile || !cdrFile){
+        alert("Please upload APR and CDR files");
+        return;
+    }
+
+    readAPR(aprFile,(aprData)=>{
+        readCDR(cdrFile,(cdrData)=>{
+
+            let final = buildDashboard(aprData,cdrData);
+            let summary = buildSummary(cdrData,final);
+
+            db.ref("dashboard").set({
+                final,
+                summary,
+                reportTime: window.reportDate || ""
+            });
+
+            window.location.href = "dashboard.html";
+        });
+    });
+}
+
+// ================= READ APR =================
+function readAPR(file,cb){
+
+    let r = new FileReader();
+
+    r.onload = e=>{
+        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+
+        let row2 = raw[1] || [];
+        let fullText = row2.join(" ");
+
+        if(fullText.includes("to")){
+            window.reportDate = fullText.split("to")[1].trim();
+        }
+
+        let data = raw.slice(2);
+        let headers = data[0];
+
+        let json = data.slice(1).map(r=>{
+            let obj = {};
+            headers.forEach((h,i)=> obj[h]=r[i]);
+            return obj;
+        });
+
+        cb(json);
+    };
+
+    r.readAsArrayBuffer(file);
+}
+
+// ================= READ CDR =================
+function readCDR(file,cb){
+
+    let r = new FileReader();
+
+    r.onload = e=>{
+        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
+
+        let data = raw.slice(1);
+        let headers = data[0];
+
+        let json = data.slice(1).map(r=>{
+            let obj = {};
+            headers.forEach((h,i)=> obj[h]=r[i]);
+            return obj;
+        });
+
+        cb(json);
+    };
+
+    r.readAsArrayBuffer(file);
 }
 
 // ================= CORE =================
@@ -114,6 +197,8 @@ function buildSummary(cdr,data){
 function loadDashboard(data){
 
     let tbody = document.querySelector("#table tbody");
+    if(!tbody) return;
+
     tbody.innerHTML = "";
 
     data.final.forEach((r,i)=>{
@@ -178,26 +263,12 @@ function downloadPNG(){
 
     let tableBox = document.querySelector(".table-container");
 
-    // 🔥 remove scroll temporarily
     if(tableBox){
         tableBox.style.maxHeight = "none";
         tableBox.style.overflow = "visible";
     }
 
-    let body = document.body;
-    let html = document.documentElement;
-
-    let height = Math.max(
-        body.scrollHeight,
-        html.scrollHeight
-    );
-
-    html2canvas(document.body,{
-        scale:3,
-        useCORS:true,
-        windowHeight: height
-    }).then(canvas=>{
-
+    html2canvas(document.body,{scale:3}).then(canvas=>{
         canvas.toBlob(blob=>{
             navigator.clipboard.write([
                 new ClipboardItem({"image/png":blob})
@@ -205,7 +276,6 @@ function downloadPNG(){
             alert("Full Page Copied ✅");
         });
 
-        // 🔁 restore scroll
         if(tableBox){
             tableBox.style.maxHeight = "520px";
             tableBox.style.overflow = "auto";

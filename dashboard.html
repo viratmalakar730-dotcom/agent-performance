@@ -2,8 +2,10 @@
 <html>
 <head>
 <title>Dashboard</title>
+
 <link rel="stylesheet" href="style.css">
 
+<!-- ✅ Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -11,17 +13,6 @@
 .table-container{
     max-height:520px;
     overflow:auto;
-}
-
-/* TV MODE */
-body.tv{
-    background:black;
-    zoom:1.2;
-}
-
-body.tv button,
-body.tv input{
-    display:none;
 }
 </style>
 
@@ -33,17 +24,20 @@ body.tv input{
 
 <div id="reportTime"></div>
 
+<!-- 🔍 SEARCH -->
 <input type="text" id="search" placeholder="Search..." onkeyup="searchTable()">
 
+<!-- 🔘 BUTTONS -->
 <div>
 <button onclick="exportExcel()">📤 Excel</button>
 <button onclick="downloadPNG()">📋 Copy</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
-<button onclick="toggleTV()">📺 TV Mode</button>
 </div>
 
+<!-- 📊 CARDS -->
 <div id="cards"></div>
 
+<!-- 📋 TABLE -->
 <div class="table-container">
 <table id="table">
 
@@ -68,8 +62,12 @@ body.tv input{
 </table>
 </div>
 
-<script src="xlsx.full.min.js"></script>
-<script src="html2canvas.min.js"></script>
+<!-- ✅ REQUIRED LIBRARIES (IMPORTANT ORDER) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<!-- MAIN SCRIPT -->
 <script src="script.js"></script>
 
 </body>

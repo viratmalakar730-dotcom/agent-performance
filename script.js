@@ -15,10 +15,31 @@ let db = firebase.database();
 let lastUpdateTime = "";
 let soundUnlocked = false;
 
-// 🔥 SOUND UNLOCK (fix autoplay issue)
+// 🔥 SOUND UNLOCK
 document.addEventListener("click",()=>{
     soundUnlocked = true;
 });
+
+// ================= 🔔 DESKTOP NOTIFICATION =================
+function requestNotificationPermission(){
+    if("Notification" in window){
+        if(Notification.permission !== "granted"){
+            Notification.requestPermission();
+        }
+    }
+}
+
+function showDesktopNotification(){
+    if("Notification" in window && Notification.permission === "granted"){
+
+        let n = new Notification("📊 Dashboard Updated",{
+            body:"New data uploaded",
+            icon:"https://cdn-icons-png.flaticon.com/512/1828/1828817.png"
+        });
+
+        n.onclick = ()=> window.focus();
+    }
+}
 
 // ================= HELPERS =================
 function safeStr(v){
@@ -318,8 +339,10 @@ function searchTable(){
     });
 }
 
-// ================= LIVE + SOUND + ALERT =================
+// ================= LIVE + SOUND + ALERT + DESKTOP =================
 document.addEventListener("DOMContentLoaded",()=>{
+
+    requestNotificationPermission();
 
     db.ref("dashboard").on("value",snap=>{
 
@@ -343,6 +366,7 @@ document.addEventListener("DOMContentLoaded",()=>{
             }
 
             showAlert();
+            showDesktopNotification();
 
             lastUpdateTime = d.reportTime;
         }

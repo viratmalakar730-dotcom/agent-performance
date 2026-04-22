@@ -13,6 +13,12 @@ let db = firebase.database();
 
 // 🔔 SOUND TRACKER
 let lastUpdateTime = "";
+let soundUnlocked = false;
+
+// 🔥 SOUND UNLOCK (fix autoplay issue)
+document.addEventListener("click",()=>{
+    soundUnlocked = true;
+});
 
 // ================= HELPERS =================
 function safeStr(v){
@@ -32,6 +38,21 @@ function secondsToTime(sec){
     let m = String(Math.floor((sec%3600)/60)).padStart(2,'0');
     let s = String(sec%60).padStart(2,'0');
     return `${h}:${m}:${s}`;
+}
+
+// ================= 🔔 ALERT =================
+function showAlert(){
+    let alertBox = document.getElementById("liveAlert");
+
+    if(alertBox){
+        alertBox.style.display = "block";
+        alertBox.classList.add("blink");
+
+        setTimeout(()=>{
+            alertBox.style.display = "none";
+            alertBox.classList.remove("blink");
+        },3000);
+    }
 }
 
 // ================= PROCESS FILES =================
@@ -282,6 +303,7 @@ function exportExcel(){
 // ================= RESET =================
 function resetDashboard(){
     db.ref("dashboard").remove();
+    lastUpdateTime = "";
     location.href="index.html";
 }
 
@@ -296,7 +318,7 @@ function searchTable(){
     });
 }
 
-// ================= LIVE + SOUND =================
+// ================= LIVE + SOUND + ALERT =================
 document.addEventListener("DOMContentLoaded",()=>{
 
     db.ref("dashboard").on("value",snap=>{
@@ -312,10 +334,15 @@ document.addEventListener("DOMContentLoaded",()=>{
 
         if(d.reportTime !== lastUpdateTime){
 
-            let sound = document.getElementById("notifySound");
-            if(sound){
-                sound.play().catch(()=>{});
+            if(soundUnlocked){
+                let sound = document.getElementById("notifySound");
+                if(sound){
+                    sound.currentTime = 0;
+                    sound.play().catch(()=>{});
+                }
             }
+
+            showAlert();
 
             lastUpdateTime = d.reportTime;
         }

@@ -8,19 +8,23 @@ const firebaseConfig = {
   projectId: "agent-performance-live"
 };
 
-if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-let db = firebase.database();
+// ✅ FIX: INIT BEFORE USE
+let db;
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+db = firebase.database();
 
-// 🔔 SOUND TRACKER
+// ================= SOUND =================
 let lastUpdateTime = "";
 let soundUnlocked = false;
 
-// 🔥 SOUND UNLOCK
+// 🔥 SOUND UNLOCK (REQUIRED FOR BROWSER)
 document.addEventListener("click",()=>{
     soundUnlocked = true;
 });
 
-// ================= 🔔 DESKTOP NOTIFICATION =================
+// ================= 🔔 DESKTOP =================
 function requestNotificationPermission(){
     if("Notification" in window){
         if(Notification.permission !== "granted"){
@@ -31,12 +35,10 @@ function requestNotificationPermission(){
 
 function showDesktopNotification(){
     if("Notification" in window && Notification.permission === "granted"){
-
         let n = new Notification("📊 Dashboard Updated",{
             body:"New data uploaded",
             icon:"https://cdn-icons-png.flaticon.com/512/1828/1828817.png"
         });
-
         n.onclick = ()=> window.focus();
     }
 }
@@ -73,6 +75,20 @@ function showAlert(){
             alertBox.style.display = "none";
             alertBox.classList.remove("blink");
         },3000);
+    }
+}
+
+// ================= 🔊 SOUND FUNCTION =================
+function playSound(){
+    let sound = document.getElementById("notifySound");
+
+    if(sound && soundUnlocked){
+        sound.currentTime = 0;
+        sound.play().then(()=>{
+            console.log("🔊 Sound Played");
+        }).catch(e=>{
+            console.log("❌ Sound blocked:", e);
+        });
     }
 }
 
@@ -303,43 +319,7 @@ function loadDashboard(data){
     "Last Update Till: " + (data.reportTime || "");
 }
 
-// ================= COPY =================
-function downloadPNG(){
-    html2canvas(document.body,{scale:3}).then(canvas=>{
-        canvas.toBlob(blob=>{
-            navigator.clipboard.write([
-                new ClipboardItem({"image/png":blob})
-            ]);
-            alert("Full Page Copied ✅");
-        });
-    });
-}
-
-// ================= EXPORT =================
-function exportExcel(){
-    let wb = XLSX.utils.table_to_book(document.getElementById("table"));
-    XLSX.writeFile(wb,"Dashboard.xlsx");
-}
-
-// ================= RESET =================
-function resetDashboard(){
-    db.ref("dashboard").remove();
-    lastUpdateTime = "";
-    location.href="index.html";
-}
-
-// ================= SEARCH =================
-function searchTable(){
-    let input = document.getElementById("search").value.toLowerCase();
-    let rows = document.querySelectorAll("#table tbody tr");
-
-    rows.forEach(r=>{
-        let text = r.innerText.toLowerCase();
-        r.style.display = text.includes(input) ? "" : "none";
-    });
-}
-
-// ================= LIVE + SOUND + ALERT + DESKTOP =================
+// ================= LIVE =================
 document.addEventListener("DOMContentLoaded",()=>{
 
     requestNotificationPermission();
@@ -357,14 +337,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
         if(d.reportTime !== lastUpdateTime){
 
-            if(soundUnlocked){
-                let sound = document.getElementById("notifySound");
-                if(sound){
-                    sound.currentTime = 0;
-                    sound.play().catch(()=>{});
-                }
-            }
-
+            playSound(); // 🔊 FIXED
             showAlert();
             showDesktopNotification();
 

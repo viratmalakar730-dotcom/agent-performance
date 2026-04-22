@@ -1,11 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+<title>APR Dashboard</title>
 
 <link rel="stylesheet" href="style.css">
 
-<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
@@ -35,11 +34,13 @@
 <!-- 🔔 SOUND -->
 <audio id="notifySound" src="sounds/notify.mp3" preload="auto"></audio>
 
+<!-- 🔔 POPUP -->
+<div id="liveAlert">🚀 New Data Updated</div>
+
 <div id="cards"></div>
 
 <div class="table-container">
 <table id="table">
-
 <thead>
 <tr>
 <th>S.No</th>
@@ -55,13 +56,13 @@
 <th>OB Mature</th>
 </tr>
 </thead>
-
 <tbody></tbody>
-
 </table>
 </div>
 
-<!-- LIBRARIES -->
+<!-- ❤️ BRANDING -->
+<div id="branding">❤️ Powered by Chandan Malakar ❤️</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 

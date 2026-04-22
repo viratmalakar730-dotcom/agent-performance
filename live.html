@@ -1,26 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Agent Performance Dashboard</title>
+<title>Live Dashboard</title>
+
 <link rel="stylesheet" href="style.css">
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 
 <body>
 
-<h2>Agent Performance Dashboard</h2>
+<h2>📊 Live Agent Performance Dashboard</h2>
 
 <div id="reportTime"></div>
-
-<input type="text" id="search" placeholder="Search Agent..." onkeyup="searchTable()">
 
 <div id="cards"></div>
 
 <div class="table-container">
 <table id="table">
-
 <thead>
 <tr>
 <th>S.No</th>
@@ -36,11 +32,20 @@
 <th>OB Mature</th>
 </tr>
 </thead>
-
 <tbody></tbody>
-
 </table>
 </div>
+
+<!-- ❤️ SIMPLE BRANDING -->
+<div id="brandingLive">❤️ Powered by Chandan Malakar ❤️</div>
+
+<audio id="notifySound" src="sounds/notify.mp3"></audio>
+
+<div id="liveAlert">🚀 Agent Performance Report Updated</div>
+
+<!-- firebase -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
 <script src="script.js"></script>
 

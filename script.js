@@ -34,7 +34,6 @@ function initFirebase(){
     db = firebase.database();
 }
 
-// 🔥 IMPORTANT (FIX)
 waitForFirebase(initFirebase);
 
 // ================= SOUND =================
@@ -60,6 +59,30 @@ function showDesktopNotification(){
             body:"New data uploaded"
         });
     }
+}
+
+// ================= 🔍 SEARCH (UPGRADED) =================
+function searchTable(){
+
+    let input = document.getElementById("search");
+    if(!input) return;
+
+    let filter = input.value.toLowerCase();
+
+    let rows = document.querySelectorAll("#table tbody tr");
+
+    rows.forEach(row => {
+
+        let text = row.innerText.toLowerCase();
+
+        if(text.includes(filter)){
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+
+    });
+
 }
 
 // ================= HELPERS =================
@@ -123,7 +146,6 @@ function processFiles(){
         return;
     }
 
-    // 🔥 ADDED (processing UI)
     let btn = document.querySelector("button");
     if(btn){
         btn.innerText = "⏳ Processing...";
@@ -136,7 +158,6 @@ function processFiles(){
             let final = buildDashboard(aprData,cdrData);
             let summary = buildSummary(cdrData,final);
 
-            // 🔥 SAFE FIREBASE WRITE (ADDED WRAP)
             if(db){
                 db.ref("dashboard").set({
                     final,
@@ -157,7 +178,6 @@ function resetDashboard(){
         db.ref("dashboard").remove();
     }
 
-    // 🔥 ADDED CACHE CLEAR
     localStorage.clear();
     sessionStorage.clear();
 
@@ -308,27 +328,6 @@ function loadDashboard(data){
 
     data.final.forEach((r,i)=>{
 
-        let loginSec = timeToSeconds(r.login);
-        let netSec = timeToSeconds(r.netLogin);
-        let breakSec = timeToSeconds(r.break);
-        let meetSec = timeToSeconds(r.meeting);
-
-        let netCls = "";
-        if(netSec > 8*3600){
-            netCls = "green3d";
-        }
-        else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
-            netCls = "red3d";
-        }
-
-        let breakCls = breakSec > 2100 ? "red3d" : "";
-        let meetCls = meetSec > 2100 ? "red3d" : "";
-
-        let callCls="";
-        if(r.calls >= 100) callCls="green3d";
-        else if(r.calls >= 70) callCls="yellow3d";
-        else callCls="red3d";
-
         let tr = document.createElement("tr");
 
         tr.innerHTML = `
@@ -336,11 +335,11 @@ function loadDashboard(data){
         <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${r.login}</td>
-        <td class="${netCls}">${r.netLogin}</td>
-        <td class="${breakCls}">${r.break}</td>
-        <td class="${meetCls}">${r.meeting}</td>
+        <td>${r.netLogin}</td>
+        <td>${r.break}</td>
+        <td>${r.meeting}</td>
         <td>${r.aht}</td>
-        <td class="${callCls}">${r.calls}</td>
+        <td>${r.calls}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;

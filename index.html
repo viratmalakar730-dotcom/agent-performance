@@ -12,18 +12,25 @@
 
 <h2>📂 Upload Required Data</h2>
 
-<label>📊 Upload Agent Performance File</label><br>
-<input type="file" id="aprFile"><br>
+<p>📊 Upload Agent Performance File</p>
+<input type="file" id="aprFile">
 
-<label>📞 Upload CDR File</label><br>
-<input type="file" id="cdrFile"><br>
+<p>📞 Upload CDR File</p>
+<input type="file" id="cdrFile">
 
 <button onclick="processFiles()">🚀 Generate Dashboard</button>
 
 </div>
 </div>
 
+<!-- 🔥 LIBRARIES -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<!-- 🔥 FIREBASE FIRST -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<!-- 🔥 YOUR SCRIPT LAST -->
 <script src="script.js"></script>
 
 </body>

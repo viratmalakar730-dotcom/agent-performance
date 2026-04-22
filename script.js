@@ -1,5 +1,15 @@
 console.log("🔥 FINAL PRO SYSTEM");
 
+// ================= WAIT FOR FIREBASE =================
+function waitForFirebase(callback){
+    let check = setInterval(()=>{
+        if(typeof firebase !== "undefined"){
+            clearInterval(check);
+            callback();
+        }
+    },100);
+}
+
 // ================= FIREBASE SAFE INIT =================
 let db = null;
 
@@ -24,8 +34,8 @@ function initFirebase(){
     db = firebase.database();
 }
 
-// INIT
-initFirebase();
+// 🔥 IMPORTANT (FIX)
+waitForFirebase(initFirebase);
 
 // ================= SOUND =================
 let lastUpdateTime = "";
@@ -101,7 +111,7 @@ function playSound(){
 function processFiles(){
 
     if(!db){
-        alert("Firebase not ready");
+        alert("Firebase loading... try again");
         return;
     }
 
@@ -334,29 +344,33 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     requestNotificationPermission();
 
-    if(!db) return;
+    let checkDB = setInterval(()=>{
+        if(db){
+            clearInterval(checkDB);
 
-    db.ref("dashboard").on("value",snap=>{
+            db.ref("dashboard").on("value",snap=>{
 
-        let d = snap.val();
-        if(!d) return;
+                let d = snap.val();
+                if(!d) return;
 
-        if(!lastUpdateTime){
-            lastUpdateTime = d.reportTime;
-            loadDashboard(d);
-            return;
+                if(!lastUpdateTime){
+                    lastUpdateTime = d.reportTime;
+                    loadDashboard(d);
+                    return;
+                }
+
+                if(d.reportTime !== lastUpdateTime){
+
+                    playSound();
+                    showAlert();
+                    showDesktopNotification();
+
+                    lastUpdateTime = d.reportTime;
+                }
+
+                loadDashboard(d);
+            });
         }
-
-        if(d.reportTime !== lastUpdateTime){
-
-            playSound();
-            showAlert();
-            showDesktopNotification();
-
-            lastUpdateTime = d.reportTime;
-        }
-
-        loadDashboard(d);
-    });
+    },200);
 
 });

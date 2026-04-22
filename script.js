@@ -10,7 +10,7 @@ function waitForFirebase(callback){
     },100);
 }
 
-// ================= FIREBASE SAFE INIT =================
+// ================= FIREBASE =================
 let db = null;
 
 function initFirebase(){
@@ -36,6 +36,19 @@ function initFirebase(){
 
 waitForFirebase(initFirebase);
 
+// ================= SEARCH =================
+function searchTable(){
+
+    let input = document.getElementById("search");
+    if(!input) return;
+
+    let filter = input.value.toLowerCase();
+
+    document.querySelectorAll("#table tbody tr").forEach(row=>{
+        row.style.display = row.innerText.toLowerCase().includes(filter) ? "" : "none";
+    });
+}
+
 // ================= SOUND =================
 let lastUpdateTime = "";
 let soundUnlocked = false;
@@ -44,45 +57,26 @@ document.addEventListener("click",()=>{
     soundUnlocked = true;
 });
 
-// ================= 🔔 DESKTOP =================
-function requestNotificationPermission(){
-    if("Notification" in window){
-        if(Notification.permission !== "granted"){
-            Notification.requestPermission();
-        }
+// ================= ALERT =================
+function showAlert(){
+    let el = document.getElementById("liveAlert");
+    if(el){
+        el.style.display = "block";
+        el.classList.add("blink");
+        setTimeout(()=>{
+            el.style.display = "none";
+            el.classList.remove("blink");
+        },3000);
     }
 }
 
-function showDesktopNotification(){
-    if("Notification" in window && Notification.permission === "granted"){
-        new Notification("📊 Agent Performance Report Updated",{
-            body:"New data uploaded"
-        });
+// ================= SOUND =================
+function playSound(){
+    let sound = document.getElementById("notifySound");
+    if(sound && soundUnlocked){
+        sound.currentTime = 0;
+        sound.play().catch(()=>{});
     }
-}
-
-// ================= 🔍 SEARCH (UPGRADED) =================
-function searchTable(){
-
-    let input = document.getElementById("search");
-    if(!input) return;
-
-    let filter = input.value.toLowerCase();
-
-    let rows = document.querySelectorAll("#table tbody tr");
-
-    rows.forEach(row => {
-
-        let text = row.innerText.toLowerCase();
-
-        if(text.includes(filter)){
-            row.style.display = "";
-        } else {
-            row.style.display = "none";
-        }
-
-    });
-
 }
 
 // ================= HELPERS =================
@@ -105,36 +99,11 @@ function secondsToTime(sec){
     return `${h}:${m}:${s}`;
 }
 
-// ================= 🔔 ALERT =================
-function showAlert(){
-    let el = document.getElementById("liveAlert");
-
-    if(el){
-        el.style.display = "block";
-        el.classList.add("blink");
-
-        setTimeout(()=>{
-            el.style.display = "none";
-            el.classList.remove("blink");
-        },3000);
-    }
-}
-
-// ================= 🔊 SOUND =================
-function playSound(){
-    let sound = document.getElementById("notifySound");
-
-    if(sound && soundUnlocked){
-        sound.currentTime = 0;
-        sound.play().catch(()=>{});
-    }
-}
-
-// ================= PROCESS FILES =================
+// ================= PROCESS =================
 function processFiles(){
 
     if(!db){
-        alert("Firebase loading... try again");
+        alert("Firebase loading...");
         return;
     }
 
@@ -142,7 +111,7 @@ function processFiles(){
     let cdrFile = document.getElementById("cdrFile")?.files[0];
 
     if(!aprFile || !cdrFile){
-        alert("Please upload APR and CDR files");
+        alert("Upload both files");
         return;
     }
 
@@ -194,10 +163,10 @@ function readAPR(file,cb){
         let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
         let row2 = raw[1] || [];
-        let fullText = row2.join(" ");
+        let txt = row2.join(" ");
 
-        if(fullText.includes("to")){
-            window.reportDate = fullText.split("to")[1].trim();
+        if(txt.includes("to")){
+            window.reportDate = txt.split("to")[1].trim();
         }
 
         let data = raw.slice(2);
@@ -229,7 +198,7 @@ function readCDR(file,cb){
 
         let json = data.slice(1).map(r=>{
             let obj = {};
-            headers.forEach((h,i)=> obj[h]=r[i]);
+            headers.forEach((h,i)=> obj[h]=r[i];
             return obj;
         });
 
@@ -318,7 +287,7 @@ function buildSummary(cdr,data){
     };
 }
 
-// ================= LOAD =================
+// ================= LOAD (3D FIX) =================
 function loadDashboard(data){
 
     let tbody = document.querySelector("#table tbody");
@@ -328,6 +297,23 @@ function loadDashboard(data){
 
     data.final.forEach((r,i)=>{
 
+        let loginSec = timeToSeconds(r.login);
+        let netSec = timeToSeconds(r.netLogin);
+        let breakSec = timeToSeconds(r.break);
+        let meetSec = timeToSeconds(r.meeting);
+
+        let netCls="";
+        if(netSec > 8*3600) netCls="green3d";
+        else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600) netCls="red3d";
+
+        let breakCls = breakSec > 2100 ? "red3d" : "";
+        let meetCls = meetSec > 2100 ? "red3d" : "";
+
+        let callCls="";
+        if(r.calls >= 100) callCls="green3d";
+        else if(r.calls >= 70) callCls="yellow3d";
+        else callCls="red3d";
+
         let tr = document.createElement("tr");
 
         tr.innerHTML = `
@@ -335,11 +321,11 @@ function loadDashboard(data){
         <td>${r.emp}</td>
         <td>${r.name}</td>
         <td>${r.login}</td>
-        <td>${r.netLogin}</td>
-        <td>${r.break}</td>
-        <td>${r.meeting}</td>
+        <td class="${netCls}">${r.netLogin}</td>
+        <td class="${breakCls}">${r.break}</td>
+        <td class="${meetCls}">${r.meeting}</td>
         <td>${r.aht}</td>
-        <td>${r.calls}</td>
+        <td class="${callCls}">${r.calls}</td>
         <td>${r.ib}</td>
         <td>${r.ob}</td>
         `;
@@ -347,7 +333,7 @@ function loadDashboard(data){
         tbody.appendChild(tr);
     });
 
-    let c = data.summary || {ivr:0,total:0,ib:0,ob:0,totalLogin:0,aht:"00:00:00"};
+    let c = data.summary;
 
     document.getElementById("cards").innerHTML = `
     <div class="card">Total IVR Hit<br>${c.ivr}</div>
@@ -357,12 +343,13 @@ function loadDashboard(data){
     <div class="card">Overall AHT<br>${c.aht}</div>
     <div class="card">Total Login Count<br>${c.totalLogin}</div>
     `;
+
+    document.getElementById("reportTime").innerText =
+    "Last Update Till: " + data.reportTime;
 }
 
 // ================= LIVE =================
 document.addEventListener("DOMContentLoaded",()=>{
-
-    requestNotificationPermission();
 
     let checkDB = setInterval(()=>{
         if(db){
@@ -380,11 +367,8 @@ document.addEventListener("DOMContentLoaded",()=>{
                 }
 
                 if(d.reportTime !== lastUpdateTime){
-
                     playSound();
                     showAlert();
-                    showDesktopNotification();
-
                     lastUpdateTime = d.reportTime;
                 }
 

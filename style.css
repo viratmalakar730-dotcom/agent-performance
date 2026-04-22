@@ -21,7 +21,7 @@ body{
 h2{
     color:white;
     margin:15px;
-    text-shadow:0 0 12px rgba(255,255,255,0.5);
+    text-shadow:0 0 15px rgba(255,255,255,0.6);
 }
 
 /* ================= UPLOAD PAGE ================= */
@@ -39,8 +39,9 @@ h2{
     width:350px;
 
     box-shadow:
-        15px 15px 40px rgba(0,0,0,0.95),
-        -4px -4px 12px rgba(255,255,255,0.08);
+        20px 20px 60px rgba(0,0,0,0.95),
+        -5px -5px 15px rgba(255,255,255,0.08),
+        0 0 25px rgba(30,58,138,0.4);
 }
 
 .box input{
@@ -49,6 +50,8 @@ h2{
     width:90%;
     border-radius:6px;
     border:none;
+
+    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
 }
 
 /* ================= BUTTON ================= */
@@ -62,14 +65,14 @@ button{
     cursor:pointer;
     margin:8px;
 
-    box-shadow: 6px 6px 15px rgba(0,0,0,0.8);
+    box-shadow: 8px 8px 20px rgba(0,0,0,0.9);
 }
 
 button:hover{
-    transform:scale(1.08);
+    transform:scale(1.1);
     box-shadow:
-        0 0 18px rgba(14,165,233,0.9),
-        0 0 35px rgba(14,165,233,0.6);
+        0 0 20px rgba(14,165,233,1),
+        0 0 40px rgba(14,165,233,0.7);
 }
 
 /* ================= CARDS ================= */
@@ -89,15 +92,16 @@ button:hover{
     color:white;
 
     box-shadow:
-        8px 8px 25px rgba(0,0,0,0.95),
-        -3px -3px 6px rgba(255,255,255,0.1);
+        10px 10px 30px rgba(0,0,0,1),
+        -3px -3px 8px rgba(255,255,255,0.1),
+        0 0 20px rgba(30,58,138,0.3);
 }
 
 .card:hover{
-    transform:translateY(-5px);
+    transform:translateY(-6px) scale(1.03);
     box-shadow:
-        0 0 25px rgba(30,58,138,0.9),
-        0 0 50px rgba(30,58,138,0.6);
+        0 0 30px rgba(30,58,138,1),
+        0 0 60px rgba(30,58,138,0.6);
 }
 
 /* ================= TABLE ================= */
@@ -105,6 +109,7 @@ button:hover{
     max-height:520px;
     overflow:auto;
     margin:10px;
+    scroll-behavior:smooth;
 }
 
 table{
@@ -116,7 +121,9 @@ table{
     font-weight:bold;
     font-size:15px;
 
-    box-shadow:0 12px 35px rgba(0,0,0,0.95);
+    box-shadow:
+        0 15px 40px rgba(0,0,0,1),
+        0 0 20px rgba(0,0,0,0.5);
 }
 
 /* ================= HEADER ================= */
@@ -127,9 +134,9 @@ th{
     border:1px solid black;
 
     box-shadow:
-        inset -4px -4px 8px rgba(255,255,255,0.1),
-        inset 4px 4px 10px rgba(0,0,0,0.8),
-        0 6px 15px rgba(0,0,0,0.9);
+        inset -5px -5px 10px rgba(255,255,255,0.1),
+        inset 5px 5px 12px rgba(0,0,0,0.9),
+        0 8px 20px rgba(0,0,0,1);
 
     position:sticky;
     top:0;
@@ -145,16 +152,17 @@ td{
     color:black;
 
     box-shadow:
-        inset -3px -3px 6px rgba(255,255,255,0.7),
-        inset 3px 3px 6px rgba(0,0,0,0.3),
-        0 3px 6px rgba(0,0,0,0.4);
+        inset -3px -3px 6px rgba(255,255,255,0.8),
+        inset 3px 3px 6px rgba(0,0,0,0.35),
+        0 3px 8px rgba(0,0,0,0.4);
 }
 
 /* ================= ROW HOVER ================= */
 tbody tr:hover td{
     background:#1e3a8a !important;
     color:white !important;
-    transform:scale(1.01);
+    transform:scale(1.015);
+    text-shadow:0 0 5px rgba(255,255,255,0.6);
 }
 
 /* ================= SCROLL ================= */
@@ -163,6 +171,7 @@ tbody tr:hover td{
 }
 .table-container::-webkit-scrollbar-thumb{
     background:#0b3d91;
+    border-radius:10px;
 }
 
 /* ================= REPORT TIME ================= */
@@ -170,6 +179,7 @@ tbody tr:hover td{
     color:white;
     font-weight:bold;
     margin:10px;
+    text-shadow:0 0 10px rgba(255,255,255,0.5);
 }
 
 /* ================= ALERT ================= */
@@ -185,18 +195,18 @@ tbody tr:hover td{
     z-index:999;
 
     box-shadow:
-        0 0 25px rgba(14,165,233,0.9),
-        0 0 50px rgba(14,165,233,0.6);
+        0 0 30px rgba(14,165,233,1),
+        0 0 60px rgba(14,165,233,0.6);
 }
 
 @keyframes blinkSmooth{
     0%{opacity:1; transform:scale(1);}
-    50%{opacity:0.7; transform:scale(1.08);}
+    50%{opacity:0.75; transform:scale(1.1);}
     100%{opacity:1; transform:scale(1);}
 }
 
 .blink{
-    animation:blinkSmooth 1s infinite;
+    animation:blinkSmooth 0.9s infinite;
 }
 
 /* ================= BRANDING ================= */
@@ -204,8 +214,10 @@ tbody tr:hover td{
     margin:25px;
     font-size:15px;
     color:white;
-    opacity:0.9;
-    text-shadow:0 0 10px rgba(255,255,255,0.6);
+    opacity:0.95;
+    text-shadow:0 0 12px rgba(255,255,255,0.7);
+
+    animation:heartBeat 2s infinite;
 }
 
 /* ❤️ FRONT + BACK */
@@ -216,14 +228,9 @@ tbody tr:hover td{
     content:" ❤️";
 }
 
-/* ❤️ ANIMATION */
-#branding{
-    animation:heartBeat 2s infinite;
-}
-
 @keyframes heartBeat{
     0%{transform:scale(1);}
-    50%{transform:scale(1.1);}
+    50%{transform:scale(1.12);}
     100%{transform:scale(1);}
 }
 
@@ -231,17 +238,17 @@ tbody tr:hover td{
 .green3d{
     background: linear-gradient(145deg,#22c55e,#15803d);
     color:white;
-    box-shadow:0 0 10px rgba(34,197,94,0.6);
+    box-shadow:0 0 15px rgba(34,197,94,0.8);
 }
 
 .yellow3d{
     background: linear-gradient(145deg,#facc15,#ca8a04);
     color:black;
-    box-shadow:0 0 10px rgba(250,204,21,0.6);
+    box-shadow:0 0 15px rgba(250,204,21,0.8);
 }
 
 .red3d{
     background: linear-gradient(145deg,#dc2626,#7f1d1d);
     color:white;
-    box-shadow:0 0 10px rgba(220,38,38,0.7);
+    box-shadow:0 0 18px rgba(220,38,38,0.9);
 }

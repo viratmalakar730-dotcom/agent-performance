@@ -11,6 +11,9 @@ const firebaseConfig = {
 if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
 let db = firebase.database();
 
+// 🔔 SOUND TRACKER
+let lastUpdateTime = "";
+
 // ================= HELPERS =================
 function safeStr(v){
     return (v ?? "").toString().trim();
@@ -51,7 +54,7 @@ function processFiles(){
             db.ref("dashboard").set({
                 final,
                 summary,
-                reportTime: window.reportDate || ""
+                reportTime: window.reportDate || new Date().toLocaleString()
             });
 
             window.location.href = "dashboard.html";
@@ -258,16 +261,8 @@ function loadDashboard(data){
     "Last Update Till: " + (data.reportTime || "");
 }
 
-// ================= FULL PAGE COPY =================
+// ================= COPY =================
 function downloadPNG(){
-
-    let tableBox = document.querySelector(".table-container");
-
-    if(tableBox){
-        tableBox.style.maxHeight = "none";
-        tableBox.style.overflow = "visible";
-    }
-
     html2canvas(document.body,{scale:3}).then(canvas=>{
         canvas.toBlob(blob=>{
             navigator.clipboard.write([
@@ -275,11 +270,6 @@ function downloadPNG(){
             ]);
             alert("Full Page Copied ✅");
         });
-
-        if(tableBox){
-            tableBox.style.maxHeight = "520px";
-            tableBox.style.overflow = "auto";
-        }
     });
 }
 
@@ -306,10 +296,31 @@ function searchTable(){
     });
 }
 
-// ================= LIVE =================
+// ================= LIVE + SOUND =================
 document.addEventListener("DOMContentLoaded",()=>{
+
     db.ref("dashboard").on("value",snap=>{
+
         let d = snap.val();
-        if(d) loadDashboard(d);
+        if(!d) return;
+
+        if(!lastUpdateTime){
+            lastUpdateTime = d.reportTime;
+            loadDashboard(d);
+            return;
+        }
+
+        if(d.reportTime !== lastUpdateTime){
+
+            let sound = document.getElementById("notifySound");
+            if(sound){
+                sound.play().catch(()=>{});
+            }
+
+            lastUpdateTime = d.reportTime;
+        }
+
+        loadDashboard(d);
     });
+
 });

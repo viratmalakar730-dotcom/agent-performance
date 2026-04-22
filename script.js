@@ -198,7 +198,7 @@ function readCDR(file,cb){
 
         let json = data.slice(1).map(r=>{
             let obj = {};
-            headers.forEach((h,i)=> obj[h]=r[i];
+            headers.forEach((h,i)=> obj[h]=r[i]);
             return obj;
         });
 
@@ -287,7 +287,7 @@ function buildSummary(cdr,data){
     };
 }
 
-// ================= LOAD (3D FIX) =================
+// ================= LOAD =================
 function loadDashboard(data){
 
     let tbody = document.querySelector("#table tbody");
@@ -378,3 +378,8 @@ document.addEventListener("DOMContentLoaded",()=>{
     },200);
 
 });
+
+// ================= GLOBAL FIX =================
+window.processFiles = processFiles;
+window.resetDashboard = resetDashboard;
+window.searchTable = searchTable;

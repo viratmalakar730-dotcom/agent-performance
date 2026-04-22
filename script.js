@@ -56,7 +56,7 @@ function requestNotificationPermission(){
 
 function showDesktopNotification(){
     if("Notification" in window && Notification.permission === "granted"){
-        new Notification("📊 Dashboard Updated",{
+        new Notification("📊 Agent Performance Report Updated",{
             body:"New data uploaded"
         });
     }

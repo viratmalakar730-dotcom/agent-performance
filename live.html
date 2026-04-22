@@ -2,12 +2,7 @@
 <html>
 <head>
 <title>Live Dashboard</title>
-
 <link rel="stylesheet" href="style.css">
-
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 </head>
 
 <body>
@@ -16,16 +11,7 @@
 
 <div id="reportTime"></div>
 
-<!-- 🔍 SEARCH -->
-<div style="text-align:center;">
-    <input 
-        type="text" 
-        id="search" 
-        placeholder="🔍 Search Agent / ID..." 
-        onkeyup="searchTable()"
-        style="padding:10px; width:260px; border-radius:8px; border:none; margin:10px;"
-    >
-</div>
+<input type="text" id="search" placeholder="🔍 Search..." onkeyup="searchTable()">
 
 <div id="cards"></div>
 
@@ -50,16 +36,12 @@
 </table>
 </div>
 
-<!-- ❤️ BRANDING -->
 <div id="brandingLive">❤️ Powered by Chandan Malakar ❤️</div>
 
-<!-- 🔊 SOUND -->
-<audio id="notifySound" src="sounds/notify.mp3"></audio>
+<audio id="notifySound"></audio>
 
-<!-- 🔔 ALERT -->
 <div id="liveAlert">🚀 Agent Performance Report Updated</div>
 
-<!-- FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 

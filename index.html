@@ -3,35 +3,21 @@
 <head>
 <title>Upload</title>
 <link rel="stylesheet" href="style.css">
-
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 </head>
 
 <body>
 
 <div class="container">
-    <div class="box" style="width:350px;">
+<div class="box">
 
-        <h2>📤 Upload Agent Report</h2>
+<h2>📂 Upload Files</h2>
 
-        <div style="margin:15px;">
-            <label>APR File</label><br>
-            <input type="file" id="aprFile">
-        </div>
+<input type="file" id="aprFile"><br>
+<input type="file" id="cdrFile"><br>
 
-        <div style="margin:15px;">
-            <label>CDR File</label><br>
-            <input type="file" id="cdrFile">
-        </div>
+<button onclick="processFiles()">Generate Dashboard</button>
 
-        <button onclick="processFiles()">🚀 Generate Dashboard</button>
-
-        <div id="loading" class="loading" style="display:none;">
-            Processing...
-        </div>
-
-    </div>
+</div>
 </div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>

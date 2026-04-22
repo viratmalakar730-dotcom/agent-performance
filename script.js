@@ -123,21 +123,45 @@ function processFiles(){
         return;
     }
 
+    // 🔥 ADDED (processing UI)
+    let btn = document.querySelector("button");
+    if(btn){
+        btn.innerText = "⏳ Processing...";
+        btn.disabled = true;
+    }
+
     readAPR(aprFile,(aprData)=>{
         readCDR(cdrFile,(cdrData)=>{
 
             let final = buildDashboard(aprData,cdrData);
             let summary = buildSummary(cdrData,final);
 
-            db.ref("dashboard").set({
-                final,
-                summary,
-                reportTime: window.reportDate || new Date().toLocaleString()
-            });
+            // 🔥 SAFE FIREBASE WRITE (ADDED WRAP)
+            if(db){
+                db.ref("dashboard").set({
+                    final,
+                    summary,
+                    reportTime: window.reportDate || new Date().toLocaleString()
+                });
+            }
 
             window.location.href = "dashboard.html";
         });
     });
+}
+
+// ================= RESET =================
+function resetDashboard(){
+
+    if(db){
+        db.ref("dashboard").remove();
+    }
+
+    // 🔥 ADDED CACHE CLEAR
+    localStorage.clear();
+    sessionStorage.clear();
+
+    window.location.replace("index.html?reset=" + Date.now());
 }
 
 // ================= READ APR =================
@@ -334,9 +358,6 @@ function loadDashboard(data){
     <div class="card">Overall AHT<br>${c.aht}</div>
     <div class="card">Total Login Count<br>${c.totalLogin}</div>
     `;
-
-    document.getElementById("reportTime").innerText =
-    "Last Update Till: " + (data.reportTime || "");
 }
 
 // ================= LIVE =================

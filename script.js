@@ -1,25 +1,36 @@
-console.log("🔥 ULTIMATE FINAL SYSTEM");
+console.log("🔥 FINAL PRO SYSTEM");
 
-// ================= FIREBASE =================
-const firebaseConfig = {
-  apiKey: "AIzaSy...",
-  authDomain: "agent-performance-live.firebaseapp.com",
-  databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
-  projectId: "agent-performance-live"
-};
+// ================= FIREBASE SAFE INIT =================
+let db = null;
 
-// ✅ FIX: INIT BEFORE USE
-let db;
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
+function initFirebase(){
+
+    if(typeof firebase === "undefined"){
+        console.error("❌ Firebase not loaded");
+        return;
+    }
+
+    const firebaseConfig = {
+        apiKey: "AIzaSy...",
+        authDomain: "agent-performance-live.firebaseapp.com",
+        databaseURL: "https://agent-performance-live-default-rtdb.firebaseio.com/",
+        projectId: "agent-performance-live"
+    };
+
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+
+    db = firebase.database();
 }
-db = firebase.database();
+
+// INIT
+initFirebase();
 
 // ================= SOUND =================
 let lastUpdateTime = "";
 let soundUnlocked = false;
 
-// 🔥 SOUND UNLOCK (REQUIRED FOR BROWSER)
 document.addEventListener("click",()=>{
     soundUnlocked = true;
 });
@@ -35,11 +46,9 @@ function requestNotificationPermission(){
 
 function showDesktopNotification(){
     if("Notification" in window && Notification.permission === "granted"){
-        let n = new Notification("📊 Dashboard Updated",{
-            body:"New data uploaded",
-            icon:"https://cdn-icons-png.flaticon.com/512/1828/1828817.png"
+        new Notification("📊 Dashboard Updated",{
+            body:"New data uploaded"
         });
-        n.onclick = ()=> window.focus();
     }
 }
 
@@ -65,35 +74,36 @@ function secondsToTime(sec){
 
 // ================= 🔔 ALERT =================
 function showAlert(){
-    let alertBox = document.getElementById("liveAlert");
+    let el = document.getElementById("liveAlert");
 
-    if(alertBox){
-        alertBox.style.display = "block";
-        alertBox.classList.add("blink");
+    if(el){
+        el.style.display = "block";
+        el.classList.add("blink");
 
         setTimeout(()=>{
-            alertBox.style.display = "none";
-            alertBox.classList.remove("blink");
+            el.style.display = "none";
+            el.classList.remove("blink");
         },3000);
     }
 }
 
-// ================= 🔊 SOUND FUNCTION =================
+// ================= 🔊 SOUND =================
 function playSound(){
     let sound = document.getElementById("notifySound");
 
     if(sound && soundUnlocked){
         sound.currentTime = 0;
-        sound.play().then(()=>{
-            console.log("🔊 Sound Played");
-        }).catch(e=>{
-            console.log("❌ Sound blocked:", e);
-        });
+        sound.play().catch(()=>{});
     }
 }
 
 // ================= PROCESS FILES =================
 function processFiles(){
+
+    if(!db){
+        alert("Firebase not ready");
+        return;
+    }
 
     let aprFile = document.getElementById("aprFile")?.files[0];
     let cdrFile = document.getElementById("cdrFile")?.files[0];
@@ -324,6 +334,8 @@ document.addEventListener("DOMContentLoaded",()=>{
 
     requestNotificationPermission();
 
+    if(!db) return;
+
     db.ref("dashboard").on("value",snap=>{
 
         let d = snap.val();
@@ -337,7 +349,7 @@ document.addEventListener("DOMContentLoaded",()=>{
 
         if(d.reportTime !== lastUpdateTime){
 
-            playSound(); // 🔊 FIXED
+            playSound();
             showAlert();
             showDesktopNotification();
 

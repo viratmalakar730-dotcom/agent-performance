@@ -1,39 +1,63 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>Dashboard</title>
+<title>Agent Performance Dashboard</title>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <link rel="stylesheet" href="style.css">
 
+<!-- 🔥 FIREBASE (MUST BE FIRST) -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<style>
+.table-container{
+    max-height:520px;
+    overflow:auto;
+}
+</style>
 
 </head>
 
 <body>
 
+<!-- ================= TITLE ================= -->
 <h2>📊 Agent Performance Dashboard</h2>
 
+<!-- ================= REPORT TIME ================= -->
 <div id="reportTime"></div>
 
-<input type="text" id="search" placeholder="Search..." onkeyup="searchTable()">
+<!-- ================= SEARCH ================= -->
+<input 
+    type="text" 
+    id="search" 
+    placeholder="🔍 Search Agent / ID..." 
+    onkeyup="searchTable()"
+    style="padding:10px; width:250px; border-radius:8px; border:none; margin:10px;"
+>
 
+<!-- ================= BUTTONS ================= -->
 <div>
-<button onclick="exportExcel()">📤 Excel</button>
-<button onclick="downloadPNG()">📋 Copy</button>
-<button onclick="resetDashboard()">🔄 Reset</button>
+    <button onclick="exportExcel()">📤 Excel</button>
+    <button onclick="downloadPNG()">📋 Copy</button>
+    <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
 
-<!-- 🔔 SOUND -->
+<!-- ================= SOUND ================= -->
 <audio id="notifySound" src="sounds/notify.mp3" preload="auto"></audio>
 
-<!-- 🔔 POPUP -->
+<!-- ================= ALERT ================= -->
 <div id="liveAlert">🚀 New Data Updated</div>
 
+<!-- ================= CARDS ================= -->
 <div id="cards"></div>
 
+<!-- ================= TABLE ================= -->
 <div class="table-container">
 <table id="table">
+
 <thead>
 <tr>
 <th>S.No</th>
@@ -49,16 +73,22 @@
 <th>OB Mature</th>
 </tr>
 </thead>
-<tbody></tbody>
+
+<tbody>
+<!-- DATA AUTO LOAD -->
+</tbody>
+
 </table>
 </div>
 
-<!-- ❤️ BRANDING -->
+<!-- ================= BRANDING ================= -->
 <div id="branding">Powered by Chandan Malakar</div>
 
+<!-- ================= LIBRARIES ================= -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- ================= MAIN SCRIPT ================= -->
 <script src="script.js"></script>
 
 </body>

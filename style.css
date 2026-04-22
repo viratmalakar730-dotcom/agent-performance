@@ -252,3 +252,10 @@ tbody tr:hover td{
     color:white;
     box-shadow:0 0 18px rgba(220,38,38,0.9);
 }
+/* ================= LIVE BRANDING ================= */
+#brandingLive{
+    margin:20px;
+    font-size:14px;
+    color:white;
+    text-align:center;
+}

@@ -123,45 +123,8 @@ function exportExcel(){
     XLSX.writeFile(wb, "Dashboard.xlsx");
 }
 
-// ================= 📋 TABLE COPY (UPGRADED HD) =================
+// ================= 🔥 UPGRADED COPY (FULL PAGE HD) =================
 async function downloadPNG(){
-
-    const table = document.getElementById("table");
-    const container = document.querySelector(".table-container");
-
-    if(!table) return alert("Table not found");
-
-    const originalHeight = container.style.maxHeight;
-    const originalOverflow = container.style.overflow;
-
-    container.style.maxHeight = "none";
-    container.style.overflow = "visible";
-
-    await new Promise(r => setTimeout(r, 300));
-
-    const canvas = await html2canvas(table, {
-        scale: window.devicePixelRatio * 2,
-        useCORS: true,
-        backgroundColor: "#ffffff"
-    });
-
-    container.style.maxHeight = originalHeight;
-    container.style.overflow = originalOverflow;
-
-    canvas.toBlob(async (blob) => {
-        try{
-            await navigator.clipboard.write([
-                new ClipboardItem({ "image/png": blob })
-            ]);
-            alert("✅ Table copied (HD)");
-        } catch(err){
-            alert("❌ Clipboard failed");
-        }
-    });
-}
-
-// ================= 📋 FULL PAGE COPY =================
-async function copyFullPage(){
 
     const body = document.body;
     const html = document.documentElement;
@@ -183,7 +146,8 @@ async function copyFullPage(){
         width: fullWidth,
         height: fullHeight,
         windowWidth: fullWidth,
-        windowHeight: fullHeight
+        windowHeight: fullHeight,
+        backgroundColor: "#ffffff"
     });
 
     body.style.overflow = originalOverflow;
@@ -194,65 +158,217 @@ async function copyFullPage(){
             await navigator.clipboard.write([
                 new ClipboardItem({ "image/png": blob })
             ]);
-            alert("✅ Full page copied");
+            alert("✅ Full page copied (HD)");
         } catch(e){
-            alert("❌ Clipboard blocked");
+            alert("❌ Clipboard blocked (Use HTTPS)");
         }
     });
 }
 
-// ================= 📄 PDF =================
-async function downloadPDF(){
+// ================= FILE READ =================
+function readExcel(file, skip, cb){
+    let r = new FileReader();
 
-    const body = document.body;
-    const html = document.documentElement;
+    r.onload = e=>{
+        let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
+        let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
 
-    const originalOverflow = body.style.overflow;
-    const originalHeight = body.style.height;
+        let data = raw.slice(skip);
+        let headers = data[0];
 
-    body.style.overflow = "hidden";
-    body.style.height = "auto";
+        let json = data.slice(1).map(row=>{
+            let o = {};
+            headers.forEach((h,i)=> o[h]=row[i]);
+            return o;
+        });
 
-    const fullWidth = html.scrollWidth;
-    const fullHeight = html.scrollHeight;
+        cb(json, raw);
+    };
 
-    await new Promise(r => setTimeout(r, 300));
+    r.readAsArrayBuffer(file);
+}
 
-    const canvas = await html2canvas(body, {
-        scale: 3,
-        useCORS: true,
-        width: fullWidth,
-        height: fullHeight,
-        windowWidth: fullWidth,
-        windowHeight: fullHeight
-    });
+// ================= PROCESS =================
+function processFiles(){
 
-    body.style.overflow = originalOverflow;
-    body.style.height = originalHeight;
-
-    const imgData = canvas.toDataURL("image/png");
-
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF("p", "mm", "a4");
-
-    const imgWidth = 210;
-    const imgHeight = (canvas.height * imgWidth) / canvas.width;
-
-    let heightLeft = imgHeight;
-    let position = 0;
-
-    pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= 297;
-
-    while (heightLeft > 0) {
-        position = heightLeft - imgHeight;
-        pdf.addPage();
-        pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= 297;
+    if(!db){
+        alert("Firebase loading...");
+        return;
     }
 
-    pdf.save("Dashboard-Full.pdf");
+    let apr = $("aprFile")?.files[0];
+    let cdr = $("cdrFile")?.files[0];
+
+    if(!apr || !cdr){
+        alert("Upload both files");
+        return;
+    }
+
+    let btn = document.querySelector("button");
+    if(btn){
+        btn.innerText="⏳ Processing...";
+        btn.disabled=true;
+    }
+
+    readExcel(apr,2,(aprData,raw)=>{
+
+        let row2 = raw[1]?.join(" ") || "";
+        if(row2.includes("to")) window.reportDate = row2.split("to")[1].trim();
+
+        readExcel(cdr,1,(cdrData)=>{
+
+            let final = buildDashboard(aprData,cdrData);
+            let summary = buildSummary(cdrData,final);
+
+            db.ref("dashboard").set({
+                final, summary,
+                reportTime: window.reportDate || new Date().toLocaleString()
+            });
+
+            window.location.href = "dashboard.html";
+        });
+    });
 }
+
+// ================= RESET =================
+function resetDashboard(){
+    if(db) db.ref("dashboard").remove();
+    localStorage.clear();
+    sessionStorage.clear();
+    window.location.replace("index.html?reset="+Date.now());
+}
+
+// ================= CORE =================
+function buildDashboard(apr,cdr){
+    return apr.map(a=>{
+        let emp = safeStr(a["Agent Name"]);
+        let name = safeStr(a["Agent Full Name"]);
+        let login = timeToSeconds(a["Total Login Time"]);
+
+        let breakTime =
+            timeToSeconds(a["LUNCHBREAK"]) +
+            timeToSeconds(a["TEABREAK"]) +
+            timeToSeconds(a["SHORTBREAK"]);
+
+        let net = login - breakTime;
+
+        let agentCDR = cdr.filter(r=> safeStr(r["Username"])===emp);
+
+        let total = agentCDR.filter(r=>{
+            let d = safeStr(r["Disposition"]).toUpperCase();
+            return d.includes("CALLMATURED") || d.includes("TRANSFER");
+        }).length;
+
+        let ib = agentCDR.filter(r=>{
+            let d = safeStr(r["Disposition"]).toUpperCase();
+            let c = safeStr(r["Campaign"]).toUpperCase();
+            return (d.includes("CALLMATURED")||d.includes("TRANSFER")) && c.includes("CSRINBOUND");
+        }).length;
+
+        let ob = total - ib;
+
+        let talk = agentCDR.reduce((s,r)=> s + timeToSeconds(r["Talk Duration"]),0);
+        let aht = total ? talk/total : 0;
+
+        return {
+            emp,name,
+            login:secondsToTime(login),
+            netLogin:secondsToTime(net),
+            break:secondsToTime(breakTime),
+            meeting:a["MEETING"]||"00:00:00",
+            aht:secondsToTime(aht),
+            calls:total, ib, ob
+        };
+    });
+}
+
+// ================= SUMMARY =================
+function buildSummary(cdr,data){
+    let ivr = cdr.filter(r=> safeStr(r["Skill"]).toUpperCase().includes("INBOUND")).length;
+    let total = data.reduce((s,r)=>s+r.calls,0);
+    let ib = data.reduce((s,r)=>s+r.ib,0);
+    let ob = data.reduce((s,r)=>s+r.ob,0);
+    let totalLogin = data.length;
+    let totalTalk = data.reduce((s,r)=>s+timeToSeconds(r.aht)*r.calls,0);
+    let overallAHT = total ? totalTalk/total : 0;
+
+    return { ivr,total,ib,ob,totalLogin, aht:secondsToTime(overallAHT) };
+}
+
+// ================= LOAD =================
+function loadDashboard(data){
+    let tbody = document.querySelector("#table tbody");
+    if(!tbody) return;
+
+    tbody.innerHTML = "";
+
+    data.final.forEach((r,i)=>{
+        let netCls = timeToSeconds(r.netLogin) > 28800 ? "green3d" : "";
+        let callCls = r.calls>=100 ? "green3d" : r.calls>=70 ? "yellow3d" : "red3d";
+
+        let tr = document.createElement("tr");
+
+        tr.innerHTML = `
+        <td>${i+1}</td>
+        <td>${r.emp}</td>
+        <td>${r.name}</td>
+        <td>${r.login}</td>
+        <td class="${netCls}">${r.netLogin}</td>
+        <td>${r.break}</td>
+        <td>${r.meeting}</td>
+        <td>${r.aht}</td>
+        <td class="${callCls}">${r.calls}</td>
+        <td>${r.ib}</td>
+        <td>${r.ob}</td>
+        `;
+
+        tbody.appendChild(tr);
+    });
+
+    let c = data.summary;
+
+    $("cards").innerHTML = `
+    <div class="card">Total IVR Hit<br>${c.ivr}</div>
+    <div class="card">Total Mature<br>${c.total}</div>
+    <div class="card">IB Mature<br>${c.ib}</div>
+    <div class="card">OB Mature<br>${c.ob}</div>
+    <div class="card">Overall AHT<br>${c.aht}</div>
+    <div class="card">Total Login Count<br>${c.totalLogin}</div>
+    `;
+
+    $("reportTime").innerText = "Last Update Till: " + data.reportTime;
+}
+
+// ================= LIVE =================
+document.addEventListener("DOMContentLoaded",()=>{
+    requestNotification();
+
+    let t = setInterval(()=>{
+        if(db){
+            clearInterval(t);
+
+            db.ref("dashboard").on("value",snap=>{
+                let d = snap.val();
+                if(!d) return;
+
+                if(!lastUpdateTime){
+                    lastUpdateTime = d.reportTime;
+                    loadDashboard(d);
+                    return;
+                }
+
+                if(d.reportTime !== lastUpdateTime){
+                    playSound();
+                    showAlert();
+                    showDesktopNotification();
+                    lastUpdateTime = d.reportTime;
+                }
+
+                loadDashboard(d);
+            });
+        }
+    },200);
+});
 
 // ================= GLOBAL =================
 window.processFiles = processFiles;
@@ -260,5 +376,3 @@ window.resetDashboard = resetDashboard;
 window.searchTable = searchTable;
 window.exportExcel = exportExcel;
 window.downloadPNG = downloadPNG;
-window.copyFullPage = copyFullPage;
-window.downloadPDF = downloadPDF;

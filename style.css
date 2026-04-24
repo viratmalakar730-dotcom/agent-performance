@@ -235,23 +235,62 @@ tbody tr:hover td{
 }
 
 /* ================= COLORS ================= */
+/* ================= ULTRA 3D EFFECT ================= */
+
+/* COMMON 3D STYLE */
+.green3d, .yellow3d, .red3d{
+    position: relative;
+    transform: perspective(600px) rotateX(2deg) scale(1.03);
+    transition: all 0.25s ease;
+
+    box-shadow:
+        inset -4px -4px 8px rgba(255,255,255,0.2),
+        inset 4px 4px 10px rgba(0,0,0,0.8),
+        0 6px 15px rgba(0,0,0,0.9),
+        0 0 12px rgba(255,255,255,0.1);
+}
+
+/* HOVER POP */
+.green3d:hover, .yellow3d:hover, .red3d:hover{
+    transform: perspective(600px) rotateX(0deg) scale(1.08);
+}
+
+/* ================= GREEN (SUCCESS) ================= */
 .green3d{
     background: linear-gradient(145deg,#22c55e,#15803d);
     color:white;
-    box-shadow:0 0 15px rgba(34,197,94,0.8);
+
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.3),
+        inset 3px 3px 10px rgba(0,0,0,0.7),
+        0 6px 15px rgba(0,0,0,0.9),
+        0 0 20px rgba(34,197,94,0.6);
 }
 
+/* ================= YELLOW (WARNING) ================= */
 .yellow3d{
     background: linear-gradient(145deg,#facc15,#ca8a04);
     color:black;
-    box-shadow:0 0 15px rgba(250,204,21,0.8);
+
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.4),
+        inset 3px 3px 10px rgba(0,0,0,0.7),
+        0 6px 15px rgba(0,0,0,0.9),
+        0 0 20px rgba(250,204,21,0.6);
 }
 
+/* ================= RED (CRITICAL) ================= */
 .red3d{
     background: linear-gradient(145deg,#dc2626,#7f1d1d);
     color:white;
-    box-shadow:0 0 18px rgba(220,38,38,0.9);
+
+    box-shadow:
+        inset -3px -3px 6px rgba(255,255,255,0.2),
+        inset 3px 3px 10px rgba(0,0,0,0.8),
+        0 6px 15px rgba(0,0,0,0.9),
+        0 0 20px rgba(220,38,38,0.7);
 }
+
 /* ================= LIVE BRANDING ================= */
 #brandingLive{
     margin:20px;

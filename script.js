@@ -61,10 +61,8 @@ function searchTable(){
 
 // ================= SOUND + ALERT =================
 let lastUpdateTime = "";
-let soundUnlocked = false;
 
 document.addEventListener("click",()=>{
-    soundUnlocked = true;
     let s = $("notifySound");
     if(s){
         s.muted = false;
@@ -74,8 +72,9 @@ document.addEventListener("click",()=>{
 
 function playSound(){
     let s = $("notifySound");
-    if(s && soundUnlocked){
+    if(s){
         s.currentTime = 0;
+        s.volume = 1;
         s.play().catch(()=>{});
     }
 }
@@ -83,8 +82,10 @@ function playSound(){
 function showAlert(){
     let el = $("liveAlert");
     if(!el) return;
+
     el.style.display = "block";
     el.classList.add("blink");
+
     setTimeout(()=>{
         el.style.display = "none";
         el.classList.remove("blink");
@@ -100,9 +101,16 @@ function requestNotification(){
 
 function showDesktopNotification(){
     if("Notification" in window && Notification.permission === "granted"){
-        new Notification("📊 Agent Performance Report Updated",{
-            body:"New data available"
+
+        let n = new Notification("📊 Agent Performance Report Updated",{
+            body:"New data available",
+            icon:"https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
         });
+
+        n.onclick = ()=>{
+            window.focus();
+            window.location.href = "dashboard.html";
+        };
     }
 }
 
@@ -110,6 +118,7 @@ function showDesktopNotification(){
 function exportExcel(){
     let table = $("table");
     if(!table) return;
+
     let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
     XLSX.writeFile(wb, "Dashboard.xlsx");
 }
@@ -126,6 +135,7 @@ function downloadPNG(){
 // ================= FILE READ =================
 function readExcel(file, skip, cb){
     let r = new FileReader();
+
     r.onload = e=>{
         let wb = XLSX.read(new Uint8Array(e.target.result),{type:"array"});
         let raw = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{header:1});
@@ -141,6 +151,7 @@ function readExcel(file, skip, cb){
 
         cb(json, raw);
     };
+
     r.readAsArrayBuffer(file);
 }
 
@@ -161,9 +172,13 @@ function processFiles(){
     }
 
     let btn = document.querySelector("button");
-    if(btn){ btn.innerText="⏳ Processing..."; btn.disabled=true; }
+    if(btn){
+        btn.innerText="⏳ Processing...";
+        btn.disabled=true;
+    }
 
     readExcel(apr,2,(aprData,raw)=>{
+
         let row2 = raw[1]?.join(" ") || "";
         if(row2.includes("to")) window.reportDate = row2.split("to")[1].trim();
 
@@ -199,6 +214,7 @@ function buildDashboard(apr,cdr){
         let name = safeStr(a["Agent Full Name"]);
 
         let login = timeToSeconds(a["Total Login Time"]);
+
         let breakTime =
             timeToSeconds(a["LUNCHBREAK"]) +
             timeToSeconds(a["TEABREAK"]) +
@@ -267,6 +283,7 @@ function loadDashboard(data){
         let callCls = r.calls>=100 ? "green3d" : r.calls>=70 ? "yellow3d" : "red3d";
 
         let tr = document.createElement("tr");
+
         tr.innerHTML = `
         <td>${i+1}</td>
         <td>${r.emp}</td>
@@ -278,7 +295,9 @@ function loadDashboard(data){
         <td>${r.aht}</td>
         <td class="${callCls}">${r.calls}</td>
         <td>${r.ib}</td>
-        <td>${r.ob}</td>`;
+        <td>${r.ob}</td>
+        `;
+
         tbody.appendChild(tr);
     });
 
@@ -306,6 +325,7 @@ document.addEventListener("DOMContentLoaded",()=>{
             clearInterval(t);
 
             db.ref("dashboard").on("value",snap=>{
+
                 let d = snap.val();
                 if(!d) return;
 

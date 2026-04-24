@@ -297,14 +297,51 @@ function buildSummary(cdr,data){
 
 // ================= LOAD =================
 function loadDashboard(data){
+
     let tbody = document.querySelector("#table tbody");
     if(!tbody) return;
 
     tbody.innerHTML = "";
 
     data.final.forEach((r,i)=>{
-        let netCls = timeToSeconds(r.netLogin) > 28800 ? "green3d" : "";
-        let callCls = r.calls>=100 ? "green3d" : r.calls>=70 ? "yellow3d" : "red3d";
+
+        let loginSec = timeToSeconds(r.login);
+        let netSec = timeToSeconds(r.netLogin);
+        let breakSec = timeToSeconds(r.break);
+        let meetSec = timeToSeconds(r.meeting);
+
+        // 🔥 NET LOGIN CONDITION
+        let netCls = "";
+        if(netSec >= 8*3600){
+            netCls = "green3d";
+        }
+        else if(loginSec >= (8*3600 + 15*60) && netSec < 8*3600){
+            netCls = "red3d";
+        }
+
+        // 🔥 BREAK CONDITION
+        let breakCls = "";
+        if(breakSec > 2100){ // 35 min
+            breakCls = "red3d";
+        }
+
+        // 🔥 MEETING CONDITION
+        let meetCls = "";
+        if(meetSec > 2100){
+            meetCls = "red3d";
+        }
+
+        // 🔥 CALL PERFORMANCE
+        let callCls="";
+        if(r.calls >= 100){
+            callCls="green3d";
+        }
+        else if(r.calls >= 70){
+            callCls="yellow3d";
+        }
+        else{
+            callCls="red3d";
+        }
 
         let tr = document.createElement("tr");
 
@@ -314,8 +351,8 @@ function loadDashboard(data){
         <td>${r.name}</td>
         <td>${r.login}</td>
         <td class="${netCls}">${r.netLogin}</td>
-        <td>${r.break}</td>
-        <td>${r.meeting}</td>
+        <td class="${breakCls}">${r.break}</td>
+        <td class="${meetCls}">${r.meeting}</td>
         <td>${r.aht}</td>
         <td class="${callCls}">${r.calls}</td>
         <td>${r.ib}</td>
@@ -327,7 +364,7 @@ function loadDashboard(data){
 
     let c = data.summary;
 
-    $("cards").innerHTML = `
+    document.getElementById("cards").innerHTML = `
     <div class="card">Total IVR Hit<br>${c.ivr}</div>
     <div class="card">Total Mature<br>${c.total}</div>
     <div class="card">IB Mature<br>${c.ib}</div>
@@ -336,7 +373,8 @@ function loadDashboard(data){
     <div class="card">Total Login Count<br>${c.totalLogin}</div>
     `;
 
-    $("reportTime").innerText = "Last Update Till: " + data.reportTime;
+    document.getElementById("reportTime").innerText =
+    "Last Update Till: " + data.reportTime;
 }
 
 // ================= LIVE =================

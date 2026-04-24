@@ -2,7 +2,12 @@
 <html>
 <head>
 <title>Upload</title>
+
 <link rel="stylesheet" href="style.css">
+
+<!-- ✅ Responsive -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 
 <body>
@@ -13,12 +18,19 @@
 <h2>📂 Upload Required Data</h2>
 
 <p>📊 Upload Agent Performance (APR)</p>
-<input type="file" id="aprFile">
+<input type="file" id="aprFile" onchange="showFileName('aprFile','aprName')">
+<div id="aprName" style="font-size:12px;color:#9ca3af;"></div>
 
 <p>📞 Upload CDR Report</p>
-<input type="file" id="cdrFile">
+<input type="file" id="cdrFile" onchange="showFileName('cdrFile','cdrName')">
+<div id="cdrName" style="font-size:12px;color:#9ca3af;"></div>
 
-<button onclick="processFiles()">🚀 Generate Dashboard</button>
+<button id="generateBtn" onclick="processFiles()">🚀 Generate Dashboard</button>
+
+<!-- 🔄 Loading -->
+<div id="loading" style="display:none; margin-top:10px;">
+⏳ Processing... Please wait
+</div>
 
 </div>
 </div>
@@ -30,8 +42,44 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+<!-- 🔥 Helper Script -->
+<script>
+function showFileName(inputId, displayId){
+    let file = document.getElementById(inputId).files[0];
+    if(file){
+        document.getElementById(displayId).innerText = "✔ " + file.name;
+    }
+}
+</script>
+
 <!-- Main Script -->
 <script src="script.js"></script>
+
+<!-- 🔥 UX Upgrade -->
+<script>
+const originalProcess = window.processFiles;
+
+window.processFiles = function(){
+
+    let apr = document.getElementById("aprFile").files[0];
+    let cdr = document.getElementById("cdrFile").files[0];
+
+    if(!apr || !cdr){
+        alert("⚠️ Please upload both APR & CDR files");
+        return;
+    }
+
+    // 🔄 UI Update
+    document.getElementById("loading").style.display = "block";
+
+    let btn = document.getElementById("generateBtn");
+    btn.innerText = "⏳ Processing...";
+    btn.disabled = true;
+
+    // 🔥 Call original
+    originalProcess();
+};
+</script>
 
 </body>
 </html>

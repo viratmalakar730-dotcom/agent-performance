@@ -3,6 +3,10 @@
 <head>
 <title>Dashboard</title>
 <link rel="stylesheet" href="style.css">
+
+<!-- ✅ Responsive -->
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 </head>
 
 <body>
@@ -13,16 +17,23 @@
 
 <input type="text" id="search" placeholder="🔍 Search..." onkeyup="searchTable()">
 
-<div>
+<!-- 🔥 ACTION BUTTONS -->
+<div style="margin:10px;">
+<button onclick="exportExcel()">📤 Excel</button>
+<button onclick="downloadPNG()">📋 Copy</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
 
+<!-- 🔊 SOUND -->
 <audio id="notifySound" src="sounds/notify.mp3"></audio>
 
+<!-- 🔔 ALERT -->
 <div id="liveAlert">🚀 Agent Performance Report Updated</div>
 
+<!-- 📊 CARDS -->
 <div id="cards"></div>
 
+<!-- 📋 TABLE -->
 <div class="table-container">
 <table id="table">
 <thead>
@@ -44,12 +55,15 @@
 </table>
 </div>
 
+<!-- 📚 LIBS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- 🔥 FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
+<!-- MAIN SCRIPT -->
 <script src="script.js"></script>
 
 </body>

@@ -124,11 +124,45 @@ function exportExcel(){
 }
 
 function downloadPNG(){
-    html2canvas(document.body).then(c=>{
-        let a = document.createElement("a");
-        a.download = "dashboard.png";
-        a.href = c.toDataURL();
-        a.click();
+
+    // 🔒 Save original state
+    const originalOverflow = document.body.style.overflow;
+    const originalHeight = document.body.style.height;
+
+    // 🚫 Hide scroll
+    document.body.style.overflow = "hidden";
+
+    // 📏 Expand full page
+    document.body.style.height = "auto";
+
+    // 🔥 High Resolution Scale
+    const scale = 3; // (2 = good, 3 = ultra HD, 4 = super heavy)
+
+    html2canvas(document.body, {
+        scale: scale,
+        useCORS: true,
+        scrollY: -window.scrollY,
+        windowWidth: document.documentElement.scrollWidth,
+        windowHeight: document.documentElement.scrollHeight
+    }).then(canvas => {
+
+        // 📸 Download
+        const link = document.createElement("a");
+        link.download = "dashboard-HD.png";
+        link.href = canvas.toDataURL("image/png", 1.0);
+        link.click();
+
+        // 🔄 Restore original state
+        document.body.style.overflow = originalOverflow;
+        document.body.style.height = originalHeight;
+
+    }).catch(() => {
+
+        // ❗ Safety restore
+        document.body.style.overflow = originalOverflow;
+        document.body.style.height = originalHeight;
+
+        alert("❌ Image capture failed");
     });
 }
 

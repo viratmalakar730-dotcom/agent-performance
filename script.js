@@ -123,49 +123,53 @@ function exportExcel(){
     XLSX.writeFile(wb, "Dashboard.xlsx");
 }
 
-function downloadPNG(){
+async function downloadPNG(){
 
-    // 🔒 Save original state
-    const originalOverflow = document.body.style.overflow;
-    const originalHeight = document.body.style.height;
+    const table = document.getElementById("table");
+    const container = document.querySelector(".table-container");
 
-    // 🚫 Hide scroll
-    document.body.style.overflow = "hidden";
+    if(!table) return alert("Table not found");
 
-    // 📏 Expand full page
-    document.body.style.height = "auto";
+    // 🔒 Save original styles
+    const originalHeight = container.style.maxHeight;
+    const originalOverflow = container.style.overflow;
 
-    // 🔥 High Resolution Scale
-    const scale = 3; // (2 = good, 3 = ultra HD, 4 = super heavy)
+    // 🚫 Remove scroll
+    container.style.maxHeight = "none";
+    container.style.overflow = "visible";
 
-    html2canvas(document.body, {
-        scale: scale,
+    // ⏳ Wait for layout
+    await new Promise(r => setTimeout(r, 300));
+
+    // 🔥 Ultra HD
+    const canvas = await html2canvas(table, {
+        scale: 3,
         useCORS: true,
-        scrollY: -window.scrollY,
-        windowWidth: document.documentElement.scrollWidth,
-        windowHeight: document.documentElement.scrollHeight
-    }).then(canvas => {
+        backgroundColor: "#ffffff"
+    });
 
-        // 📸 Download
-        const link = document.createElement("a");
-        link.download = "dashboard-HD.png";
-        link.href = canvas.toDataURL("image/png", 1.0);
-        link.click();
+    // 🔄 Restore UI
+    container.style.maxHeight = originalHeight;
+    container.style.overflow = originalOverflow;
 
-        // 🔄 Restore original state
-        document.body.style.overflow = originalOverflow;
-        document.body.style.height = originalHeight;
+    // 📋 COPY TO CLIPBOARD
+    canvas.toBlob(async (blob) => {
 
-    }).catch(() => {
+        try{
+            await navigator.clipboard.write([
+                new ClipboardItem({
+                    "image/png": blob
+                })
+            ]);
 
-        // ❗ Safety restore
-        document.body.style.overflow = originalOverflow;
-        document.body.style.height = originalHeight;
+            alert("✅ Table copied to clipboard");
+        } catch(err){
+            console.error(err);
+            alert("❌ Clipboard copy failed (Try HTTPS / Chrome)");
+        }
 
-        alert("❌ Image capture failed");
     });
 }
-
 // ================= FILE READ =================
 function readExcel(file, skip, cb){
     let r = new FileReader();

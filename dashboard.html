@@ -18,9 +18,11 @@
 <input type="text" id="search" placeholder="🔍 Search..." onkeyup="searchTable()">
 
 <!-- 🔥 ACTION BUTTONS -->
-<div style="margin:10px;">
+<div style="margin:10px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
 <button onclick="exportExcel()">📤 Excel</button>
-<button onclick="downloadPNG()">📋 Copy</button>
+<button onclick="downloadPNG()">📋 Copy Table</button>
+<button onclick="copyFullPage()">📋 Copy Full</button>
+<button onclick="downloadPDF()">📄 PDF</button>
 <button onclick="resetDashboard()">🔄 Reset</button>
 </div>
 
@@ -55,13 +57,28 @@
 </table>
 </div>
 
+<!-- 🔥 BRANDING (simple, no animation) -->
+<div style="margin:20px; color:white; font-size:13px;">
+❤️ Powered by Chandan Malakar ❤️
+</div>
+
 <!-- 📚 LIBS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
+<!-- 🔥 PDF LIB -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 <!-- 🔥 FIREBASE -->
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<!-- 🔔 AUTO NOTIFICATION PERMISSION -->
+<script>
+if ("Notification" in window && Notification.permission !== "granted") {
+    Notification.requestPermission();
+}
+</script>
 
 <!-- MAIN SCRIPT -->
 <script src="script.js"></script>

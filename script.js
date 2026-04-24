@@ -31,7 +31,7 @@ function waitForFirebase(cb){
 
 waitForFirebase(initFirebase);
 
-// ================= HELPERS =================
+// ================= COMMON HELPERS =================
 const $ = id => document.getElementById(id);
 
 function safeStr(v){ return (v ?? "").toString().trim(); }
@@ -59,7 +59,7 @@ function searchTable(){
     });
 }
 
-// ================= SOUND =================
+// ================= SOUND + ALERT =================
 let lastUpdateTime = "";
 
 document.addEventListener("click",()=>{
@@ -79,7 +79,6 @@ function playSound(){
     }
 }
 
-// ================= ALERT =================
 function showAlert(){
     let el = $("liveAlert");
     if(!el) return;
@@ -93,7 +92,7 @@ function showAlert(){
     },3000);
 }
 
-// ================= NOTIFICATION =================
+// ================= 🔔 NOTIFICATION =================
 function requestNotification(){
     if("Notification" in window && Notification.permission !== "granted"){
         Notification.requestPermission();
@@ -102,6 +101,7 @@ function requestNotification(){
 
 function showDesktopNotification(){
     if("Notification" in window && Notification.permission === "granted"){
+
         let n = new Notification("📊 Agent Performance Report Updated",{
             body:"New data available",
             icon:"https://cdn-icons-png.flaticon.com/512/1827/1827392.png"
@@ -118,15 +118,18 @@ function showDesktopNotification(){
 function exportExcel(){
     let table = $("table");
     if(!table) return;
+
     let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
     XLSX.writeFile(wb, "Dashboard.xlsx");
 }
 
-// ================= 📋 TABLE COPY =================
+// ================= 📋 TABLE COPY (UPGRADED HD) =================
 async function downloadPNG(){
 
     const table = document.getElementById("table");
     const container = document.querySelector(".table-container");
+
+    if(!table) return alert("Table not found");
 
     const originalHeight = container.style.maxHeight;
     const originalOverflow = container.style.overflow;
@@ -137,7 +140,7 @@ async function downloadPNG(){
     await new Promise(r => setTimeout(r, 300));
 
     const canvas = await html2canvas(table, {
-        scale: 3,
+        scale: window.devicePixelRatio * 2,
         useCORS: true,
         backgroundColor: "#ffffff"
     });
@@ -146,10 +149,14 @@ async function downloadPNG(){
     container.style.overflow = originalOverflow;
 
     canvas.toBlob(async (blob) => {
-        await navigator.clipboard.write([
-            new ClipboardItem({ "image/png": blob })
-        ]);
-        alert("✅ Table copied");
+        try{
+            await navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })
+            ]);
+            alert("✅ Table copied (HD)");
+        } catch(err){
+            alert("❌ Clipboard failed");
+        }
     });
 }
 
@@ -171,7 +178,7 @@ async function copyFullPage(){
     await new Promise(r => setTimeout(r, 300));
 
     const canvas = await html2canvas(body, {
-        scale: 3,
+        scale: window.devicePixelRatio * 2,
         useCORS: true,
         width: fullWidth,
         height: fullHeight,
@@ -183,10 +190,14 @@ async function copyFullPage(){
     body.style.height = originalHeight;
 
     canvas.toBlob(async (blob)=>{
-        await navigator.clipboard.write([
-            new ClipboardItem({ "image/png": blob })
-        ]);
-        alert("✅ Full page copied");
+        try{
+            await navigator.clipboard.write([
+                new ClipboardItem({ "image/png": blob })
+            ]);
+            alert("✅ Full page copied");
+        } catch(e){
+            alert("❌ Clipboard blocked");
+        }
     });
 }
 
@@ -224,30 +235,24 @@ async function downloadPDF(){
     const { jsPDF } = window.jspdf;
     const pdf = new jsPDF("p", "mm", "a4");
 
-    const pageWidth = 210;
-    const pageHeight = 297;
-
-    const imgWidth = pageWidth;
+    const imgWidth = 210;
     const imgHeight = (canvas.height * imgWidth) / canvas.width;
 
     let heightLeft = imgHeight;
     let position = 0;
 
     pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-    heightLeft -= pageHeight;
+    heightLeft -= 297;
 
     while (heightLeft > 0) {
         position = heightLeft - imgHeight;
         pdf.addPage();
         pdf.addImage(imgData, "PNG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        heightLeft -= 297;
     }
 
     pdf.save("Dashboard-Full.pdf");
 }
-
-// ================= बाकी logic SAME =================
-// (readExcel, processFiles, buildDashboard, buildSummary, loadDashboard, LIVE)
 
 // ================= GLOBAL =================
 window.processFiles = processFiles;

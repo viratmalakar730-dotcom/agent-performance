@@ -19,11 +19,19 @@
 
 <!-- 🔥 ACTION BUTTONS -->
 <div style="margin:10px; display:flex; flex-wrap:wrap; gap:10px; justify-content:center;">
+
 <button onclick="exportExcel()">📤 Excel</button>
-<button onclick="downloadPNG()">📋 Copy Table</button>
-<button onclick="copyFullPage()">📋 Copy Full</button>
+
+<!-- ✅ ONLY ONE COPY (FULL PAGE) -->
+<button onclick="downloadPNG()">📋 Copy</button>
+
+<!-- ❌ ये button रहेगा लेकिन hidden (remove नहीं किया) -->
+<button onclick="copyFullPage()" style="display:none;">📋 Copy Full</button>
+
 <button onclick="downloadPDF()">📄 PDF</button>
+
 <button onclick="resetDashboard()">🔄 Reset</button>
+
 </div>
 
 <!-- 🔊 SOUND -->
@@ -57,7 +65,7 @@
 </table>
 </div>
 
-<!-- 🔥 BRANDING (simple, no animation) -->
+<!-- 🔥 BRANDING -->
 <div style="margin:20px; color:white; font-size:13px;">
 ❤️ Powered by Chandan Malakar ❤️
 </div>

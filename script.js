@@ -116,11 +116,103 @@ function showDesktopNotification(){
 
 // ================= EXPORT =================
 function exportExcel(){
-    let table = $("table");
+
+    const table = document.getElementById("table");
     if(!table) return;
 
-    let wb = XLSX.utils.table_to_book(table, {sheet:"Report"});
-    XLSX.writeFile(wb, "Dashboard.xlsx");
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet([]);
+
+    let data = [];
+    
+    // 🔹 Header
+    let headers = [];
+    table.querySelectorAll("thead th").forEach(th=>{
+        headers.push(th.innerText);
+    });
+    data.push(headers);
+
+    // 🔹 Body
+    table.querySelectorAll("tbody tr").forEach(tr=>{
+        let row = [];
+        tr.querySelectorAll("td").forEach(td=>{
+            row.push(td.innerText);
+        });
+        data.push(row);
+    });
+
+    XLSX.utils.sheet_add_aoa(ws, data);
+
+    // ================= 🎨 STYLING =================
+    const range = XLSX.utils.decode_range(ws['!ref']);
+
+    for(let R = 0; R <= range.e.r; ++R){
+        for(let C = 0; C <= range.e.c; ++C){
+
+            const cellAddress = XLSX.utils.encode_cell({r:R,c:C});
+            if(!ws[cellAddress]) continue;
+
+            ws[cellAddress].s = {
+                border:{
+                    top:{style:"thin"},
+                    bottom:{style:"thin"},
+                    left:{style:"thin"},
+                    right:{style:"thin"}
+                },
+                alignment:{
+                    horizontal:"center",
+                    vertical:"center"
+                },
+                font:{
+                    bold: R===0
+                }
+            };
+
+            // 🔥 HEADER STYLE
+            if(R===0){
+                ws[cellAddress].s.fill = {
+                    fgColor:{rgb:"0B3D91"}
+                };
+                ws[cellAddress].s.font = {
+                    bold:true,
+                    color:{rgb:"FFFFFF"}
+                };
+            }
+        }
+    }
+
+    // ================= 🔥 CONDITIONAL COLORS =================
+    table.querySelectorAll("tbody tr").forEach((tr,rowIndex)=>{
+
+        tr.querySelectorAll("td").forEach((td,colIndex)=>{
+
+            const cellAddress = XLSX.utils.encode_cell({r:rowIndex+1,c:colIndex});
+            if(!ws[cellAddress]) return;
+
+            if(td.classList.contains("green3d")){
+                ws[cellAddress].s.fill = { fgColor:{rgb:"22C55E"} };
+                ws[cellAddress].s.font = { color:{rgb:"FFFFFF"} };
+            }
+
+            if(td.classList.contains("yellow3d")){
+                ws[cellAddress].s.fill = { fgColor:{rgb:"FACC15"} };
+                ws[cellAddress].s.font = { color:{rgb:"000000"} };
+            }
+
+            if(td.classList.contains("red3d")){
+                ws[cellAddress].s.fill = { fgColor:{rgb:"DC2626"} };
+                ws[cellAddress].s.font = { color:{rgb:"FFFFFF"} };
+            }
+
+        });
+    });
+
+    // 📏 Auto column width
+    ws['!cols'] = headers.map(()=>({wch:20}));
+
+    XLSX.utils.book_append_sheet(wb, ws, "Dashboard");
+
+    XLSX.writeFile(wb, "Agent_Performance_CM.xlsx");
 }
 
 // ================= 🔥 UPGRADED COPY (FULL PAGE HD) =================

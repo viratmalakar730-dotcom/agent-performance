@@ -12,6 +12,43 @@
 
 <body>
 
+<!-- 🔐 PASSWORD GATE -->
+<script>
+(function(){
+
+    const CORRECT_PASSWORD = "1122";
+    const MAX_ATTEMPT = 3;
+
+    let attempts = 0;
+
+    function askPassword(){
+
+        let saved = localStorage.getItem("auth_ok");
+
+        if(saved === "true") return;
+
+        while(attempts < MAX_ATTEMPT){
+
+            let pass = prompt("🔐 Enter Access Code");
+
+            if(pass === CORRECT_PASSWORD){
+                localStorage.setItem("auth_ok","true");
+                return;
+            }
+
+            attempts++;
+            alert("❌ Wrong Code (" + attempts + "/3)");
+        }
+
+        // 🔒 Lock after 3 attempts
+        document.body.innerHTML = "<h2 style='color:white;text-align:center;margin-top:100px;'>🚫 Access Blocked</h2>";
+    }
+
+    askPassword();
+
+})();
+</script>
+
 <div class="container">
 <div class="box">
 
@@ -79,6 +116,16 @@ window.processFiles = function(){
     // 🔥 Call original
     originalProcess();
 };
+
+// 🔥 ENTER KEY SUPPORT
+document.addEventListener("keydown", function(e){
+    if(e.key === "Enter"){
+        let btn = document.getElementById("generateBtn");
+        if(btn && !btn.disabled){
+            btn.click();
+        }
+    }
+});
 </script>
 
 </body>

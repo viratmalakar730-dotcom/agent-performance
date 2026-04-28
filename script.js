@@ -324,9 +324,23 @@ function processFiles(){
 
 // ================= RESET =================
 function resetDashboard(){
+
+    const pass = prompt("🔐 Enter Code to Reset");
+
+    if(pass !== "1122"){
+        alert("❌ Wrong Code");
+        return;
+    }
+
     if(db) db.ref("dashboard").remove();
-    localStorage.clear();
+
+    // 🔥 only dashboard data clear (auth remove नहीं करेंगे)
+    localStorage.removeItem("dashboard");
     sessionStorage.clear();
+
+    // 🔒 दुबारा login force
+    localStorage.removeItem("auth_ok");
+
     window.location.replace("index.html?reset="+Date.now());
 }
 

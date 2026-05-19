@@ -9,6 +9,10 @@ body{
     background: linear-gradient(-45deg, #020617, #0b1f3a, #1e3a8a, #020617);
     background-size: 400% 400%;
     animation: bgMove 12s ease infinite;
+
+    width:100%;
+    overflow-x:hidden;
+    zoom:100%;
 }
 
 @keyframes bgMove {
@@ -22,6 +26,19 @@ h2{
     color:white;
     margin:15px;
     text-shadow:0 0 15px rgba(255,255,255,0.6);
+
+    animation:titleGlow 2s infinite alternate;
+}
+
+@keyframes titleGlow{
+    from{
+        text-shadow:0 0 10px rgba(255,255,255,0.4);
+    }
+    to{
+        text-shadow:
+            0 0 15px rgba(255,255,255,0.7),
+            0 0 30px rgba(59,130,246,0.4);
+    }
 }
 
 /* ================= UPLOAD PAGE ================= */
@@ -29,50 +46,89 @@ h2{
     display:flex;
     justify-content:center;
     align-items:center;
-    height:100vh;
+    min-height:100vh;
+
+    padding:20px;
+    box-sizing:border-box;
 }
 
 .box{
     background: linear-gradient(145deg,#0b3d91,#072c6b);
     padding:30px;
-    border-radius:20px;
+    border-radius:22px;
     width:350px;
 
+    overflow:hidden;
+    isolation:isolate;
+
     box-shadow:
-        20px 20px 60px rgba(0,0,0,0.95),
-        -5px -5px 15px rgba(255,255,255,0.08),
-        0 0 25px rgba(30,58,138,0.4);
+        0 14px 35px rgba(0,0,0,0.65),
+        inset 0 1px 1px rgba(255,255,255,0.08),
+        0 0 25px rgba(30,58,138,0.25);
+
+    backdrop-filter: blur(8px);
+
+    animation:boxFloat 4s ease-in-out infinite;
+}
+
+@keyframes boxFloat{
+    0%{transform:translateY(0px);}
+    50%{transform:translateY(-4px);}
+    100%{transform:translateY(0px);}
 }
 
 .box input{
     margin:10px 0;
     padding:10px;
     width:90%;
-    border-radius:6px;
+    border-radius:8px;
     border:none;
+    outline:none;
 
-    box-shadow: inset 2px 2px 5px rgba(0,0,0,0.3);
+    background:#f8fafc;
+
+    box-shadow:
+        inset 2px 2px 5px rgba(0,0,0,0.3),
+        0 2px 8px rgba(0,0,0,0.15);
+
+    transition:0.25s;
+}
+
+.box input:focus{
+    transform:scale(1.02);
+
+    box-shadow:
+        0 0 12px rgba(14,165,233,0.8),
+        inset 2px 2px 5px rgba(0,0,0,0.2);
 }
 
 /* ================= BUTTON ================= */
 button{
     padding:10px 18px;
     border:none;
-    border-radius:8px;
+    border-radius:10px;
     background:#0ea5e9;
     color:white;
     font-weight:bold;
     cursor:pointer;
     margin:8px;
 
-    box-shadow: 8px 8px 20px rgba(0,0,0,0.9);
+    transition:all .25s ease;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.65),
+        inset 0 1px 1px rgba(255,255,255,0.2);
+
+    transform:translateZ(0);
 }
 
 button:hover{
-    transform:scale(1.1);
+    transform:translateY(-3px) scale(1.06);
+
     box-shadow:
         0 0 20px rgba(14,165,233,1),
-        0 0 40px rgba(14,165,233,0.7);
+        0 0 40px rgba(14,165,233,0.6),
+        0 12px 28px rgba(0,0,0,0.7);
 }
 
 /* ================= CARDS ================= */
@@ -81,27 +137,39 @@ button:hover{
     gap:15px;
     justify-content:center;
     flex-wrap:wrap;
-    margin:15px;
+    margin:20px;
+
+    background:transparent !important;
+    box-shadow:none !important;
+    filter:none !important;
+    backdrop-filter:none !important;
 }
 
 .card{
     background:linear-gradient(145deg,#0b3d91,#072c6b);
     padding:15px;
-    border-radius:12px;
+    border-radius:14px;
     width:150px;
     color:white;
 
+    overflow:hidden;
+    isolation:isolate;
+
+    transition:all .25s ease;
+
     box-shadow:
-        10px 10px 30px rgba(0,0,0,1),
-        -3px -3px 8px rgba(255,255,255,0.1),
-        0 0 20px rgba(30,58,138,0.3);
+        0 10px 25px rgba(0,0,0,0.55),
+        inset 0 1px 1px rgba(255,255,255,0.08),
+        0 0 18px rgba(30,58,138,0.25);
 }
 
 .card:hover{
-    transform:translateY(-6px) scale(1.03);
+    transform:translateY(-5px) scale(1.04);
+
     box-shadow:
-        0 0 30px rgba(30,58,138,1),
-        0 0 60px rgba(30,58,138,0.6);
+        0 0 30px rgba(30,58,138,0.9),
+        0 0 55px rgba(30,58,138,0.5),
+        0 12px 28px rgba(0,0,0,0.7);
 }
 
 /* ================= TABLE ================= */
@@ -109,7 +177,15 @@ button:hover{
     max-height:520px;
     overflow:auto;
     margin:10px;
+
+    width:100%;
+
+    border-radius:14px;
+
     scroll-behavior:smooth;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.35);
 }
 
 table{
@@ -121,9 +197,12 @@ table{
     font-weight:bold;
     font-size:15px;
 
+    border-radius:14px;
+    overflow:hidden;
+
     box-shadow:
-        0 15px 40px rgba(0,0,0,1),
-        0 0 20px rgba(0,0,0,0.5);
+        0 15px 40px rgba(0,0,0,0.7),
+        0 0 20px rgba(0,0,0,0.25);
 }
 
 /* ================= HEADER ================= */
@@ -131,12 +210,11 @@ th{
     background: linear-gradient(145deg,#0b3d91,#072c6b);
     color:white;
     padding:12px;
-    border:1px solid black;
+    border:1px solid rgba(255,255,255,0.1);
 
     box-shadow:
-        inset -5px -5px 10px rgba(255,255,255,0.1),
-        inset 5px 5px 12px rgba(0,0,0,0.9),
-        0 8px 20px rgba(0,0,0,1);
+        inset -3px -3px 8px rgba(255,255,255,0.08),
+        inset 3px 3px 10px rgba(0,0,0,0.85);
 
     position:sticky;
     top:0;
@@ -146,32 +224,43 @@ th{
 /* ================= CELLS ================= */
 td{
     padding:10px;
-    border:1px solid black;
+    border:1px solid rgba(0,0,0,0.15);
 
-    background: linear-gradient(145deg,#ffffff,#e5e7eb);
+    background: linear-gradient(145deg,#ffffff,#eef2f7);
     color:black;
 
+    transition:0.2s;
+
     box-shadow:
-        inset -3px -3px 6px rgba(255,255,255,0.8),
-        inset 3px 3px 6px rgba(0,0,0,0.35),
-        0 3px 8px rgba(0,0,0,0.4);
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        inset 2px 2px 4px rgba(0,0,0,0.18);
 }
 
 /* ================= ROW HOVER ================= */
+tbody tr{
+    transition:all .18s ease;
+}
+
 tbody tr:hover td{
     background:#1e3a8a !important;
     color:white !important;
-    transform:scale(1.015);
+
     text-shadow:0 0 5px rgba(255,255,255,0.6);
 }
 
 /* ================= SCROLL ================= */
 .table-container::-webkit-scrollbar{
     width:8px;
+    height:8px;
 }
+
 .table-container::-webkit-scrollbar-thumb{
     background:#0b3d91;
     border-radius:10px;
+}
+
+.table-container::-webkit-scrollbar-track{
+    background:#dbeafe;
 }
 
 /* ================= REPORT TIME ================= */
@@ -179,7 +268,40 @@ tbody tr:hover td{
     color:white;
     font-weight:bold;
     margin:10px;
+
     text-shadow:0 0 10px rgba(255,255,255,0.5);
+}
+
+/* ================= SEARCH ================= */
+#search{
+    width:220px;
+    max-width:90%;
+
+    padding:8px 12px;
+
+    border:none;
+    border-radius:8px;
+
+    outline:none;
+
+    background:white;
+    color:black;
+
+    margin:10px auto;
+    display:block;
+
+    box-shadow:
+        0 6px 18px rgba(0,0,0,0.35);
+
+    transition:0.2s;
+}
+
+#search:focus{
+    transform:scale(1.03);
+
+    box-shadow:
+        0 0 15px rgba(14,165,233,0.8),
+        0 6px 18px rgba(0,0,0,0.35);
 }
 
 /* ================= ALERT ================= */
@@ -187,21 +309,24 @@ tbody tr:hover td{
     position:fixed;
     bottom:20px;
     right:20px;
+
     background: linear-gradient(145deg,#0ea5e9,#0369a1);
     color:white;
+
     padding:14px 24px;
     border-radius:12px;
+
     display:none;
     z-index:999;
 
     box-shadow:
-        0 0 30px rgba(14,165,233,1),
-        0 0 60px rgba(14,165,233,0.6);
+        0 0 30px rgba(14,165,233,0.9),
+        0 0 60px rgba(14,165,233,0.5);
 }
 
 @keyframes blinkSmooth{
     0%{opacity:1; transform:scale(1);}
-    50%{opacity:0.75; transform:scale(1.1);}
+    50%{opacity:0.75; transform:scale(1.08);}
     100%{opacity:1; transform:scale(1);}
 }
 
@@ -210,91 +335,103 @@ tbody tr:hover td{
 }
 
 /* ================= BRANDING ================= */
-#branding{
-    margin:25px;
-    font-size:15px;
-    color:white;
-    opacity:0.95;
-    text-shadow:0 0 12px rgba(255,255,255,0.7);
-
-    animation:heartBeat 2s infinite;
-}
-
-/* ❤️ FRONT + BACK */
-#branding::before{
-    content:"❤️ ";
-}
-#branding::after{
-    content:" ❤️";
-}
-
-@keyframes heartBeat{
-    0%{transform:scale(1);}
-    50%{transform:scale(1.12);}
-    100%{transform:scale(1);}
-}
-
-/* ================= COLORS ================= */
-/* ================= ULTRA 3D EFFECT ================= */
-
-/* COMMON 3D STYLE */
-.green3d, .yellow3d, .red3d{
-    position: relative;
-    transform: perspective(600px) rotateX(2deg) scale(1.03);
-    transition: all 0.25s ease;
-
-    box-shadow:
-        inset -4px -4px 8px rgba(255,255,255,0.2),
-        inset 4px 4px 10px rgba(0,0,0,0.8),
-        0 6px 15px rgba(0,0,0,0.9),
-        0 0 12px rgba(255,255,255,0.1);
-}
-
-/* HOVER POP */
-.green3d:hover, .yellow3d:hover, .red3d:hover{
-    transform: perspective(600px) rotateX(0deg) scale(1.08);
-}
-
-/* ================= GREEN (SUCCESS) ================= */
-.green3d{
-    background: linear-gradient(145deg,#22c55e,#15803d);
-    color:white;
-
-    box-shadow:
-        inset -3px -3px 6px rgba(255,255,255,0.3),
-        inset 3px 3px 10px rgba(0,0,0,0.7),
-        0 6px 15px rgba(0,0,0,0.9),
-        0 0 20px rgba(34,197,94,0.6);
-}
-
-/* ================= YELLOW (WARNING) ================= */
-.yellow3d{
-    background: linear-gradient(145deg,#facc15,#ca8a04);
-    color:black;
-
-    box-shadow:
-        inset -3px -3px 6px rgba(255,255,255,0.4),
-        inset 3px 3px 10px rgba(0,0,0,0.7),
-        0 6px 15px rgba(0,0,0,0.9),
-        0 0 20px rgba(250,204,21,0.6);
-}
-
-/* ================= RED (CRITICAL) ================= */
-.red3d{
-    background: linear-gradient(145deg,#dc2626,#7f1d1d);
-    color:white;
-
-    box-shadow:
-        inset -3px -3px 6px rgba(255,255,255,0.2),
-        inset 3px 3px 10px rgba(0,0,0,0.8),
-        0 6px 15px rgba(0,0,0,0.9),
-        0 0 20px rgba(220,38,38,0.7);
-}
-
-/* ================= LIVE BRANDING ================= */
+#branding,
 #brandingLive{
     margin:20px;
     font-size:14px;
     color:white;
     text-align:center;
+
+    text-shadow:0 0 10px rgba(255,255,255,0.55);
+}
+
+#branding::before,
+#brandingLive::before{
+    content:"❤️ ";
+}
+
+#branding::after,
+#brandingLive::after{
+    content:" ❤️";
+}
+
+/* ================= ULTRA 3D COLORS ================= */
+
+.green3d,
+.yellow3d,
+.red3d{
+    position:relative;
+
+    transition:all .22s ease;
+
+    backface-visibility:hidden;
+    will-change:transform;
+
+    transform:translateZ(0);
+}
+
+/* ================= GREEN ================= */
+.green3d{
+    background: linear-gradient(145deg,#22c55e,#15803d) !important;
+    color:white !important;
+
+    box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.25),
+        0 4px 12px rgba(34,197,94,.45),
+        0 0 10px rgba(34,197,94,.35) !important;
+}
+
+/* ================= YELLOW ================= */
+.yellow3d{
+    background: linear-gradient(145deg,#facc15,#ca8a04) !important;
+    color:black !important;
+
+    box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.3),
+        0 4px 12px rgba(250,204,21,.45),
+        0 0 10px rgba(250,204,21,.35) !important;
+}
+
+/* ================= RED ================= */
+.red3d{
+    background: linear-gradient(145deg,#dc2626,#7f1d1d) !important;
+    color:white !important;
+
+    box-shadow:
+        inset 0 1px 2px rgba(255,255,255,.2),
+        0 4px 12px rgba(220,38,38,.5),
+        0 0 10px rgba(220,38,38,.35) !important;
+}
+
+/* ================= MOBILE ================= */
+@media(max-width:768px){
+
+    h2{
+        font-size:22px;
+    }
+
+    #cards{
+        gap:10px;
+    }
+
+    .card{
+        width:130px;
+        padding:12px;
+    }
+
+    table{
+        font-size:12px;
+    }
+
+    button{
+        min-width:110px;
+    }
+
+    .box{
+        width:92%;
+    }
+
+    .table-container{
+        overflow:auto;
+    }
 }

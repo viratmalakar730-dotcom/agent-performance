@@ -760,27 +760,18 @@ document.addEventListener(
 
                 if(!lastUpdateTime){
 
-                    lastUpdateTime =
-                        d.reportTime;
-
+                    lastUpdateTime = d.reportTime;
                     loadDashboard(d);
-
                     return;
                 }
 
-                if(
-                    d.reportTime !==
-                    lastUpdateTime
-                ){
+                if(d.reportTime !== lastUpdateTime){
 
                     playSound();
-
                     showAlert();
-
                     showDesktopNotification();
 
-                    lastUpdateTime =
-                        d.reportTime;
+                    lastUpdateTime = d.reportTime;
                 }
 
                 loadDashboard(d);
@@ -790,9 +781,70 @@ document.addEventListener(
     },200);
 });
 
+// ================= BHOPAL LIVE CLOCK =================
+
+function updateBhopalClock(){
+
+    const now = new Date();
+
+    const timeParts = new Intl.DateTimeFormat("en-IN",{
+        timeZone:"Asia/Kolkata",
+        hour:"2-digit",
+        minute:"2-digit",
+        second:"2-digit",
+        hour12:false
+    }).formatToParts(now);
+
+    const getPart = type =>
+        Number(timeParts.find(p=>p.type===type)?.value || 0);
+
+    const hour = getPart("hour") % 12;
+    const minute = getPart("minute");
+    const second = getPart("second");
+
+    const hourDeg = (hour * 30) + (minute * 0.5);
+    const minuteDeg = (minute * 6) + (second * 0.1);
+    const secondDeg = second * 6;
+
+    const hourHand = $("hourHand");
+    const minuteHand = $("minuteHand");
+    const secondHand = $("secondHand");
+
+    if(hourHand) hourHand.style.transform = `translateX(-50%) rotate(${hourDeg}deg)`;
+    if(minuteHand) minuteHand.style.transform = `translateX(-50%) rotate(${minuteDeg}deg)`;
+    if(secondHand) secondHand.style.transform = `translateX(-50%) rotate(${secondDeg}deg)`;
+
+    const digital = $("bhopalDigitalTime");
+    const date = $("bhopalDate");
+
+    if(digital){
+        digital.textContent = new Intl.DateTimeFormat("en-IN",{
+            timeZone:"Asia/Kolkata",
+            hour:"2-digit",
+            minute:"2-digit",
+            second:"2-digit",
+            hour12:false
+        }).format(now);
+    }
+
+    if(date){
+        date.textContent = new Intl.DateTimeFormat("en-IN",{
+            timeZone:"Asia/Kolkata",
+            weekday:"long",
+            day:"2-digit",
+            month:"long",
+            year:"numeric"
+        }).format(now);
+    }
+}
+
+updateBhopalClock();
+setInterval(updateBhopalClock,1000);
+
 // ================= GLOBAL =================
 
 window.processFiles = processFiles;
 window.resetDashboard = resetDashboard;
 window.searchTable = searchTable;
 window.exportExcel = exportExcel;
+window.downloadPNG = downloadPNG;

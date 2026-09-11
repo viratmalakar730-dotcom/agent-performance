@@ -522,3 +522,163 @@ tbody tr:hover td{
         overflow:auto;
     }
 }
+
+
+/* ================= BHOPAL LIVE FLOATING CLOCK ================= */
+
+.bhopal-clock{
+    position:fixed;
+    top:14px;
+    right:14px;
+    z-index:2000;
+    width:270px;
+    padding:12px 14px;
+    box-sizing:border-box;
+    border:1px solid rgba(125,211,252,.30);
+    border-radius:16px;
+    background:rgba(2,15,38,.58);
+    backdrop-filter:blur(10px);
+    -webkit-backdrop-filter:blur(10px);
+    box-shadow:0 8px 24px rgba(0,0,0,.38), 0 0 18px rgba(14,165,233,.14);
+    color:#fff;
+    text-align:center;
+    pointer-events:none;
+}
+
+.clock-location{
+    font-size:11px;
+    letter-spacing:.7px;
+    margin-bottom:9px;
+    color:#bae6fd;
+    text-shadow:0 0 8px rgba(56,189,248,.25);
+}
+
+.clock-main{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:13px;
+}
+
+.analog-clock{
+    position:relative;
+    width:78px;
+    height:78px;
+    flex:0 0 78px;
+    border:2px solid rgba(186,230,253,.72);
+    border-radius:50%;
+    background:rgba(2,6,23,.45);
+    box-shadow:inset 0 0 12px rgba(0,0,0,.55), 0 0 12px rgba(56,189,248,.12);
+}
+
+.clock-number{
+    position:absolute;
+    font-size:9px;
+    line-height:1;
+    color:#e0f2fe;
+    font-weight:bold;
+}
+
+.n12{top:5px;left:50%;transform:translateX(-50%)}
+.n3{right:5px;top:50%;transform:translateY(-50%)}
+.n6{bottom:5px;left:50%;transform:translateX(-50%)}
+.n9{left:5px;top:50%;transform:translateY(-50%)}
+
+.clock-hand{
+    position:absolute;
+    left:50%;
+    bottom:50%;
+    transform-origin:50% 100%;
+    border-radius:5px;
+}
+
+.hour-hand{
+    width:4px;
+    height:21px;
+    background:#fff;
+}
+
+.minute-hand{
+    width:3px;
+    height:29px;
+    background:#7dd3fc;
+}
+
+.second-hand{
+    width:1.5px;
+    height:32px;
+    background:#38bdf8;
+}
+
+.clock-center{
+    position:absolute;
+    left:50%;
+    top:50%;
+    width:6px;
+    height:6px;
+    transform:translate(-50%,-50%);
+    border-radius:50%;
+    background:#38bdf8;
+    box-shadow:0 0 7px rgba(56,189,248,.8);
+}
+
+.digital-clock{
+    min-width:125px;
+}
+
+#bhopalDigitalTime{
+    font-family:Consolas,Monaco,monospace;
+    font-size:22px;
+    line-height:1.15;
+    letter-spacing:1px;
+    color:#fff;
+    text-shadow:0 0 9px rgba(56,189,248,.35);
+}
+
+#bhopalDate{
+    margin-top:5px;
+    font-size:10px;
+    line-height:1.3;
+    color:#e2e8f0;
+}
+
+.clock-zone{
+    margin-top:5px;
+    font-size:9px;
+    color:#7dd3fc;
+    letter-spacing:.3px;
+}
+
+@media(max-width:900px){
+    .bhopal-clock{
+        top:8px;
+        right:8px;
+        width:220px;
+        padding:8px 9px;
+    }
+    .clock-main{gap:8px}
+    .analog-clock{width:60px;height:60px;flex-basis:60px}
+    .hour-hand{height:16px}
+    .minute-hand{height:22px}
+    .second-hand{height:25px}
+    #bhopalDigitalTime{font-size:17px}
+    #bhopalDate{font-size:9px}
+}
+
+@media(max-width:600px){
+    .bhopal-clock{
+        position:absolute;
+        top:8px;
+        right:8px;
+        width:195px;
+    }
+    .clock-location{font-size:9px}
+    .analog-clock{width:52px;height:52px;flex-basis:52px}
+    .clock-number{font-size:7px}
+    .hour-hand{height:14px}
+    .minute-hand{height:19px}
+    .second-hand{height:22px}
+    #bhopalDigitalTime{font-size:15px}
+    #bhopalDate{font-size:8px}
+    .clock-zone{font-size:7px}
+}

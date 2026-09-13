@@ -781,28 +781,100 @@ document.addEventListener(
     },200);
 });
 
-// ================= BHOPAL LIVE CLOCK =================
+// ================= BHOPAL ONLINE WORLD CLOCK =================
+// IMPORTANT: Display time is fetched from an online world-time server.
+// The computer's system clock is NOT used as the source of truth.
 
-function updateBhopalClock(){
+const BHOPAL_TIME_API = "https://timeapi.io/api/Time/current/zone?timeZone=Asia%2FKolkata";
+let onlineBhopalEpochMs = null;
+let onlineClockPerfMs = null;
+let onlineClockReady = false;
+let onlineClockRequestInProgress = false;
 
-    const now = new Date();
+function parseBhopalApiTime(data){
+    if(!data || !data.dateTime) throw new Error("Invalid online time response");
 
-    const timeParts = new Intl.DateTimeFormat("en-IN",{
-        timeZone:"Asia/Kolkata",
-        hour:"2-digit",
-        minute:"2-digit",
-        second:"2-digit",
-        hour12:false
-    }).formatToParts(now);
+    const y = Number(data.year);
+    const mo = Number(data.month);
+    const d = Number(data.day);
+    const h = Number(data.hour);
+    const mi = Number(data.minute);
+    const sec = Number(data.seconds ?? data.second ?? 0);
+    const ms = Number(data.milliSeconds ?? data.milliseconds ?? 0);
 
-    const getPart = type =>
-        Number(timeParts.find(p=>p.type===type)?.value || 0);
+    // API returns local Asia/Kolkata clock values. Convert them to UTC epoch
+    // explicitly; this does not read the computer's current date/time.
+    return Date.UTC(y, mo - 1, d, h, mi, sec, ms) - (5.5 * 60 * 60 * 1000);
+}
 
-    const hour = getPart("hour") % 12;
-    const minute = getPart("minute");
-    const second = getPart("second");
+async function syncBhopalOnlineTime(){
+    if(onlineClockRequestInProgress) return;
+    onlineClockRequestInProgress = true;
 
-    const hourDeg = (hour * 30) + (minute * 0.5);
+    const status = $("clockSourceStatus");
+    if(status) status.textContent = "● Syncing online world time...";
+
+    const requestStarted = performance.now();
+
+    try{
+        const response = await fetch(BHOPAL_TIME_API + "&cb=" + Math.random().toString(36).slice(2), {
+            method:"GET",
+            cache:"no-store",
+            headers:{"Accept":"application/json"}
+        });
+
+        if(!response.ok) throw new Error("Online time server returned " + response.status);
+
+        const data = await response.json();
+        const onlineEpoch = parseBhopalApiTime(data);
+
+        // Use monotonic browser elapsed time after the online sync.
+        // No system clock is used for displaying the time.
+        const requestFinished = performance.now();
+        const midpointPerf = requestStarted + ((requestFinished - requestStarted) / 2);
+
+        onlineBhopalEpochMs = onlineEpoch;
+        onlineClockPerfMs = midpointPerf;
+        onlineClockReady = true;
+
+        if(status){
+            status.textContent = "● ONLINE WORLD TIME";
+            status.style.color = "#86efac";
+        }
+
+        renderBhopalOnlineClock();
+    }catch(err){
+        console.error("❌ Bhopal online clock sync failed:", err);
+        if(status){
+            status.textContent = "● ONLINE TIME UNAVAILABLE";
+            status.style.color = "#fca5a5";
+        }
+        // Deliberately do NOT fall back to new Date().
+    }finally{
+        onlineClockRequestInProgress = false;
+    }
+}
+
+function getOnlineBhopalEpoch(){
+    if(!onlineClockReady || onlineBhopalEpochMs === null || onlineClockPerfMs === null){
+        return null;
+    }
+
+    return onlineBhopalEpochMs + (performance.now() - onlineClockPerfMs);
+}
+
+function renderBhopalOnlineClock(){
+    const epoch = getOnlineBhopalEpoch();
+    if(epoch === null) return;
+
+    const onlineDate = new Date(epoch);
+
+    const hour = onlineDate.getUTCHours();
+    const minute = onlineDate.getUTCMinutes();
+    const second = onlineDate.getUTCSeconds();
+
+    const hour12 = hour % 12;
+    const hourDeg = (hour12 * 30) + (minute * 0.5);
     const minuteDeg = (minute * 6) + (second * 0.1);
     const secondDeg = second * 6;
 
@@ -817,29 +889,33 @@ function updateBhopalClock(){
     const digital = $("bhopalDigitalTime");
     const date = $("bhopalDate");
 
-    if(digital){
-        digital.textContent = new Intl.DateTimeFormat("en-IN",{
-            timeZone:"Asia/Kolkata",
-            hour:"2-digit",
-            minute:"2-digit",
-            second:"2-digit",
-            hour12:false
-        }).format(now);
-    }
+    const hh = String(hour).padStart(2,"0");
+    const mm = String(minute).padStart(2,"0");
+    const ss = String(second).padStart(2,"0");
+
+    if(digital) digital.textContent = `${hh}:${mm}:${ss}`;
 
     if(date){
-        date.textContent = new Intl.DateTimeFormat("en-IN",{
-            timeZone:"Asia/Kolkata",
-            weekday:"long",
-            day:"2-digit",
-            month:"long",
-            year:"numeric"
-        }).format(now);
+        const days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+        const months = ["January","February","March","April","May","June","July","August","September","October","November","December"];
+        date.textContent = `${days[onlineDate.getUTCDay()]}, ${String(onlineDate.getUTCDate()).padStart(2,"0")} ${months[onlineDate.getUTCMonth()]} ${onlineDate.getUTCFullYear()}`;
     }
 }
 
-updateBhopalClock();
-setInterval(updateBhopalClock,1000);
+function startBhopalOnlineClock(){
+    syncBhopalOnlineTime();
+
+    // Sync with the online world clock every second.
+    // The online server remains the source of truth; the computer clock is never used.
+    setInterval(syncBhopalOnlineTime, 1000);
+    setInterval(renderBhopalOnlineClock, 100);
+}
+
+if(document.readyState === "loading"){
+    document.addEventListener("DOMContentLoaded", startBhopalOnlineClock, {once:true});
+}else{
+    startBhopalOnlineClock();
+}
 
 // ================= GLOBAL =================
 

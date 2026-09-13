@@ -524,370 +524,160 @@ tbody tr:hover td{
 }
 
 
-/* ================= DASHBOARD CLOCK CLEARANCE ================= */
-/* The floating clock stays at the top-right, while dashboard content starts below it. */
+/* ================= DASHBOARD CLOCK - DIGITAL ONLY / PAGE ANCHORED ================= */
+/* Clock is part of the page layout, not a viewport-floating widget. It scrolls with the page. */
+body:has(#bhopalClock){
+    position:relative;
+}
+
 body:has(#bhopalClock) h2{
     margin-top:15px;
 }
 
-/* ================= BHOPAL ONLINE WORLD CLOCK ================= */
 .bhopal-clock{
-    position:fixed;
-    top:44vh;
-    right:3.1vw;
-    z-index:2000;
-    width:min(36vw, 600px);
-    height:208px;
-    min-height:208px;
-    padding:8px 12px;
+    position:absolute;
+    top:58px;
+    right:2.2vw;
+    z-index:20;
+    width:min(36vw,560px);
+    min-width:420px;
+    height:132px;
+    padding:10px 14px;
     box-sizing:border-box;
     border:2px solid rgba(96,190,255,.82);
     border-radius:18px;
     background:linear-gradient(145deg,rgba(8,38,82,.97),rgba(2,20,49,.96));
-    backdrop-filter:blur(12px);
-    -webkit-backdrop-filter:blur(12px);
     box-shadow:0 10px 28px rgba(0,0,0,.42),0 0 22px rgba(56,189,248,.22),inset 0 1px 1px rgba(255,255,255,.16);
     color:#fff;
     pointer-events:none;
 }
+
 .clock-topbar{
     display:flex;
     align-items:flex-start;
     justify-content:space-between;
     gap:10px;
-    margin-bottom:3px;
+    margin-bottom:5px;
 }
 .clock-location{
     font-size:18px;
     font-weight:800;
-    line-height:1.2;
-    color:#fff;
-    text-align:left;
+    line-height:1.15;
     white-space:nowrap;
     text-shadow:0 1px 6px rgba(0,0,0,.55);
 }
 .clock-ist-top{
     display:flex;
     align-items:flex-start;
-    gap:6px;
-    font-size:14px;
+    gap:5px;
+    font-size:13px;
     line-height:1.05;
     white-space:nowrap;
     text-align:right;
 }
 .clock-ist-top small{
     display:block;
-    margin-top:14px;
-    margin-left:-37px;
-    font-size:9px;
+    margin-top:12px;
+    margin-left:-34px;
+    font-size:8px;
     font-weight:700;
     opacity:.9;
 }
+
+/* Analog clock intentionally removed. */
+.analog-clock{display:none!important}
 .clock-content{
+    display:block;
+    width:100%;
+}
+.digital-clock{
+    width:100%;
+    min-width:0;
+    text-align:left;
+}
+.clock-digital-row{
     display:flex;
     align-items:center;
-    justify-content:center;
-    gap:12px;
+    justify-content:flex-start;
+    gap:18px;
 }
-.analog-clock{
-    position:relative;
-    width:155px;
-    height:155px;
-    flex:0 0 155px;
-    border:3px solid rgba(219,242,255,.96);
-    border-radius:50%;
-    background:radial-gradient(circle at 50% 45%,#16345f 0%,#071b3b 66%,#020b1d 100%);
-    box-shadow:inset 0 0 18px rgba(0,0,0,.72),0 0 15px rgba(56,189,248,.35);
-    overflow:hidden;
-    --tick-radius:70px;
-}
-.analog-clock::before{
-    content:"";
-    position:absolute;
-    inset:7px;
-    border:1px solid rgba(160,220,255,.5);
-    border-radius:50%;
-    z-index:1;
-}
-.clock-ticks{position:absolute;inset:0;border-radius:50%;z-index:2;pointer-events:none}
-.clock-tick{
-    position:absolute;
-    left:50%;
-    top:50%;
-    transform-origin:50% 50%;
-    background:#fff;
-    border-radius:2px;
-    margin-left:-1px;
-    margin-top:-1px;
-}
-/* 60 precise second/minute marks: every 5th mark is a larger hour marker */
-.tick-0,.tick-5,.tick-10,.tick-15,.tick-20,.tick-25,.tick-30,.tick-35,.tick-40,.tick-45,.tick-50,.tick-55{
-    width:3px;
-    height:13px;
-    opacity:1;
-    box-shadow:0 0 3px rgba(255,255,255,.45);
-}
-.clock-tick:not(.tick-0):not(.tick-5):not(.tick-10):not(.tick-15):not(.tick-20):not(.tick-25):not(.tick-30):not(.tick-35):not(.tick-40):not(.tick-45):not(.tick-50):not(.tick-55){
-    width:2px;
-    height:7px;
-    opacity:.88;
-}
-.tick-0{transform:rotate(0deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-1{transform:rotate(6deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-2{transform:rotate(12deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-3{transform:rotate(18deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-4{transform:rotate(24deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-5{transform:rotate(30deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-6{transform:rotate(36deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-7{transform:rotate(42deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-8{transform:rotate(48deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-9{transform:rotate(54deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-10{transform:rotate(60deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-11{transform:rotate(66deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-12{transform:rotate(72deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-13{transform:rotate(78deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-14{transform:rotate(84deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-15{transform:rotate(90deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-16{transform:rotate(96deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-17{transform:rotate(102deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-18{transform:rotate(108deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-19{transform:rotate(114deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-20{transform:rotate(120deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-21{transform:rotate(126deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-22{transform:rotate(132deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-23{transform:rotate(138deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-24{transform:rotate(144deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-25{transform:rotate(150deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-26{transform:rotate(156deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-27{transform:rotate(162deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-28{transform:rotate(168deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-29{transform:rotate(174deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-30{transform:rotate(180deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-31{transform:rotate(186deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-32{transform:rotate(192deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-33{transform:rotate(198deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-34{transform:rotate(204deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-35{transform:rotate(210deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-36{transform:rotate(216deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-37{transform:rotate(222deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-38{transform:rotate(228deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-39{transform:rotate(234deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-40{transform:rotate(240deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-41{transform:rotate(246deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-42{transform:rotate(252deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-43{transform:rotate(258deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-44{transform:rotate(264deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-45{transform:rotate(270deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-46{transform:rotate(276deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-47{transform:rotate(282deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-48{transform:rotate(288deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-49{transform:rotate(294deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-50{transform:rotate(300deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-51{transform:rotate(306deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-52{transform:rotate(312deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-53{transform:rotate(318deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-54{transform:rotate(324deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-55{transform:rotate(330deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-56{transform:rotate(336deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-57{transform:rotate(342deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-58{transform:rotate(348deg) translateY(calc(-1 * var(--tick-radius)));}
-.tick-59{transform:rotate(354deg) translateY(calc(-1 * var(--tick-radius)));}
-
-.clock-number{
-    position:absolute;
-    left:50%;
-    top:50%;
-    width:30px;
-    height:26px;
-    line-height:26px;
-    margin:-13px 0 0 -15px;
-    font-size:13px;
-    color:#fff;
-    font-weight:800;
-    text-align:center;
-    z-index:3;
-    text-shadow:0 1px 5px #000;
-}
-.n1{--n:1}.n2{--n:2}.n3{--n:3}.n4{--n:4}.n5{--n:5}.n6{--n:6}.n7{--n:7}.n8{--n:8}.n9{--n:9}.n10{--n:10}.n11{--n:11}.n12{--n:0}
-.clock-number{transform:rotate(calc(var(--n) * 30deg)) translateY(-53px) rotate(calc(var(--n) * -30deg))}
-.clock-hand{
-    position:absolute;
-    left:50%;
-    bottom:50%;
-    transform-origin:50% 100%;
-    border-radius:8px;
-    z-index:5;
-}
-.hour-hand{
-    width:6px;
-    height:42px;
-    background:#fff;
-    box-shadow:0 1px 5px rgba(0,0,0,.65),0 0 4px rgba(255,255,255,.55);
-}
-.minute-hand{
-    width:4px;
-    height:59px;
-    background:#e5f2ff;
-    box-shadow:0 1px 5px rgba(0,0,0,.65),0 0 5px rgba(219,234,254,.5);
-}
-.second-hand{
-    width:2px;
-    height:69px;
-    background:#ef4444;
-    box-shadow:0 0 7px rgba(239,68,68,.8);
-}
-.second-hand::after{
-    content:"";
-    position:absolute;
-    left:50%;
-    bottom:-13px;
-    width:2px;
-    height:13px;
-    transform:translateX(-50%);
-    background:#ef4444;
-    border-radius:2px;
-}
-.clock-center{
-    position:absolute;
-    left:50%;
-    top:50%;
-    width:11px;
-    height:11px;
-    transform:translate(-50%,-50%);
-    border-radius:50%;
-    background:#ef4444;
-    border:2px solid #fff;
-    z-index:7;
-    box-shadow:0 0 8px rgba(239,68,68,.75);
-}
-.digital-clock{flex:1;min-width:0;text-align:left}
-.clock-digital-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 #bhopalDigitalTime{
     font-family:Consolas,Monaco,monospace;
-    font-size:38px;
-    line-height:1.05;
+    font-size:39px;
+    line-height:1;
     letter-spacing:1px;
     color:#fff;
     font-weight:800;
     white-space:nowrap;
     text-shadow:0 0 12px rgba(125,211,252,.28);
 }
-.clock-ist-badge{display:none}
-#bhopalDate{margin-top:6px;font-size:14px;line-height:1.3;color:#f8fafc;font-weight:700;white-space:nowrap}
-.clock-divider{height:1px;margin:7px 0 6px;background:rgba(186,230,253,.7)}
-.clock-zone{font-size:13px;line-height:1.3;color:#e0f2fe;font-weight:700}
+.clock-ist-badge{
+    display:block;
+    font-size:13px;
+    font-weight:800;
+    white-space:nowrap;
+}
+#bhopalDate{
+    margin-top:6px;
+    font-size:13px;
+    line-height:1.15;
+    color:#f8fafc;
+    font-weight:700;
+    white-space:nowrap;
+}
+.clock-divider{
+    height:1px;
+    margin:6px 0 5px;
+    background:rgba(186,230,253,.7);
+}
+.clock-zone{
+    font-size:12px;
+    line-height:1.2;
+    color:#e0f2fe;
+    font-weight:700;
+    white-space:nowrap;
+}
 .clock-source-status{display:none!important}
-@media(max-width:1200px){
+
+/* Reserve enough vertical room before the result table so it can never be covered. */
+.table-container{
+    position:relative;
+    z-index:5;
+    margin-top:15px;
+}
+
+@media(max-width:1100px){
     .bhopal-clock{
-        width:min(39vw,560px);
-        right:2vw;
-        height:200px;
-        min-height:200px;
+        right:1.5vw;
+        width:min(39vw,500px);
+        min-width:380px;
+        height:124px;
+        padding:8px 11px;
     }
     .clock-location{font-size:16px}
-    .clock-ist-top{font-size:13px}
-    .clock-ist-top small{font-size:8px;margin-top:13px;margin-left:-34px}
-    .analog-clock{width:148px;height:148px;flex-basis:148px;--tick-radius:67px}
-    .clock-number{font-size:12px;transform:rotate(calc(var(--n) * 30deg)) translateY(-51px) rotate(calc(var(--n) * -30deg))}
     #bhopalDigitalTime{font-size:34px}
-    #bhopalDate,.clock-zone{font-size:12px}
+    .clock-ist-badge{font-size:12px}
+    #bhopalDate{font-size:12px}
+    .clock-zone{font-size:11px}
 }
+
 @media(max-width:800px){
-    body:has(#bhopalClock) h2{margin-top:220px}
-    .bhopal-clock{top:8px;right:8px;width:calc(100% - 16px);max-width:520px;height:auto;min-height:190px}
-    .clock-location{font-size:14px}
-    .clock-ist-top{font-size:12px}
-    .clock-ist-top small{font-size:7px;margin-top:12px;margin-left:-31px}
-    .analog-clock{width:125px;height:125px;flex-basis:125px;--tick-radius:56px}
-    .clock-number{font-size:10px;width:18px;margin-left:-9px;transform:rotate(calc(var(--n) * 30deg)) translateY(-43px) rotate(calc(var(--n) * -30deg))}
-    #bhopalDigitalTime{font-size:27px}
-    #bhopalDate,.clock-zone{font-size:10px}
-}
-@media(max-width:520px){
-    body:has(#bhopalClock) h2{margin-top:190px}
-    .bhopal-clock{top:8px;right:8px;width:calc(100% - 16px);min-height:0;padding:7px 9px}
-    .clock-content{gap:7px}
-    .analog-clock{width:105px;height:105px;flex-basis:105px;--tick-radius:46px}
-    .clock-number{font-size:9px;transform:rotate(calc(var(--n) * 30deg)) translateY(-37px) rotate(calc(var(--n) * -30deg))}
-    #bhopalDigitalTime{font-size:22px}
-    #bhopalDate,.clock-zone{font-size:9px}
-}
-
-
-
-/* ================= CLOCK FINAL POSITION + THIN HANDS ================= */
-/* Place the frozen clock inside the dashboard's reserved right-side area. */
-.bhopal-clock{
-    top:37vh;
-    right:2.2vw;
-    width:min(35vw,580px);
-    height:190px;
-    min-height:190px;
-    padding:7px 10px;
-}
-
-.clock-content{gap:10px}
-
-.analog-clock{
-    width:136px;
-    height:136px;
-    flex:0 0 136px;
-    --tick-radius:60px;
-}
-
-.clock-number{
-    width:24px;
-    height:22px;
-    line-height:22px;
-    margin:-11px 0 0 -12px;
-    font-size:12px;
-    transform:rotate(calc(var(--n) * 30deg)) translateY(-46px) rotate(calc(var(--n) * -30deg));
-}
-
-/* Thin, clean clock hands */
-.hour-hand{
-    width:4px;
-    height:38px;
-}
-.minute-hand{
-    width:3px;
-    height:53px;
-}
-.second-hand{
-    width:1.5px;
-    height:62px;
-}
-.second-hand::after{
-    width:1.5px;
-    height:11px;
-    bottom:-11px;
-}
-.clock-center{
-    width:10px;
-    height:10px;
-}
-
-#bhopalDigitalTime{font-size:34px}
-#bhopalDate{font-size:13px}
-.clock-zone{font-size:12px}
-
-@media(max-width:1200px){
     .bhopal-clock{
-        top:37vh;
-        right:1.8vw;
-        width:min(38vw,540px);
-        height:184px;
-        min-height:184px;
+        position:relative;
+        top:auto;
+        right:auto;
+        width:calc(100% - 20px);
+        min-width:0;
+        height:auto;
+        min-height:120px;
+        margin:10px auto 8px;
+        order:-1;
     }
-    .analog-clock{
-        width:130px;
-        height:130px;
-        flex-basis:130px;
-        --tick-radius:57px;
+    body:has(#bhopalClock){
+        display:flex;
     }
-    .clock-number{
-        font-size:11px;
-        transform:rotate(calc(var(--n) * 30deg)) translateY(-44px) rotate(calc(var(--n) * -30deg));
-    }
-    #bhopalDigitalTime{font-size:31px}
+    body:has(#bhopalClock) h2{margin-top:8px}
+    .clock-location{font-size:14px}
+    #bhopalDigitalTime{font-size:28px}
+    .clock-zone{white-space:normal}
 }

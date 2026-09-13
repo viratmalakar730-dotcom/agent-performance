@@ -527,18 +527,19 @@ tbody tr:hover td{
 /* ================= DASHBOARD CLOCK CLEARANCE ================= */
 /* The floating clock stays at the top-right, while dashboard content starts below it. */
 body:has(#bhopalClock) h2{
-    margin-top:320px;
+    margin-top:15px;
 }
 
 /* ================= BHOPAL ONLINE WORLD CLOCK ================= */
 .bhopal-clock{
     position:fixed;
-    top:12px;
-    right:14px;
+    top:44vh;
+    right:3.1vw;
     z-index:2000;
-    width:560px;
-    min-height:260px;
-    padding:14px 18px;
+    width:min(36vw, 600px);
+    height:208px;
+    min-height:208px;
+    padding:8px 12px;
     box-sizing:border-box;
     border:2px solid rgba(96,190,255,.82);
     border-radius:18px;
@@ -553,11 +554,11 @@ body:has(#bhopalClock) h2{
     display:flex;
     align-items:flex-start;
     justify-content:space-between;
-    gap:12px;
-    margin-bottom:8px;
+    gap:10px;
+    margin-bottom:3px;
 }
 .clock-location{
-    font-size:20px;
+    font-size:18px;
     font-weight:800;
     line-height:1.2;
     color:#fff;
@@ -569,16 +570,16 @@ body:has(#bhopalClock) h2{
     display:flex;
     align-items:flex-start;
     gap:6px;
-    font-size:17px;
+    font-size:14px;
     line-height:1.05;
     white-space:nowrap;
     text-align:right;
 }
 .clock-ist-top small{
     display:block;
-    margin-top:18px;
-    margin-left:-44px;
-    font-size:10px;
+    margin-top:14px;
+    margin-left:-37px;
+    font-size:9px;
     font-weight:700;
     opacity:.9;
 }
@@ -586,19 +587,19 @@ body:has(#bhopalClock) h2{
     display:flex;
     align-items:center;
     justify-content:center;
-    gap:18px;
+    gap:12px;
 }
 .analog-clock{
     position:relative;
-    width:190px;
-    height:190px;
-    flex:0 0 190px;
+    width:155px;
+    height:155px;
+    flex:0 0 155px;
     border:3px solid rgba(219,242,255,.96);
     border-radius:50%;
     background:radial-gradient(circle at 50% 45%,#16345f 0%,#071b3b 66%,#020b1d 100%);
     box-shadow:inset 0 0 18px rgba(0,0,0,.72),0 0 15px rgba(56,189,248,.35);
     overflow:hidden;
-    --tick-radius:87px;
+    --tick-radius:70px;
 }
 .analog-clock::before{
     content:"";
@@ -700,7 +701,7 @@ body:has(#bhopalClock) h2{
     height:26px;
     line-height:26px;
     margin:-13px 0 0 -15px;
-    font-size:15px;
+    font-size:13px;
     color:#fff;
     font-weight:800;
     text-align:center;
@@ -708,7 +709,7 @@ body:has(#bhopalClock) h2{
     text-shadow:0 1px 5px #000;
 }
 .n1{--n:1}.n2{--n:2}.n3{--n:3}.n4{--n:4}.n5{--n:5}.n6{--n:6}.n7{--n:7}.n8{--n:8}.n9{--n:9}.n10{--n:10}.n11{--n:11}.n12{--n:0}
-.clock-number{transform:rotate(calc(var(--n) * 30deg)) translateY(-66px) rotate(calc(var(--n) * -30deg))}
+.clock-number{transform:rotate(calc(var(--n) * 30deg)) translateY(-53px) rotate(calc(var(--n) * -30deg))}
 .clock-hand{
     position:absolute;
     left:50%;
@@ -719,19 +720,19 @@ body:has(#bhopalClock) h2{
 }
 .hour-hand{
     width:6px;
-    height:52px;
+    height:42px;
     background:#fff;
     box-shadow:0 1px 5px rgba(0,0,0,.65),0 0 4px rgba(255,255,255,.55);
 }
 .minute-hand{
     width:4px;
-    height:72px;
+    height:59px;
     background:#e5f2ff;
     box-shadow:0 1px 5px rgba(0,0,0,.65),0 0 5px rgba(219,234,254,.5);
 }
 .second-hand{
     width:2px;
-    height:84px;
+    height:69px;
     background:#ef4444;
     box-shadow:0 0 7px rgba(239,68,68,.8);
 }
@@ -763,7 +764,7 @@ body:has(#bhopalClock) h2{
 .clock-digital-row{display:flex;align-items:center;justify-content:space-between;gap:8px}
 #bhopalDigitalTime{
     font-family:Consolas,Monaco,monospace;
-    font-size:46px;
+    font-size:38px;
     line-height:1.05;
     letter-spacing:1px;
     color:#fff;
@@ -772,26 +773,43 @@ body:has(#bhopalClock) h2{
     text-shadow:0 0 12px rgba(125,211,252,.28);
 }
 .clock-ist-badge{display:none}
-#bhopalDate{margin-top:12px;font-size:17px;line-height:1.3;color:#f8fafc;font-weight:700;white-space:nowrap}
-.clock-divider{height:1px;margin:12px 0 10px;background:rgba(186,230,253,.7)}
-.clock-zone{font-size:16px;line-height:1.3;color:#e0f2fe;font-weight:700}
+#bhopalDate{margin-top:6px;font-size:14px;line-height:1.3;color:#f8fafc;font-weight:700;white-space:nowrap}
+.clock-divider{height:1px;margin:7px 0 6px;background:rgba(186,230,253,.7)}
+.clock-zone{font-size:13px;line-height:1.3;color:#e0f2fe;font-weight:700}
 .clock-source-status{display:none!important}
-@media(max-width:900px){
-    body:has(#bhopalClock) h2{margin-top:270px}
-    .bhopal-clock{width:430px;min-height:220px;padding:11px 13px}
-    .clock-location{font-size:15px}
-    .clock-ist-top{font-size:13px}.clock-ist-top small{font-size:8px;margin-top:15px;margin-left:-37px}
-    .clock-content{gap:14px}.analog-clock{width:145px;height:145px;flex-basis:145px;--tick-radius:66px}
+@media(max-width:1200px){
+    .bhopal-clock{
+        width:min(39vw,560px);
+        right:2vw;
+        height:200px;
+        min-height:200px;
+    }
+    .clock-location{font-size:16px}
+    .clock-ist-top{font-size:13px}
+    .clock-ist-top small{font-size:8px;margin-top:13px;margin-left:-34px}
+    .analog-clock{width:148px;height:148px;flex-basis:148px;--tick-radius:67px}
     .clock-number{font-size:12px;transform:rotate(calc(var(--n) * 30deg)) translateY(-51px) rotate(calc(var(--n) * -30deg))}
-    .clock-tick{transform-origin:50% 50%}.tick-0,.tick-5,.tick-10,.tick-15,.tick-20,.tick-25,.tick-30,.tick-35,.tick-40,.tick-45,.tick-50,.tick-55{height:10px}
-    .clock-tick:not(.tick-0):not(.tick-5):not(.tick-10):not(.tick-15):not(.tick-20):not(.tick-25):not(.tick-30):not(.tick-35):not(.tick-40):not(.tick-45):not(.tick-50):not(.tick-55){height:5px}
-    #bhopalDigitalTime{font-size:34px}.clock-ist-badge,#bhopalDate,.clock-zone{font-size:12px}
+    #bhopalDigitalTime{font-size:34px}
+    #bhopalDate,.clock-zone{font-size:12px}
 }
-@media(max-width:600px){
-    body:has(#bhopalClock) h2{margin-top:145px}
-    .bhopal-clock{top:8px;right:8px;width:calc(100% - 16px);max-width:380px;min-height:0}
-    .clock-location{font-size:13px}.clock-ist-top{font-size:11px}.clock-ist-top small{font-size:7px;margin-top:12px;margin-left:-32px}
-    .clock-content{gap:8px}.analog-clock{width:105px;height:105px;flex-basis:105px;--tick-radius:46px}
-    .clock-number{font-size:10px;width:18px;margin-left:-9px;transform:rotate(calc(var(--n) * 30deg)) translateY(-38px) rotate(calc(var(--n) * -30deg))}
-    #bhopalDigitalTime{font-size:20px}#bhopalDate,.clock-zone{font-size:10px}
+@media(max-width:800px){
+    body:has(#bhopalClock) h2{margin-top:220px}
+    .bhopal-clock{top:8px;right:8px;width:calc(100% - 16px);max-width:520px;height:auto;min-height:190px}
+    .clock-location{font-size:14px}
+    .clock-ist-top{font-size:12px}
+    .clock-ist-top small{font-size:7px;margin-top:12px;margin-left:-31px}
+    .analog-clock{width:125px;height:125px;flex-basis:125px;--tick-radius:56px}
+    .clock-number{font-size:10px;width:18px;margin-left:-9px;transform:rotate(calc(var(--n) * 30deg)) translateY(-43px) rotate(calc(var(--n) * -30deg))}
+    #bhopalDigitalTime{font-size:27px}
+    #bhopalDate,.clock-zone{font-size:10px}
 }
+@media(max-width:520px){
+    body:has(#bhopalClock) h2{margin-top:190px}
+    .bhopal-clock{top:8px;right:8px;width:calc(100% - 16px);min-height:0;padding:7px 9px}
+    .clock-content{gap:7px}
+    .analog-clock{width:105px;height:105px;flex-basis:105px;--tick-radius:46px}
+    .clock-number{font-size:9px;transform:rotate(calc(var(--n) * 30deg)) translateY(-37px) rotate(calc(var(--n) * -30deg))}
+    #bhopalDigitalTime{font-size:22px}
+    #bhopalDate,.clock-zone{font-size:9px}
+}
+

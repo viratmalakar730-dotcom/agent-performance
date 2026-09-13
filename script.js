@@ -1,92 +1,594 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Live Dashboard</title>
-<link rel="stylesheet" href="style.css">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-</head>
+/* ================= BODY (LIVE ANIMATED BG) ================= */
 
-<body>
+body{
+    font-family: Arial, sans-serif;
+    color:white;
+    margin:0;
+    text-align:center;
+    font-weight:bold;
 
-<!-- 🕐 BHOPAL ONLINE WORLD CLOCK -->
-<div id="bhopalClock" class="bhopal-clock" aria-label="Bhopal online world clock">
-    <div class="clock-topbar">
-        <div class="clock-location">📍 Bhopal, Madhya Pradesh</div>
-        <div class="clock-online"><span class="online-dot"></span> ONLINE</div>
-    </div>
+    display:flex;
+    flex-direction:column;
+    align-items:center;
 
-    <div class="clock-content">
-        <div class="analog-clock" aria-hidden="true">
-            <div class="clock-number n12">12</div>
-            <div class="clock-number n1">1</div>
-            <div class="clock-number n2">2</div>
-            <div class="clock-number n3">3</div>
-            <div class="clock-number n4">4</div>
-            <div class="clock-number n5">5</div>
-            <div class="clock-number n6">6</div>
-            <div class="clock-number n7">7</div>
-            <div class="clock-number n8">8</div>
-            <div class="clock-number n9">9</div>
-            <div class="clock-number n10">10</div>
-            <div class="clock-number n11">11</div>
-            <div class="clock-hand hour-hand" id="hourHand"></div>
-            <div class="clock-hand minute-hand" id="minuteHand"></div>
-            <div class="clock-hand second-hand" id="secondHand"></div>
-            <div class="clock-center"></div>
-        </div>
+    background: linear-gradient(-45deg, #020617, #0b1f3a, #1e3a8a, #020617);
+    background-size: 400% 400%;
+    animation: bgMove 12s ease infinite;
 
-        <div class="digital-clock">
-            <div class="clock-digital-row">
-                <div id="bhopalDigitalTime">--:--:--</div>
-                <div class="clock-ist-badge">🇮🇳 IST</div>
-            </div>
-            <div id="bhopalDate">Connecting to online time...</div>
-            <div class="clock-divider"></div>
-            <div class="clock-zone">📅 IN IST • Asia/Kolkata</div>
-            <div id="clockSourceStatus" class="clock-source-status">Connecting to world time...</div>
-        </div>
-    </div>
-</div>
+    width:100%;
+    overflow-x:hidden;
+}
 
-<h2>📊 Agent Performance Dashboard</h2>
+@keyframes bgMove{
+    0%{background-position:0% 50%;}
+    50%{background-position:100% 50%;}
+    100%{background-position:0% 50%;}
+}
 
-<div id="reportTime"></div>
+/* ================= TITLE ================= */
 
-<input type="text" id="search" placeholder="🔍 Search..." onkeyup="searchTable()">
+h2{
+    color:white;
+    margin:15px auto;
+    text-align:center;
 
-<div id="cards"></div>
+    text-shadow:
+        0 0 12px rgba(255,255,255,0.6),
+        0 0 25px rgba(59,130,246,0.3);
+}
 
-<div class="table-container">
-<table id="table">
-<thead>
-<tr>
-<th>S.No</th>
-<th>Employee ID</th>
-<th>Agent Full Name</th>
-<th>Total Login</th>
-<th>Net Login</th>
-<th>Total Break</th>
-<th>Total Meeting</th>
-<th>AHT</th>
-<th>Total Mature</th>
-<th>IB Mature</th>
-<th>OB Mature</th>
-</tr>
-</thead>
-<tbody></tbody>
-</table>
-</div>
+/* ================= UPLOAD PAGE ================= */
 
-<div id="brandingLive"> Powered by Chandan Malakar </div>
+.container{
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    min-height:100vh;
 
-<audio id="notifySound"></audio>
+    width:100%;
+    padding:20px;
+    box-sizing:border-box;
+}
 
-<div id="liveAlert">🚀 Agent Performance Report Updated</div>
+.box{
+    background: linear-gradient(145deg,#0b3d91,#072c6b);
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    padding:30px;
+    border-radius:22px;
+    width:350px;
 
-<script src="script.js"></script>
+    text-align:center;
 
-</body>
-</html>
+    overflow:hidden;
+    isolation:isolate;
+
+    box-shadow:
+        0 14px 35px rgba(0,0,0,0.65),
+        inset 0 1px 1px rgba(255,255,255,0.08),
+        0 0 25px rgba(30,58,138,0.25);
+
+    backdrop-filter: blur(8px);
+}
+
+.box input{
+    margin:10px auto;
+    padding:10px;
+    width:90%;
+
+    display:block;
+
+    border-radius:8px;
+    border:none;
+    outline:none;
+
+    background:#f8fafc;
+
+    box-shadow:
+        inset 2px 2px 5px rgba(0,0,0,0.3),
+        0 2px 8px rgba(0,0,0,0.15);
+
+    transition:0.25s;
+}
+
+.box input:focus{
+    transform:scale(1.02);
+
+    box-shadow:
+        0 0 12px rgba(14,165,233,0.8),
+        inset 2px 2px 5px rgba(0,0,0,0.2);
+}
+
+/* ================= BUTTON ================= */
+
+button{
+    padding:10px 18px;
+    border:none;
+    border-radius:10px;
+
+    background:#0ea5e9;
+    color:white;
+
+    font-weight:bold;
+    cursor:pointer;
+
+    margin:8px;
+
+    transition:all .25s ease;
+
+    box-shadow:
+        0 8px 20px rgba(0,0,0,0.65),
+        inset 0 1px 1px rgba(255,255,255,0.2);
+}
+
+button:hover{
+    transform:translateY(-3px) scale(1.06);
+
+    box-shadow:
+        0 0 20px rgba(14,165,233,1),
+        0 0 40px rgba(14,165,233,0.6),
+        0 12px 28px rgba(0,0,0,0.7);
+}
+
+/* ================= CARDS ================= */
+
+#cards{
+    display:flex;
+    gap:15px;
+    justify-content:center;
+    align-items:center;
+    flex-wrap:wrap;
+
+    width:100%;
+    margin:20px auto;
+
+    background:transparent !important;
+    box-shadow:none !important;
+}
+
+.card{
+    background:linear-gradient(145deg,#0b3d91,#072c6b);
+
+    padding:15px;
+    border-radius:14px;
+    width:150px;
+
+    color:white;
+    text-align:center;
+
+    overflow:hidden;
+    isolation:isolate;
+
+    transition:all .25s ease;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.55),
+        inset 0 1px 1px rgba(255,255,255,0.08),
+        0 0 18px rgba(30,58,138,0.25);
+}
+
+.card:hover{
+    transform:translateY(-5px) scale(1.04);
+
+    box-shadow:
+        0 0 30px rgba(30,58,138,0.9),
+        0 0 55px rgba(30,58,138,0.5),
+        0 12px 28px rgba(0,0,0,0.7);
+}
+
+/* ================= TABLE CONTAINER ================= */
+
+.table-container{
+    max-height:520px;
+
+    overflow-y:auto;
+    overflow-x:auto;
+
+    width:98%;
+    margin:15px auto;
+
+    border-radius:14px;
+
+    position:relative;
+
+    scroll-behavior:smooth;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.35);
+}
+
+/* ================= TABLE ================= */
+
+table{
+    width:100%;
+
+    border-collapse:separate;
+    border-spacing:0;
+
+    background:white;
+    color:black;
+
+    font-weight:bold;
+    font-size:15px;
+
+    position:relative;
+
+    box-shadow:
+        0 15px 40px rgba(0,0,0,0.7),
+        0 0 20px rgba(0,0,0,0.25);
+}
+
+/* ================= FIXED HEADER ================= */
+
+thead th{
+    position:sticky;
+
+    top:0;
+
+    z-index:1000;
+
+    background: linear-gradient(145deg,#0b3d91,#072c6b);
+
+    color:white;
+
+    padding:14px 12px;
+
+    border:1px solid rgba(255,255,255,0.1);
+
+    text-align:center;
+
+    box-shadow:
+        inset -3px -3px 8px rgba(255,255,255,0.08),
+        inset 3px 3px 10px rgba(0,0,0,0.85),
+        0 4px 10px rgba(0,0,0,0.35);
+}
+
+/* 🔥 HEADER BOTTOM GLOW LINE */
+
+thead th::after{
+    content:"";
+
+    position:absolute;
+
+    left:0;
+    bottom:-2px;
+
+    width:100%;
+    height:3px;
+
+    background:#38bdf8;
+
+    box-shadow:
+        0 0 10px #38bdf8,
+        0 0 20px #38bdf8;
+}
+
+/* ================= CELLS ================= */
+
+td{
+    padding:10px;
+
+    border:1px solid rgba(0,0,0,0.15);
+
+    background: linear-gradient(145deg,#ffffff,#eef2f7);
+
+    color:black;
+    text-align:center;
+
+    transition:0.2s;
+
+    box-shadow:
+        inset -2px -2px 4px rgba(255,255,255,0.7),
+        inset 2px 2px 4px rgba(0,0,0,0.18);
+}
+
+/* ================= ROW HOVER ================= */
+
+tbody tr{
+    transition:all .18s ease;
+}
+
+tbody tr:hover td{
+    background:#1e3a8a !important;
+    color:white !important;
+
+    text-shadow:0 0 5px rgba(255,255,255,0.6);
+}
+
+/* ================= SCROLL ================= */
+
+.table-container::-webkit-scrollbar{
+    width:8px;
+    height:8px;
+}
+
+.table-container::-webkit-scrollbar-thumb{
+    background:#0b3d91;
+    border-radius:10px;
+}
+
+.table-container::-webkit-scrollbar-track{
+    background:#dbeafe;
+}
+
+/* ================= REPORT TIME ================= */
+
+#reportTime{
+    color:white;
+    font-weight:bold;
+
+    width:100%;
+    text-align:center;
+
+    margin:15px auto;
+
+    text-shadow:0 0 10px rgba(255,255,255,0.5);
+}
+
+/* ================= SEARCH ================= */
+
+#search{
+    width:220px;
+    max-width:90%;
+
+    padding:8px 12px;
+
+    border:none;
+    border-radius:8px;
+
+    outline:none;
+
+    background:white;
+    color:black;
+
+    margin:10px auto;
+    display:block;
+
+    text-align:center;
+
+    box-shadow:
+        0 6px 18px rgba(0,0,0,0.35);
+
+    transition:0.2s;
+}
+
+#search:focus{
+    transform:scale(1.03);
+
+    box-shadow:
+        0 0 15px rgba(14,165,233,0.8),
+        0 6px 18px rgba(0,0,0,0.35);
+}
+
+/* ================= ALERT ================= */
+
+#liveAlert{
+    position:fixed;
+    bottom:20px;
+    right:20px;
+
+    background: linear-gradient(145deg,#0ea5e9,#0369a1);
+
+    color:white;
+
+    padding:14px 24px;
+    border-radius:12px;
+
+    display:none;
+    z-index:999;
+
+    box-shadow:
+        0 0 30px rgba(14,165,233,0.9),
+        0 0 60px rgba(14,165,233,0.5);
+}
+
+@keyframes blinkSmooth{
+    0%{opacity:1; transform:scale(1);}
+    50%{opacity:0.75; transform:scale(1.08);}
+    100%{opacity:1; transform:scale(1);}
+}
+
+.blink{
+    animation:blinkSmooth 0.9s infinite;
+}
+
+/* ================= BRANDING ================= */
+
+#branding,
+#brandingLive{
+    margin:20px auto;
+
+    font-size:14px;
+    color:white;
+
+    text-align:center;
+    width:100%;
+
+    text-shadow:0 0 10px rgba(255,255,255,0.55);
+}
+/* ================= PREMIUM FLOAT CONDITIONAL ================= */
+
+.green3d,
+.yellow3d,
+.red3d{
+
+    position:relative;
+
+    transition:all .22s ease;
+
+    transform:translateY(-2px);
+
+    border-radius:6px;
+
+    animation:floatGlow 2s ease-in-out infinite alternate;
+}
+
+/* ================= GREEN ================= */
+
+.green3d{
+
+    background:
+        linear-gradient(
+            145deg,
+            #22c55e,
+            #15803d
+        ) !important;
+
+    color:white !important;
+
+    box-shadow:
+        0 3px 10px rgba(34,197,94,.35),
+        inset 0 1px 1px rgba(255,255,255,.2);
+}
+
+/* ================= YELLOW ================= */
+
+.yellow3d{
+
+    background:
+        linear-gradient(
+            145deg,
+            #facc15,
+            #ca8a04
+        ) !important;
+
+    color:black !important;
+
+    box-shadow:
+        0 3px 10px rgba(250,204,21,.35),
+        inset 0 1px 1px rgba(255,255,255,.2);
+}
+
+/* ================= RED ================= */
+
+.red3d{
+
+    background:
+        linear-gradient(
+            145deg,
+            #dc2626,
+            #7f1d1d
+        ) !important;
+
+    color:white !important;
+
+    box-shadow:
+        0 3px 10px rgba(220,38,38,.35),
+        inset 0 1px 1px rgba(255,255,255,.15);
+}
+
+/* ================= FLOAT EFFECT ================= */
+
+@keyframes floatGlow{
+
+    from{
+        transform:translateY(-1px);
+    }
+
+    to{
+        transform:translateY(-3px);
+    }
+}
+
+/* ================= MOBILE ================= */
+
+@media(max-width:768px){
+
+    h2{
+        font-size:22px;
+    }
+
+    #cards{
+        gap:10px;
+    }
+
+    .card{
+        width:130px;
+        padding:12px;
+    }
+
+    table{
+        font-size:12px;
+    }
+
+    button{
+        min-width:110px;
+    }
+
+    .box{
+        width:92%;
+    }
+
+    .table-container{
+        overflow:auto;
+    }
+}
+
+
+/* ================= BHOPAL ONLINE WORLD CLOCK ================= */
+
+'.bhopal-clock{position:fixed;top:14px;right:14px;z-index:2000;width:430px;min-height:225px;padding:14px 16px;box-sizing:border-box;border:2px solid rgba(125,211,252,.78);border-radius:18px;background:linear-gradient(145deg,rgba(8,31,73,.94),rgba(2,15,38,.91));backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);box-shadow:0 12px 32px rgba(0,0,0,.45),0 0 24px rgba(56,189,248,.22),inset 0 1px 1px rgba(255,255,255,.16);color:#fff;pointer-events:none}
+.clock-topbar{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.clock-location{font-size:18px;font-weight:800;letter-spacing:.2px;color:#fff;text-align:left;text-shadow:0 0 10px rgba(125,211,252,.25)}.clock-online{font-size:13px;font-weight:800;color:#fff;white-space:nowrap;display:flex;align-items:center;gap:6px}.online-dot{width:10px;height:10px;border-radius:50%;background:#22c55e;box-shadow:0 0 10px rgba(34,197,94,.95);animation:onlinePulse 1.5s ease-in-out infinite}@keyframes onlinePulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.55;transform:scale(.78)}}
+.clock-content{display:flex;align-items:center;justify-content:center;gap:22px}.analog-clock{position:relative;width:150px;height:150px;flex:0 0 150px;border:3px solid rgba(219,242,255,.95);border-radius:50%;background:radial-gradient(circle at 50% 45%,#132e59 0%,#071a39 68%,#020b1d 100%);box-shadow:inset 0 0 18px rgba(0,0,0,.72),0 0 16px rgba(56,189,248,.35);overflow:hidden}.analog-clock::before{content:"";position:absolute;inset:7px;border:1px solid rgba(125,211,252,.42);border-radius:50%;z-index:1}.clock-ticks{position:absolute;inset:0;border-radius:50%;z-index:2}.clock-tick{position:absolute;left:50%;top:50%;transform-origin:50% 0;background:rgba(255,255,255,.78)}
+.tick-0{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(0deg);}
+.tick-1{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(6deg);}
+.tick-2{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(12deg);}
+.tick-3{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(18deg);}
+.tick-4{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(24deg);}
+.tick-5{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(30deg);}
+.tick-6{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(36deg);}
+.tick-7{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(42deg);}
+.tick-8{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(48deg);}
+.tick-9{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(54deg);}
+.tick-10{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(60deg);}
+.tick-11{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(66deg);}
+.tick-12{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(72deg);}
+.tick-13{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(78deg);}
+.tick-14{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(84deg);}
+.tick-15{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(90deg);}
+.tick-16{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(96deg);}
+.tick-17{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(102deg);}
+.tick-18{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(108deg);}
+.tick-19{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(114deg);}
+.tick-20{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(120deg);}
+.tick-21{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(126deg);}
+.tick-22{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(132deg);}
+.tick-23{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(138deg);}
+.tick-24{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(144deg);}
+.tick-25{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(150deg);}
+.tick-26{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(156deg);}
+.tick-27{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(162deg);}
+.tick-28{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(168deg);}
+.tick-29{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(174deg);}
+.tick-30{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(180deg);}
+.tick-31{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(186deg);}
+.tick-32{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(192deg);}
+.tick-33{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(198deg);}
+.tick-34{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(204deg);}
+.tick-35{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(210deg);}
+.tick-36{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(216deg);}
+.tick-37{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(222deg);}
+.tick-38{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(228deg);}
+.tick-39{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(234deg);}
+.tick-40{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(240deg);}
+.tick-41{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(246deg);}
+.tick-42{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(252deg);}
+.tick-43{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(258deg);}
+.tick-44{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(264deg);}
+.tick-45{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(270deg);}
+.tick-46{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(276deg);}
+.tick-47{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(282deg);}
+.tick-48{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(288deg);}
+.tick-49{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(294deg);}
+.tick-50{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(300deg);}
+.tick-51{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(306deg);}
+.tick-52{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(312deg);}
+.tick-53{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(318deg);}
+.tick-54{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(324deg);}
+.tick-55{width:2px;height:9px;opacity:1;transform:translate(-50%,-68px) rotate(330deg);}
+.tick-56{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(336deg);}
+.tick-57{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(342deg);}
+.tick-58{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(348deg);}
+.tick-59{width:1px;height:5px;opacity:.7;transform:translate(-50%,-68px) rotate(354deg);}
+.clock-number{position:absolute;left:50%;top:50%;width:24px;height:22px;line-height:22px;margin:-11px 0 0 -12px;font-size:14px;color:#fff;font-weight:800;text-align:center;z-index:3;text-shadow:0 1px 4px #000}.n1{--n:1}.n2{--n:2}.n3{--n:3}.n4{--n:4}.n5{--n:5}.n6{--n:6}.n7{--n:7}.n8{--n:8}.n9{--n:9}.n10{--n:10}.n11{--n:11}.n12{--n:0}.clock-number{transform:rotate(calc(var(--n) * 30deg)) translateY(-55px) rotate(calc(var(--n) * -30deg))}.clock-hand{position:absolute;left:50%;bottom:50%;transform-origin:50% 100%;border-radius:8px;z-index:5}.hour-hand{width:5px;height:40px;background:#fff;box-shadow:0 0 4px rgba(255,255,255,.55)}.minute-hand{width:4px;height:55px;background:#dbeafe;box-shadow:0 0 5px rgba(219,234,254,.45)}.second-hand{width:2px;height:64px;background:#ef4444;box-shadow:0 0 7px rgba(239,68,68,.7)}.clock-center{position:absolute;left:50%;top:50%;width:10px;height:10px;transform:translate(-50%,-50%);border-radius:50%;background:#ef4444;border:2px solid #fff;z-index:7;box-shadow:0 0 8px rgba(239,68,68,.75)}.digital-clock{flex:1;min-width:0;text-align:left}.clock-digital-row{display:flex;align-items:center;justify-content:space-between;gap:10px}#bhopalDigitalTime{font-family:Consolas,Monaco,monospace;font-size:37px;line-height:1.05;letter-spacing:1px;color:#fff;font-weight:800;white-space:nowrap;text-shadow:0 0 12px rgba(125,211,252,.3)}.clock-ist-badge{font-size:15px;font-weight:800;white-space:nowrap}#bhopalDate{margin-top:9px;font-size:15px;line-height:1.3;color:#f8fafc;font-weight:700;white-space:nowrap}.clock-divider{height:1px;margin:12px 0 10px;background:rgba(186,230,253,.7)}.clock-zone{font-size:15px;color:#e0f2fe;font-weight:700}.clock-source-status{display:none!important}
+@media(max-width:900px){.bhopal-clock{width:360px;min-height:190px;padding:11px 13px}.clock-location{font-size:15px}.clock-online{font-size:12px}.clock-content{gap:14px}.analog-clock{width:120px;height:120px;flex-basis:120px}.clock-number{font-size:12px;transform:rotate(calc(var(--n) * 30deg)) translateY(-45px) rotate(calc(var(--n) * -30deg))}.tick-0{transform:translate(-50%,-54px) rotate(0deg)}#bhopalDigitalTime{font-size:29px}.clock-ist-badge,#bhopalDate,.clock-zone{font-size:12px}}
+@media(max-width:600px){.bhopal-clock{position:fixed;top:8px;right:8px;width:calc(100% - 16px);max-width:350px;min-height:0}.clock-location{font-size:13px}.clock-online{font-size:10px}.clock-content{gap:8px}.analog-clock{width:100px;height:100px;flex-basis:100px}.clock-number{font-size:10px;width:18px;margin-left:-9px;transform:rotate(calc(var(--n) * 30deg)) translateY(-37px) rotate(calc(var(--n) * -30deg))}#bhopalDigitalTime{font-size:21px}.clock-ist-badge,#bhopalDate,.clock-zone{font-size:10px}}

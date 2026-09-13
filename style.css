@@ -524,6 +524,12 @@ tbody tr:hover td{
 }
 
 
+/* ================= DASHBOARD CLOCK CLEARANCE ================= */
+/* The floating clock stays at the top-right, while dashboard content starts below it. */
+body:has(#bhopalClock) h2{
+    margin-top:320px;
+}
+
 /* ================= BHOPAL ONLINE WORLD CLOCK ================= */
 .bhopal-clock{
     position:fixed;
@@ -771,6 +777,7 @@ tbody tr:hover td{
 .clock-zone{font-size:16px;line-height:1.3;color:#e0f2fe;font-weight:700}
 .clock-source-status{display:none!important}
 @media(max-width:900px){
+    body:has(#bhopalClock) h2{margin-top:270px}
     .bhopal-clock{width:430px;min-height:220px;padding:11px 13px}
     .clock-location{font-size:15px}
     .clock-ist-top{font-size:13px}.clock-ist-top small{font-size:8px;margin-top:15px;margin-left:-37px}
@@ -781,6 +788,7 @@ tbody tr:hover td{
     #bhopalDigitalTime{font-size:34px}.clock-ist-badge,#bhopalDate,.clock-zone{font-size:12px}
 }
 @media(max-width:600px){
+    body:has(#bhopalClock) h2{margin-top:145px}
     .bhopal-clock{top:8px;right:8px;width:calc(100% - 16px);max-width:380px;min-height:0}
     .clock-location{font-size:13px}.clock-ist-top{font-size:11px}.clock-ist-top small{font-size:7px;margin-top:12px;margin-left:-32px}
     .clock-content{gap:8px}.analog-clock{width:105px;height:105px;flex-basis:105px;--tick-radius:46px}

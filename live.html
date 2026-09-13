@@ -8,24 +8,103 @@
 
 <body>
 
-<!-- 🕐 BHOPAL LIVE CLOCK -->
-<div id="bhopalClock" class="bhopal-clock" aria-label="Bhopal live date and time">
-    <div class="clock-location">📍 BHOPAL, MADHYA PRADESH</div>
-    <div class="clock-main">
+<!-- 🕐 BHOPAL ONLINE WORLD CLOCK -->
+<div id="bhopalClock" class="bhopal-clock" aria-label="Bhopal online world clock">
+    <div class="clock-topbar">
+        <div class="clock-location">📍 Bhopal, Madhya Pradesh</div>
+        <div class="clock-online"><span class="online-dot"></span> ONLINE</div>
+    </div>
+    <div class="clock-content">
         <div class="analog-clock" aria-hidden="true">
-            <div class="clock-number n12">12</div>
+            <div class="clock-ticks" aria-hidden="true">
+                <span class="clock-tick tick-0"></span>
+                <span class="clock-tick tick-1"></span>
+                <span class="clock-tick tick-2"></span>
+                <span class="clock-tick tick-3"></span>
+                <span class="clock-tick tick-4"></span>
+                <span class="clock-tick tick-5"></span>
+                <span class="clock-tick tick-6"></span>
+                <span class="clock-tick tick-7"></span>
+                <span class="clock-tick tick-8"></span>
+                <span class="clock-tick tick-9"></span>
+                <span class="clock-tick tick-10"></span>
+                <span class="clock-tick tick-11"></span>
+                <span class="clock-tick tick-12"></span>
+                <span class="clock-tick tick-13"></span>
+                <span class="clock-tick tick-14"></span>
+                <span class="clock-tick tick-15"></span>
+                <span class="clock-tick tick-16"></span>
+                <span class="clock-tick tick-17"></span>
+                <span class="clock-tick tick-18"></span>
+                <span class="clock-tick tick-19"></span>
+                <span class="clock-tick tick-20"></span>
+                <span class="clock-tick tick-21"></span>
+                <span class="clock-tick tick-22"></span>
+                <span class="clock-tick tick-23"></span>
+                <span class="clock-tick tick-24"></span>
+                <span class="clock-tick tick-25"></span>
+                <span class="clock-tick tick-26"></span>
+                <span class="clock-tick tick-27"></span>
+                <span class="clock-tick tick-28"></span>
+                <span class="clock-tick tick-29"></span>
+                <span class="clock-tick tick-30"></span>
+                <span class="clock-tick tick-31"></span>
+                <span class="clock-tick tick-32"></span>
+                <span class="clock-tick tick-33"></span>
+                <span class="clock-tick tick-34"></span>
+                <span class="clock-tick tick-35"></span>
+                <span class="clock-tick tick-36"></span>
+                <span class="clock-tick tick-37"></span>
+                <span class="clock-tick tick-38"></span>
+                <span class="clock-tick tick-39"></span>
+                <span class="clock-tick tick-40"></span>
+                <span class="clock-tick tick-41"></span>
+                <span class="clock-tick tick-42"></span>
+                <span class="clock-tick tick-43"></span>
+                <span class="clock-tick tick-44"></span>
+                <span class="clock-tick tick-45"></span>
+                <span class="clock-tick tick-46"></span>
+                <span class="clock-tick tick-47"></span>
+                <span class="clock-tick tick-48"></span>
+                <span class="clock-tick tick-49"></span>
+                <span class="clock-tick tick-50"></span>
+                <span class="clock-tick tick-51"></span>
+                <span class="clock-tick tick-52"></span>
+                <span class="clock-tick tick-53"></span>
+                <span class="clock-tick tick-54"></span>
+                <span class="clock-tick tick-55"></span>
+                <span class="clock-tick tick-56"></span>
+                <span class="clock-tick tick-57"></span>
+                <span class="clock-tick tick-58"></span>
+                <span class="clock-tick tick-59"></span>
+            </div>
+            <div class="clock-number n1">1</div>
+            <div class="clock-number n2">2</div>
             <div class="clock-number n3">3</div>
+            <div class="clock-number n4">4</div>
+            <div class="clock-number n5">5</div>
             <div class="clock-number n6">6</div>
+            <div class="clock-number n7">7</div>
+            <div class="clock-number n8">8</div>
             <div class="clock-number n9">9</div>
+            <div class="clock-number n10">10</div>
+            <div class="clock-number n11">11</div>
+            <div class="clock-number n12">12</div>
+            <div class="clock-number n12">12</div>
             <div class="clock-hand hour-hand" id="hourHand"></div>
             <div class="clock-hand minute-hand" id="minuteHand"></div>
             <div class="clock-hand second-hand" id="secondHand"></div>
             <div class="clock-center"></div>
         </div>
         <div class="digital-clock">
-            <div id="bhopalDigitalTime">00:00:00</div>
-            <div id="bhopalDate">Loading date...</div>
-            <div class="clock-zone">🇮🇳 IST • Asia/Kolkata</div>
+            <div class="clock-digital-row">
+                <div id="bhopalDigitalTime">--:--:--</div>
+                <div class="clock-ist-badge">🇮🇳 IST</div>
+            </div>
+            <div id="bhopalDate">Connecting to online time...</div>
+            <div class="clock-divider"></div>
+            <div class="clock-zone">📅 IN IST • Asia/Kolkata</div>
+            <div id="clockSourceStatus" class="clock-source-status" aria-hidden="true"></div>
         </div>
     </div>
 </div>
@@ -68,7 +147,7 @@
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
 <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
 
-<script src="script.js"></script>
+<script src="./script.js"></script>
 
 </body>
 </html>

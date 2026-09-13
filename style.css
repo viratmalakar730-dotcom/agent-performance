@@ -813,3 +813,81 @@ body:has(#bhopalClock) h2{
     #bhopalDate,.clock-zone{font-size:9px}
 }
 
+
+
+/* ================= CLOCK FINAL POSITION + THIN HANDS ================= */
+/* Place the frozen clock inside the dashboard's reserved right-side area. */
+.bhopal-clock{
+    top:37vh;
+    right:2.2vw;
+    width:min(35vw,580px);
+    height:190px;
+    min-height:190px;
+    padding:7px 10px;
+}
+
+.clock-content{gap:10px}
+
+.analog-clock{
+    width:136px;
+    height:136px;
+    flex:0 0 136px;
+    --tick-radius:60px;
+}
+
+.clock-number{
+    width:24px;
+    height:22px;
+    line-height:22px;
+    margin:-11px 0 0 -12px;
+    font-size:12px;
+    transform:rotate(calc(var(--n) * 30deg)) translateY(-46px) rotate(calc(var(--n) * -30deg));
+}
+
+/* Thin, clean clock hands */
+.hour-hand{
+    width:4px;
+    height:38px;
+}
+.minute-hand{
+    width:3px;
+    height:53px;
+}
+.second-hand{
+    width:1.5px;
+    height:62px;
+}
+.second-hand::after{
+    width:1.5px;
+    height:11px;
+    bottom:-11px;
+}
+.clock-center{
+    width:10px;
+    height:10px;
+}
+
+#bhopalDigitalTime{font-size:34px}
+#bhopalDate{font-size:13px}
+.clock-zone{font-size:12px}
+
+@media(max-width:1200px){
+    .bhopal-clock{
+        top:37vh;
+        right:1.8vw;
+        width:min(38vw,540px);
+        height:184px;
+        min-height:184px;
+    }
+    .analog-clock{
+        width:130px;
+        height:130px;
+        flex-basis:130px;
+        --tick-radius:57px;
+    }
+    .clock-number{
+        font-size:11px;
+        transform:rotate(calc(var(--n) * 30deg)) translateY(-44px) rotate(calc(var(--n) * -30deg));
+    }
+    #bhopalDigitalTime{font-size:31px}
+}

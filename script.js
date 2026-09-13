@@ -793,7 +793,7 @@ function parseBhopalApiTime(data){
     const y=Number(data.year), mo=Number(data.month), d=Number(data.day), h=Number(data.hour), mi=Number(data.minute);
     const sec=Number(data.seconds ?? data.second ?? 0), ms=Number(data.milliSeconds ?? data.milliseconds ?? 0);
     if(![y,mo,d,h,mi,sec].every(Number.isFinite)) throw new Error("Invalid online clock values");
-    return Date.UTC(y,mo-1,d,h,mi,sec,ms)-19800000;
+    return Date.UTC(y,mo-1,d,h,mi,sec,ms);
 }
 
 async function syncBhopalOnlineTime(){

@@ -607,9 +607,11 @@ tbody tr:hover td{
     position:absolute;
     left:50%;
     top:50%;
-    transform-origin:50% 0;
+    transform-origin:50% 50%;
     background:#fff;
     border-radius:2px;
+    margin-left:-1px;
+    margin-top:-1px;
 }
 /* 60 precise second/minute marks: every 5th mark is a larger hour marker */
 .tick-0,.tick-5,.tick-10,.tick-15,.tick-20,.tick-25,.tick-30,.tick-35,.tick-40,.tick-45,.tick-50,.tick-55{
@@ -623,66 +625,66 @@ tbody tr:hover td{
     height:7px;
     opacity:.88;
 }
-.tick-0{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(0deg);}
-.tick-1{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(6deg);}
-.tick-2{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(12deg);}
-.tick-3{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(18deg);}
-.tick-4{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(24deg);}
-.tick-5{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(30deg);}
-.tick-6{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(36deg);}
-.tick-7{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(42deg);}
-.tick-8{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(48deg);}
-.tick-9{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(54deg);}
-.tick-10{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(60deg);}
-.tick-11{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(66deg);}
-.tick-12{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(72deg);}
-.tick-13{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(78deg);}
-.tick-14{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(84deg);}
-.tick-15{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(90deg);}
-.tick-16{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(96deg);}
-.tick-17{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(102deg);}
-.tick-18{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(108deg);}
-.tick-19{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(114deg);}
-.tick-20{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(120deg);}
-.tick-21{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(126deg);}
-.tick-22{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(132deg);}
-.tick-23{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(138deg);}
-.tick-24{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(144deg);}
-.tick-25{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(150deg);}
-.tick-26{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(156deg);}
-.tick-27{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(162deg);}
-.tick-28{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(168deg);}
-.tick-29{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(174deg);}
-.tick-30{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(180deg);}
-.tick-31{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(186deg);}
-.tick-32{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(192deg);}
-.tick-33{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(198deg);}
-.tick-34{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(204deg);}
-.tick-35{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(210deg);}
-.tick-36{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(216deg);}
-.tick-37{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(222deg);}
-.tick-38{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(228deg);}
-.tick-39{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(234deg);}
-.tick-40{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(240deg);}
-.tick-41{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(246deg);}
-.tick-42{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(252deg);}
-.tick-43{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(258deg);}
-.tick-44{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(264deg);}
-.tick-45{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(270deg);}
-.tick-46{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(276deg);}
-.tick-47{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(282deg);}
-.tick-48{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(288deg);}
-.tick-49{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(294deg);}
-.tick-50{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(300deg);}
-.tick-51{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(306deg);}
-.tick-52{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(312deg);}
-.tick-53{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(318deg);}
-.tick-54{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(324deg);}
-.tick-55{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(330deg);}
-.tick-56{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(336deg);}
-.tick-57{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(342deg);}
-.tick-58{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(348deg);}
-.tick-59{transform:translate(-50%,calc(-1 * var(--tick-radius))) rotate(354deg);}
+.tick-0{transform:rotate(0deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-1{transform:rotate(6deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-2{transform:rotate(12deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-3{transform:rotate(18deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-4{transform:rotate(24deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-5{transform:rotate(30deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-6{transform:rotate(36deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-7{transform:rotate(42deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-8{transform:rotate(48deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-9{transform:rotate(54deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-10{transform:rotate(60deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-11{transform:rotate(66deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-12{transform:rotate(72deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-13{transform:rotate(78deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-14{transform:rotate(84deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-15{transform:rotate(90deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-16{transform:rotate(96deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-17{transform:rotate(102deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-18{transform:rotate(108deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-19{transform:rotate(114deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-20{transform:rotate(120deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-21{transform:rotate(126deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-22{transform:rotate(132deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-23{transform:rotate(138deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-24{transform:rotate(144deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-25{transform:rotate(150deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-26{transform:rotate(156deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-27{transform:rotate(162deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-28{transform:rotate(168deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-29{transform:rotate(174deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-30{transform:rotate(180deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-31{transform:rotate(186deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-32{transform:rotate(192deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-33{transform:rotate(198deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-34{transform:rotate(204deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-35{transform:rotate(210deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-36{transform:rotate(216deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-37{transform:rotate(222deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-38{transform:rotate(228deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-39{transform:rotate(234deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-40{transform:rotate(240deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-41{transform:rotate(246deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-42{transform:rotate(252deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-43{transform:rotate(258deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-44{transform:rotate(264deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-45{transform:rotate(270deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-46{transform:rotate(276deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-47{transform:rotate(282deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-48{transform:rotate(288deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-49{transform:rotate(294deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-50{transform:rotate(300deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-51{transform:rotate(306deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-52{transform:rotate(312deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-53{transform:rotate(318deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-54{transform:rotate(324deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-55{transform:rotate(330deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-56{transform:rotate(336deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-57{transform:rotate(342deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-58{transform:rotate(348deg) translateY(calc(-1 * var(--tick-radius)));}
+.tick-59{transform:rotate(354deg) translateY(calc(-1 * var(--tick-radius)));}
 
 .clock-number{
     position:absolute;
@@ -774,7 +776,7 @@ tbody tr:hover td{
     .clock-ist-top{font-size:13px}.clock-ist-top small{font-size:8px;margin-top:15px;margin-left:-37px}
     .clock-content{gap:14px}.analog-clock{width:145px;height:145px;flex-basis:145px;--tick-radius:66px}
     .clock-number{font-size:12px;transform:rotate(calc(var(--n) * 30deg)) translateY(-51px) rotate(calc(var(--n) * -30deg))}
-    .clock-tick{transform-origin:50% 0}.tick-0,.tick-5,.tick-10,.tick-15,.tick-20,.tick-25,.tick-30,.tick-35,.tick-40,.tick-45,.tick-50,.tick-55{height:10px}
+    .clock-tick{transform-origin:50% 50%}.tick-0,.tick-5,.tick-10,.tick-15,.tick-20,.tick-25,.tick-30,.tick-35,.tick-40,.tick-45,.tick-50,.tick-55{height:10px}
     .clock-tick:not(.tick-0):not(.tick-5):not(.tick-10):not(.tick-15):not(.tick-20):not(.tick-25):not(.tick-30):not(.tick-35):not(.tick-40):not(.tick-45):not(.tick-50):not(.tick-55){height:5px}
     #bhopalDigitalTime{font-size:34px}.clock-ist-badge,#bhopalDate,.clock-zone{font-size:12px}
 }
